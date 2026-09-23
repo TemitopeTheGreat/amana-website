@@ -26,3 +26,8 @@ python -m http.server 8000
 ```
 
 Then open `http://localhost:8000`.
+
+## Product docs
+
+- [docs/PRD.md](docs/PRD.md): product requirements
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): technical architecture
