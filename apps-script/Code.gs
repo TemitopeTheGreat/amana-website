@@ -15,6 +15,10 @@ const CONFIG = {
   MAX_CV_BYTES: 3 * 1024 * 1024,
 };
 
+// Optional: paste a fixed secret here (then use the same value in Vercel as APPS_SCRIPT_SECRET).
+// Leave empty to have setup() generate one and print it in the log.
+const PRESET_SECRET = '';
+
 const STAGES = ['Identity', 'Police cert', 'Guarantors', 'References', 'Medical', 'Assessment', 'Training'];
 
 const TABS = {
@@ -105,7 +109,9 @@ function doPost(e) {
  */
 function setup() {
   const props = PropertiesService.getScriptProperties();
-  if (!props.getProperty('SECRET')) {
+  if (PRESET_SECRET) {
+    props.setProperty('SECRET', PRESET_SECRET);
+  } else if (!props.getProperty('SECRET')) {
     props.setProperty('SECRET', Utilities.getUuid() + Utilities.getUuid());
   }
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
