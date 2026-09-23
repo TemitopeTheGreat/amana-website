@@ -18,7 +18,7 @@
   --ink-soft:#5d6570;
   --border:#e7dfd0;
 
-  --font-head:'Fraunces',Georgia,serif;
+  --font-head:'Newsreader',Georgia,'Times New Roman',serif;
   --font-body:'Inter',system-ui,sans-serif;
 
   --radius-sm:8px;
@@ -43,15 +43,18 @@ body{
   font-family:var(--font-body);
   color:var(--ink);
   background:var(--cream);
-  line-height:1.6;
+  line-height:1.65;
   -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  font-feature-settings:"kern","liga","calt";
   overflow-x:hidden;
 }
 h1,h2,h3,h4{
   font-family:var(--font-head);
   font-weight:500;
-  line-height:1.12;
-  letter-spacing:-.015em;
+  font-optical-sizing:auto;
+  line-height:1.1;
+  letter-spacing:-.01em;
   margin:0 0 .5em;
   color:var(--navy-950);
 }
@@ -220,7 +223,7 @@ section[id]{scroll-margin-top:88px;}
   margin-bottom:20px;
 }
 .hero-photo .eyebrow{color:var(--gold-soft);}
-.hero h1{font-size:clamp(2.5rem, 5.4vw, 4.2rem); margin-bottom:.4em;}
+.hero h1{font-size:clamp(2.7rem, 5.6vw, 4.6rem); margin-bottom:.4em; letter-spacing:-.02em;}
 .hero h1 em{color:var(--terracotta);}
 .hero-lead{font-size:1.18rem; max-width:520px; color:var(--ink-soft);}
 .hero-actions{display:flex; gap:22px; flex-wrap:wrap; align-items:center; margin-top:28px;}
@@ -284,7 +287,7 @@ section[id]{scroll-margin-top:88px;}
 .section-dark h2, .section-dark h3{color:var(--white);}
 .section-dark p{color:rgba(255,255,255,.72);}
 .section-head{max-width:620px; margin:0 auto 48px; text-align:center;}
-.section-head h2{font-size:clamp(1.9rem, 3.4vw, 2.7rem);}
+.section-head h2{font-size:clamp(2rem, 3.6vw, 2.9rem);}
 .section-head p{font-size:1.03rem;}
 .section-head-left{margin-left:0; text-align:left; max-width:560px;}
 .center-badge{margin:0 auto 18px;}
@@ -912,3 +915,22 @@ body{animation:pageIn .8s ease both;}
   .footer-links h4{margin-bottom:8px;}
   .final-cta .section, .final-cta{padding:52px 0;}
 }
+
+/* Typography refinements */
+.brand{font-weight:600; font-size:1.7rem; letter-spacing:-.015em;}
+.photo-card h3, .service-card h3, .org-card h3, .explore-card h3, .pillar h3, .plan-card h3{font-weight:600;}
+.faq-question{font-size:1.18rem; font-weight:500;}
+.lead{font-family:var(--font-body); font-weight:500;}
+.standard-line, .standard-line-sm{font-weight:500;}
+.trust-strip strong{font-variant-numeric:tabular-nums;}
+.eyebrow, .chips-label{font-family:var(--font-body);}
+.btn{letter-spacing:.005em;}
+.compare-table thead th{font-weight:600;}
+.modal h3{font-weight:600;}
+.photo-card h3{font-size:1.65rem;}
+.service-card h3, .org-card h3{font-size:1.35rem;}
+.plan-card h3{font-size:1.75rem;}
+.explore-card h3{font-size:1.5rem;}
+.modal h3{font-size:1.9rem;}
+.pillar h3, .steps h3{font-size:1.2rem;}
+.footer-brand p{font-size:1.05rem;}
