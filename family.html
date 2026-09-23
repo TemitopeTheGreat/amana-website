@@ -53,8 +53,8 @@
       <a href="professionals.html">Professionals</a>
       <a href="business.html">Business</a>
       <a href="index.html#services">Services</a>
-      <a href="index.html#academy">Academy</a>
-      <a href="index.html#plans">Pricing</a>
+      <a href="professionals.html#academy">Academy</a>
+      <a href="family.html#plans">Pricing</a>
       <a href="index.html#faq">FAQ</a>
     </nav>
 
@@ -135,6 +135,14 @@
           <div class="photo-card-body"><h3>Companions &amp; Carers</h3><p>Compassionate care at home</p></div>
         </article>
       </div>
+      <div class="role-chips reveal">
+        <p class="chips-label">Also available</p>
+        <ul>
+          <li>Babysitters</li><li>Private chefs</li><li>Gardeners</li><li>Security &amp; gatekeepers</li>
+          <li>Laundry &amp; ironing</li><li>Handymen</li><li>Errand runners</li><li>Pool attendants</li>
+          <li>Elderly care</li><li>Estate &amp; facility staff</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -209,14 +217,67 @@
         </div>
         <div class="hero-actions">
           <button class="btn btn-primary" data-open-modal="family">Get a quote</button>
-          <a href="index.html#plans" class="btn-text">See the plans <svg><use href="#icon-arrow"/></svg></a>
+          <a href="family.html#plans" class="btn-text">See the plans <svg><use href="#icon-arrow"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERVICE PLANS ============ -->
+  <section class="section" id="plans">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2>Our Service Plans</h2>
+        <p>Choose the level of support that fits your household.</p>
+      </div>
+
+      <div class="plan-grid reveal-stagger">
+        <div class="plan-card">
+          <h3>Standard</h3>
+          <p class="plan-tagline">Everyday households</p>
+          <p class="plan-desc">Reliable cleaners, housekeepers, nannies and drivers.</p>
+          <ul class="plan-features">
+            <li><svg><use href="#icon-check"/></svg>Core verification</li>
+            <li><svg><use href="#icon-check"/></svg>Role-specific training</li>
+            <li><svg><use href="#icon-check"/></svg>Professional matching</li>
+            <li><svg><use href="#icon-check"/></svg>30-day replacement guarantee</li>
+          </ul>
+          <button class="btn btn-outline btn-block" data-open-modal="family" data-plan="Standard">Get Started</button>
+        </div>
+
+        <div class="plan-card plan-card-featured">
+          <span class="badge">Most popular</span>
+          <h3>Premium</h3>
+          <p class="plan-tagline">Specialised professionals</p>
+          <p class="plan-desc">More experienced staff for households with specific needs.</p>
+          <ul class="plan-features">
+            <li><svg><use href="#icon-check"/></svg>Enhanced background checks</li>
+            <li><svg><use href="#icon-check"/></svg>Higher-experience professionals</li>
+            <li><svg><use href="#icon-check"/></svg>Specialised cooks &amp; multilingual nannies</li>
+            <li><svg><use href="#icon-check"/></svg>Defensive-driving certified drivers</li>
+            <li><svg><use href="#icon-check"/></svg>60-day replacement guarantee</li>
+          </ul>
+          <button class="btn btn-primary btn-block" data-open-modal="family" data-plan="Premium">Get Started</button>
+        </div>
+
+        <div class="plan-card">
+          <h3>Executive</h3>
+          <p class="plan-tagline">Demanding environments</p>
+          <p class="plan-desc">Senior staffing for high-net-worth homes, embassies and executives.</p>
+          <ul class="plan-features">
+            <li><svg><use href="#icon-check"/></svg>Senior house managers</li>
+            <li><svg><use href="#icon-check"/></svg>Experienced household professionals</li>
+            <li><svg><use href="#icon-check"/></svg>Dedicated relationship management</li>
+            <li><svg><use href="#icon-check"/></svg>60-day replacement guarantee</li>
+          </ul>
+          <button class="btn btn-outline btn-block" data-open-modal="family" data-plan="Executive">Talk to Amana</button>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ============ FAQ ============ -->
-  <section class="section" id="faq">
+  <section class="section section-alt" id="faq">
     <div class="container narrow">
       <div class="section-head reveal">
         <h2>Questions from families</h2>
@@ -277,9 +338,9 @@
       <div>
         <h4>Explore</h4>
         <a href="index.html#services">Services</a>
-        <a href="index.html#how-it-works">How It Works</a>
-        <a href="index.html#academy">Academy</a>
-        <a href="index.html#plans">Pricing</a>
+        <a href="family.html#how-it-works">How It Works</a>
+        <a href="professionals.html#academy">Academy</a>
+        <a href="family.html#plans">Pricing</a>
       </div>
       <div>
         <h4>Company</h4>
@@ -338,6 +399,9 @@
             <option>Companion / Carer</option>
             <option>Not sure yet</option>
           </select>
+        </label>
+        <label class="other-field" id="otherField" hidden>Please tell us which one
+          <input type="text" name="needOther" id="needOther" maxlength="80" placeholder="e.g. Pool cleaner" disabled>
         </label>
         <label>Anything else we should know?
           <textarea name="message" rows="3" placeholder="Schedule, live-in/live-out, specific requirements..."></textarea>

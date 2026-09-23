@@ -246,24 +246,39 @@
       title: 'Find Your Professional',
       sub: "Tell us about your household and we'll be in touch.",
       needLabel: 'What do you need help with?',
-      needOptions: ['Nanny', 'Housekeeper / Cleaner', 'Driver', 'Cook', 'House Manager', 'Companion / Carer', 'Not sure yet']
+      needOptions: ['Nanny', 'Babysitter', 'Housekeeper / Cleaner', 'Laundry and ironing', 'Driver', 'Cook', 'Private chef', 'House Manager', 'Companion / Carer', 'Elderly care', 'Gardener', 'Security / Gatekeeper', 'Handyman', 'Errand runner', 'Pool attendant', 'Estate / facility staff', 'Other (tell us)', 'Not sure yet']
     },
     professional: {
       title: 'Join the Amana Talent Pool',
       sub: "Tell us about yourself and we'll guide you through verification and training. You can attach a CV, but it's optional.",
       needLabel: 'What role are you applying for?',
-      needOptions: ['Nanny', 'Housekeeper / Cleaner', 'Driver', 'Cook', 'House Manager', 'Companion / Carer', 'Other']
+      needOptions: ['Nanny', 'Babysitter', 'Housekeeper / Cleaner', 'Laundry and ironing', 'Driver', 'Cook', 'Private chef', 'House Manager', 'Companion / Carer', 'Elderly care', 'Gardener', 'Security / Gatekeeper', 'Handyman', 'Errand runner', 'Pool attendant', 'Estate / facility staff', 'Other (tell us)']
     },
     organisation: {
       title: 'Partner With Amana',
       sub: "Tell us about your estate or organisation and we'll set up a staffing plan together.",
       needLabel: 'What type of organisation are you?',
-      needOptions: ['Residential Estate', 'Real Estate Developer', 'Corporate', 'Embassy / NGO', 'Other']
+      needOptions: ['Residential Estate', 'Real Estate Developer', 'Corporate', 'Embassy', 'NGO', 'Hotel / guesthouse', 'School', 'Hospital / clinic', 'Other (tell us)']
     }
   };
 
   var needField = document.getElementById('needField');
   var needSelect = document.getElementById('needSelect');
+  var otherField = document.getElementById('otherField');
+  var needOther = document.getElementById('needOther');
+
+  function syncOther() {
+    if (!needSelect || !otherField || !needOther) return;
+    var isOther = /^Other/.test(needSelect.value);
+    otherField.hidden = !isOther;
+    needOther.disabled = !isOther;
+    needOther.required = isOther;
+    if (!isOther) needOther.value = '';
+  }
+  if (needSelect) needSelect.addEventListener('change', function () {
+    syncOther();
+    if (/^Other/.test(needSelect.value) && needOther) needOther.focus();
+  });
 
   function openModal(kind, plan) {
     var content = MODAL_CONTENT[kind] || MODAL_CONTENT.family;
@@ -290,6 +305,7 @@
     modalForm.hidden = false;
     modalSuccess.hidden = true;
     leadForm.reset();
+    syncOther();
 
     lastFocused = document.activeElement;
     modalOverlay.classList.add('active');
@@ -362,6 +378,8 @@
       new FormData(leadForm).forEach(function (v, k) {
         if (!(v instanceof File)) data[k] = v;
       });
+      if (data.needOther) data.need = 'Other: ' + data.needOther.trim();
+      delete data.needOther;
       data.kind = currentKind;
       data.plan = currentPlan;
       data.page = window.location.pathname;
