@@ -7,7 +7,7 @@
 <meta name="description" content="Amana partners with residential estates, real estate developers, corporates, embassies and NGOs for managed household staffing — payroll, compliance, supervision and replacement, all in one place.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -21,10 +21,10 @@
   <symbol id="icon-embassy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v3"/><path d="M6 8h12l-1 3H7l-1-3z"/><path d="M5 21V11M19 21V11"/><path d="M3 21h18"/><path d="M9 21v-5h6v5"/></symbol>
   <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.2c0 4.6-3 8.4-7 9.8-4-1.4-7-5.2-7-9.8V6l7-3z"/><path d="M9.2 12l1.9 1.9 3.7-3.9"/></symbol>
   <symbol id="icon-payslip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h4"/></symbol>
-  <symbol id="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115.4-6.4L21 8"/><path d="M21 4v4h-4"/><path d="M21 12a9 9 0 01-15.4 6.4L3 16"/><path d="M3 20v-4h4"/></symbol>
   <symbol id="icon-manager" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="1.5"/><path d="M9 4V2.8h6V4"/><path d="M9 10h6"/><path d="M9 13.5h6"/><path d="M9 17h3.5"/></symbol>
-  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
   <symbol id="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="icon-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
 </svg>
 
 <!-- ============ HEADER ============ -->
@@ -42,7 +42,7 @@
     </nav>
 
     <div class="header-actions">
-      <button class="btn btn-ghost header-cta-secondary" data-open-modal="professional">Become a Professional</button>
+      <button class="btn btn-ghost header-cta-secondary" data-open-modal="professional">Become a Pro</button>
       <button class="btn btn-primary" data-open-modal="organisation">Partner With Amana</button>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -56,82 +56,89 @@
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="container hero-inner">
-      <p class="eyebrow">For estates, developers, corporates, embassies &amp; NGOs</p>
-      <h1>One trusted <span>staffing partner</span> for your organisation.</h1>
-      <p class="hero-lead">Verified, trained and professionally managed household staffing — at estate or organisation scale.</p>
-      <p class="hero-sub">Whether you're managing a residential estate, developing a new community, running a corporate facility, or operating an embassy or NGO, Amana gives you a single, accountable partner for household and support staffing.</p>
+      <p class="eyebrow">Estates · Developers · Corporates · Embassies · NGOs</p>
+      <h1>One trusted <span>staffing partner.</span></h1>
+      <p class="hero-lead">Verified, managed household staffing — at organisation scale.</p>
       <div class="hero-actions">
         <button class="btn btn-primary btn-lg" data-open-modal="organisation">Partner With Amana</button>
-        <a href="#how-it-works" class="btn btn-outline btn-lg">See How It Works</a>
+        <a href="#how-it-works" class="btn-text">See how it works <svg><use href="#icon-arrow"/></svg></a>
       </div>
-      <ul class="hero-stats">
-        <li><strong>Single</strong><span>point of accountability</span></li>
-        <li><strong>Managed</strong><span>payroll &amp; compliance</span></li>
-        <li><strong>Ongoing</strong><span>supervision &amp; replacement</span></li>
+    </div>
+    <div class="container">
+      <ul class="trust-strip">
+        <li><strong>Single</strong><span>Point of accountability</span></li>
+        <li><strong>Managed</strong><span>Payroll &amp; compliance</span></li>
+        <li><strong>Ongoing</strong><span>Supervision &amp; replacement</span></li>
+        <li><strong>Dedicated</strong><span>Relationship management</span></li>
       </ul>
     </div>
   </section>
 
   <!-- ============ WHO WE WORK WITH ============ -->
-  <section class="section" id="who-we-serve">
+  <section class="section trust-statement" id="who-we-serve">
     <div class="container">
       <div class="section-head reveal">
-        <span class="icon-badge center-badge"><svg><use href="#icon-building"/></svg></span>
         <h2>Who We Work With</h2>
-        <p>Amana can develop estate-wide and corporate staffing arrangements tailored to your organisation.</p>
+        <p>Estate-wide and corporate staffing, tailored to you.</p>
       </div>
 
-      <div class="card-grid reveal">
-        <article class="service-card">
+      <div class="card-grid reveal-stagger">
+        <article class="service-card tone-sky">
           <span class="icon-badge"><svg><use href="#icon-estate"/></svg></span>
           <h3>Residential Estates</h3>
-          <p>Provide residents with access to a trusted pool of vetted, trained household professionals — cleaners, nannies, drivers, cooks and more — as a standing estate amenity.</p>
+          <p>A trusted staff pool as a standing amenity</p>
         </article>
-        <article class="service-card">
+        <article class="service-card tone-coral">
           <span class="icon-badge"><svg><use href="#icon-developer"/></svg></span>
           <h3>Real Estate Developers</h3>
-          <p>Offer professional household staffing as part of your resident experience, from handover through to ongoing occupancy.</p>
+          <p>Staffing built into the resident experience</p>
         </article>
-        <article class="service-card">
+        <article class="service-card tone-navy">
           <span class="icon-badge"><svg><use href="#icon-corporate"/></svg></span>
           <h3>Corporates</h3>
-          <p>Source vetted drivers, facility staff and household support for executives, guesthouses and corporate residences.</p>
+          <p>Vetted drivers and facility support</p>
         </article>
-        <article class="service-card">
+        <article class="service-card tone-sage">
           <span class="icon-badge"><svg><use href="#icon-embassy"/></svg></span>
           <h3>Embassies &amp; NGOs</h3>
-          <p>Access professionally managed staff with structured documentation, background checks and accountability that meet institutional standards.</p>
+          <p>Documentation that meets institutional standards</p>
         </article>
       </div>
     </div>
   </section>
 
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Estates</span><span>Developers</span><span>Corporates</span><span>Embassies</span><span>NGOs</span>
+      <span>Estates</span><span>Developers</span><span>Corporates</span><span>Embassies</span><span>NGOs</span>
+    </div>
+  </div>
+
   <!-- ============ MANAGED STAFFING FOR ORGS ============ -->
   <section class="section section-dark reveal">
     <div class="container split">
       <div>
-        <h2>What Managed Staffing Means for Your Organisation</h2>
+        <h2>Managed Staffing, at Scale</h2>
         <p class="lead">One accountable partner, not a list of referrals.</p>
-        <p>Traditional recruitment ends at introduction. For organisations managing staff across multiple households, units or facilities, that's not enough.</p>
-        <p>With Amana's Managed Staffing model, we can remain responsible for payroll, statutory compliance, ongoing supervision and replacement — across your entire staffing arrangement, not just a single hire.</p>
+        <p>We stay responsible for payroll, compliance, supervision and replacement — across your whole staffing arrangement, not just a single hire.</p>
         <button class="btn btn-primary" data-open-modal="organisation">Talk to Amana</button>
       </div>
       <div class="compare-cards">
         <div class="compare-card">
           <span class="icon-badge"><svg><use href="#icon-payslip"/></svg></span>
           <h3>Payroll &amp; compliance</h3>
-          <p>Centralised payroll and statutory compliance handled on your behalf, across every professional placed.</p>
+          <p>Centralised and handled on your behalf.</p>
         </div>
         <div class="compare-card">
           <span class="icon-badge"><svg><use href="#icon-shield"/></svg></span>
           <h3>Supervision &amp; protection</h3>
-          <p>Ongoing supervision, formal contracts and enhanced protection and accountability where applicable.</p>
+          <p>Formal contracts, ongoing oversight.</p>
         </div>
         <div class="compare-card compare-card-featured">
           <span class="badge">Executive tier</span>
           <span class="icon-badge"><svg><use href="#icon-manager"/></svg></span>
-          <h3>Dedicated relationship management</h3>
-          <p>A single point of contact for reporting, escalation and replacement across your organisation.</p>
+          <h3>Dedicated management</h3>
+          <p>One contact for reporting and replacement.</p>
         </div>
       </div>
     </div>
@@ -142,29 +149,29 @@
     <div class="container">
       <div class="section-head reveal">
         <h2>How Partnership Works</h2>
-        <p>A straightforward process for setting up staffing at estate or organisation scale.</p>
+        <p>Set up staffing at estate or organisation scale.</p>
       </div>
 
-      <div class="org-grid reveal">
+      <div class="org-grid reveal-stagger">
         <div class="org-card">
           <span class="step-num">1</span>
           <h3>Discovery call</h3>
-          <p>We learn about your estate or organisation, the roles you need and the scale you're operating at.</p>
+          <p>Your roles, scale and requirements.</p>
         </div>
         <div class="org-card">
           <span class="step-num">2</span>
           <h3>Staffing plan</h3>
-          <p>We put together a tailored proposal — roles, coverage, service tier and reporting structure.</p>
+          <p>A tailored proposal and service tier.</p>
         </div>
         <div class="org-card">
           <span class="step-num">3</span>
           <h3>Vetting &amp; deployment</h3>
-          <p>Verified, trained professionals from our talent pool are matched and deployed to your sites.</p>
+          <p>Verified professionals, matched and placed.</p>
         </div>
         <div class="org-card">
           <span class="step-num">4</span>
-          <h3>Ongoing account management</h3>
-          <p>Continued supervision, reporting and replacement support, coordinated through a single point of contact.</p>
+          <h3>Account management</h3>
+          <p>Ongoing supervision and reporting.</p>
         </div>
       </div>
     </div>
@@ -173,15 +180,15 @@
   <!-- ============ WHY AMANA ============ -->
   <section class="section section-alt reveal">
     <div class="container narrow center">
-      <h2>Why Organisations Choose Amana</h2>
-      <p>The same standard we apply to every household, applied at scale — Verified, Trained, Matched, Monitored, Protected and Replaced.</p>
-      <ul class="check-list reveal">
-        <li><svg><use href="#icon-check"/></svg>Structured identity, guarantor and reference checks</li>
-        <li><svg><use href="#icon-check"/></svg>Role-specific training via the Amana Academy</li>
-        <li><svg><use href="#icon-check"/></svg>Formal contracts and statutory benefits where applicable</li>
-        <li><svg><use href="#icon-check"/></svg>Ongoing supervision across your entire staff pool</li>
-        <li><svg><use href="#icon-check"/></svg>Replacement guarantee if a placement doesn't work out</li>
-        <li><svg><use href="#icon-check"/></svg>A single point of accountability for your organisation</li>
+      <h2>The Amana Standard, at Scale</h2>
+      <p>Verified, Trained, Matched, Monitored, Protected and Replaced — applied across your organisation.</p>
+      <ul class="check-list reveal-stagger">
+        <li><svg><use href="#icon-check"/></svg>Identity &amp; reference checks</li>
+        <li><svg><use href="#icon-check"/></svg>Academy training</li>
+        <li><svg><use href="#icon-check"/></svg>Formal contracts</li>
+        <li><svg><use href="#icon-check"/></svg>Ongoing supervision</li>
+        <li><svg><use href="#icon-check"/></svg>Replacement guarantee</li>
+        <li><svg><use href="#icon-check"/></svg>Single point of accountability</li>
       </ul>
     </div>
   </section>
@@ -190,33 +197,33 @@
   <section class="section" id="faq">
     <div class="container narrow">
       <div class="section-head reveal">
-        <h2>Questions from Estates &amp; Organisations</h2>
+        <h2>Questions from Organisations</h2>
       </div>
 
       <div class="faq-list reveal">
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">Can Amana staff an entire residential estate?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Yes. We can develop estate-wide staffing arrangements so residents have access to a trusted pool of vetted household professionals as a standing amenity.</p></div>
+          <button class="faq-question" aria-expanded="false">Can you staff an entire estate?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Yes — estate-wide arrangements give residents a trusted staff pool as a standing amenity.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">Do you offer bulk or volume staffing arrangements?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Yes. For developers, corporates and larger estates, we build a tailored staffing plan covering multiple roles and sites under one arrangement.</p></div>
+          <button class="faq-question" aria-expanded="false">Do you offer bulk arrangements?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Yes — a tailored plan covering multiple roles and sites under one arrangement.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-question" aria-expanded="false">Can embassies and NGOs use Amana?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Yes. Embassies and NGOs can access professionally managed staff with structured documentation and accountability suited to institutional requirements.</p></div>
+          <div class="faq-answer"><p>Yes — with documentation and accountability suited to institutional needs.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">How is billing handled for organisations?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Billing is arranged as part of your staffing plan during onboarding, structured around your organisation's scale and service tier.</p></div>
+          <button class="faq-question" aria-expanded="false">How is billing handled?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Arranged as part of your staffing plan during onboarding.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">Do we get a dedicated point of contact?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Yes, particularly under our Executive tier — organisations get dedicated relationship management for reporting, escalation and replacement.</p></div>
+          <button class="faq-question" aria-expanded="false">Do we get a dedicated contact?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Yes, particularly on our Executive tier — one contact for reporting and replacement.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">What happens if a placement doesn't work out?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Eligible placements include a replacement guarantee, so a placement that isn't a fit can be addressed without disrupting your operations.</p></div>
+          <button class="faq-question" aria-expanded="false">What if a placement doesn't work out?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>A replacement guarantee applies, so it won't disrupt your operations.</p></div>
         </div>
       </div>
     </div>
@@ -226,9 +233,8 @@
   <section class="section final-cta reveal">
     <div class="container center">
       <span class="icon-badge center-badge"><svg><use href="#icon-building"/></svg></span>
-      <h2>Let's build a staffing plan for your organisation.</h2>
+      <h2>Let's build your staffing plan.</h2>
       <p class="lead">One partner. Full accountability.</p>
-      <p>Tell us about your estate, development or organisation and we'll take it from there.</p>
       <div class="hero-actions hero-actions-center">
         <button class="btn btn-primary btn-lg" data-open-modal="organisation">Partner With Amana</button>
         <a href="index.html" class="btn btn-outline-light btn-lg">Back to Home</a>
@@ -255,8 +261,8 @@
       </div>
       <div>
         <h4>Company</h4>
-        <a href="professionals.html">Professionals</a>
-        <a href="business.html">Business</a>
+        <a href="professionals.html">For Professionals</a>
+        <a href="business.html">For Business</a>
         <a href="index.html#faq">FAQ</a>
       </div>
       <div>
@@ -271,6 +277,8 @@
     <p>&copy; <span id="year"></span> Amana. All rights reserved.</p>
   </div>
 </footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top"><svg><use href="#icon-up"/></svg></button>
 
 <!-- ============ LEAD MODAL ============ -->
 <div class="modal-overlay" id="modalOverlay">

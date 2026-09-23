@@ -24,6 +24,52 @@
     });
   }
 
+  /* ---------- Sticky header shrink ---------- */
+  var header = document.querySelector('.site-header');
+  if (header) {
+    var onScrollHeader = function () {
+      header.classList.toggle('scrolled', window.scrollY > 12);
+    };
+    onScrollHeader();
+    window.addEventListener('scroll', onScrollHeader, { passive: true });
+  }
+
+  /* ---------- Back to top ---------- */
+  var backToTop = document.getElementById('backToTop');
+  if (backToTop) {
+    window.addEventListener('scroll', function () {
+      backToTop.classList.toggle('visible', window.scrollY > 600);
+    }, { passive: true });
+    backToTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  /* ---------- Animated stat counters ---------- */
+  var counters = document.querySelectorAll('[data-count]');
+  if ('IntersectionObserver' in window && counters.length) {
+    var counterObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        counterObserver.unobserve(entry.target);
+        var el = entry.target;
+        var target = parseInt(el.getAttribute('data-count'), 10);
+        var suffix = el.getAttribute('data-suffix') || '';
+        var duration = 1100;
+        var start = null;
+        function step(ts) {
+          if (start === null) start = ts;
+          var progress = Math.min((ts - start) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.round(eased * target) + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.4 });
+    counters.forEach(function (el) { counterObserver.observe(el); });
+  }
+
   /* ---------- FAQ accordion ---------- */
   document.querySelectorAll('.faq-item').forEach(function (item) {
     var question = item.querySelector('.faq-question');
@@ -41,7 +87,7 @@
   });
 
   /* ---------- Scroll reveal ---------- */
-  var revealEls = document.querySelectorAll('.reveal');
+  var revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
   if ('IntersectionObserver' in window && revealEls.length) {
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {

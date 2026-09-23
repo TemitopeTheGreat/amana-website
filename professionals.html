@@ -7,17 +7,16 @@
 <meta name="description" content="Join the Amana talent pool. Build a recognised career as a household professional through structured training, fair contracts and a clear path from Trainee to House Manager.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <!-- ============ ICON SPRITE ============ -->
 <svg style="display:none">
-  <symbol id="icon-nanny" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.2"/><path d="M6 21c0-3.6 2.7-6.2 6-6.2s6 2.6 6 6.2"/><path d="M9.2 6.3c.6-1 1.6-1.6 2.8-1.6s2.2.6 2.8 1.6"/></symbol>
   <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.2c0 4.6-3 8.4-7 9.8-4-1.4-7-5.2-7-9.8V6l7-3z"/><path d="M9.2 12l1.9 1.9 3.7-3.9"/></symbol>
   <symbol id="icon-cap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-4.5L22 9l-10 4.5L2 9z"/><path d="M6 11.3V16c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4.7"/><path d="M22 9v5"/></symbol>
-  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
   <symbol id="icon-worker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6.5" r="3"/><path d="M5.5 20.5c0-4 3-6.8 6.5-6.8s6.5 2.8 6.5 6.8"/><path d="M12 13.7v6.8"/></symbol>
   <symbol id="icon-academy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V9M20 20V9"/><path d="M2 9l10-6 10 6-10 6-10-6z"/><path d="M8 12.5V17c0 1.1 1.8 2 4 2s4-.9 4-2v-4.5"/></symbol>
   <symbol id="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
@@ -26,6 +25,7 @@
   <symbol id="icon-voice" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v10H8l-4 4V5z"/><path d="M8 9h8M8 12h5"/></symbol>
   <symbol id="icon-growth" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M6 19v-5M11 19V9M16 19v-8"/><path d="M4 9l5-4 4 3 6-4"/></symbol>
   <symbol id="icon-dignity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 2.5-6 8-6"/><path d="M15 15l2.2 2.2L21 13"/></symbol>
+  <symbol id="icon-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
 </svg>
 
 <!-- ============ HEADER ============ -->
@@ -43,7 +43,7 @@
     </nav>
 
     <div class="header-actions">
-      <button class="btn btn-ghost header-cta-secondary" data-open-modal="family">Find a Professional</button>
+      <button class="btn btn-ghost header-cta-secondary" data-open-modal="family">Find a Pro</button>
       <button class="btn btn-primary" data-open-modal="professional">Join the Talent Pool</button>
       <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -57,18 +57,20 @@
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="container hero-inner">
-      <p class="eyebrow">For household &amp; domestic professionals</p>
-      <h1>Your skills <span>deserve to be recognised.</span></h1>
-      <p class="hero-lead">Domestic work is work — and at Amana, it's the start of a career.</p>
-      <p class="hero-sub">We don't just connect you to a job. We help you become a trained and certified household professional, with fair contracts, digital payslips and a clear path to grow — from Trainee to Lead / House Manager.</p>
+      <p class="eyebrow">For Household &amp; Domestic Professionals</p>
+      <h1>Your skills <span>deserve recognition.</span></h1>
+      <p class="hero-lead">Domestic work is work — and at Amana, it's a career.</p>
       <div class="hero-actions">
-        <button class="btn btn-primary btn-lg" data-open-modal="professional">Join the Amana Talent Pool</button>
-        <a href="#career-path" class="btn btn-outline btn-lg">See the Career Path</a>
+        <button class="btn btn-primary btn-lg" data-open-modal="professional">Join the Talent Pool</button>
+        <a href="#career-path" class="btn-text">See the career path <svg><use href="#icon-arrow"/></svg></a>
       </div>
-      <ul class="hero-stats">
-        <li><strong>4 stages</strong><span>structured career ladder</span></li>
-        <li><strong>Trained</strong><span>through the Amana Academy</span></li>
-        <li><strong>Supported</strong><span>after you're placed</span></li>
+    </div>
+    <div class="container">
+      <ul class="trust-strip">
+        <li><strong><span data-count="4" data-suffix="">0</span> Stages</strong><span>Career ladder</span></li>
+        <li><strong>Trained</strong><span>Through the Academy</span></li>
+        <li><strong>Contracts</strong><span>Formal &amp; fair</span></li>
+        <li><strong>Supported</strong><span>Even after placement</span></li>
       </ul>
     </div>
   </section>
@@ -77,49 +79,56 @@
   <section class="section trust-statement reveal">
     <div class="container narrow center">
       <span class="icon-badge center-badge"><svg><use href="#icon-dignity"/></svg></span>
-      <h2>Dignity, fair treatment and a career — not just a job.</h2>
-      <p>At Amana, we believe professionals who care for homes, children and families deserve to be treated as the professionals they are. That means real contracts, real training and real opportunities to grow.</p>
+      <h2>Dignity, not just a job.</h2>
+      <p>Professionals who care for homes and families deserve real contracts, real training and real growth.</p>
     </div>
   </section>
+
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Free training</span><span>Fair contracts</span><span>Digital payslips</span><span>Real career growth</span>
+      <span>Free training</span><span>Fair contracts</span><span>Digital payslips</span><span>Real career growth</span>
+    </div>
+  </div>
 
   <!-- ============ WHY JOIN ============ -->
   <section class="section section-alt" id="benefits">
     <div class="container">
       <div class="section-head reveal">
         <h2>Why Professionals Join Amana</h2>
-        <p>Being available for work isn't the same as being set up to succeed in it. Amana is built to support you before, during and after your placement.</p>
+        <p>Support before, during and after your placement.</p>
       </div>
 
-      <div class="card-grid reveal">
-        <article class="service-card">
+      <div class="card-grid reveal-stagger">
+        <article class="service-card tone-light">
           <span class="icon-badge"><svg><use href="#icon-cap"/></svg></span>
-          <h3>Free role-specific training</h3>
-          <p>Develop practical skills and earn certifications through the Amana Academy before you're introduced to a household.</p>
+          <h3>Free training</h3>
+          <p>Role-specific skills and certification at the Amana Academy.</p>
         </article>
-        <article class="service-card">
+        <article class="service-card tone-light">
           <span class="icon-badge"><svg><use href="#icon-contract"/></svg></span>
           <h3>Structured employment</h3>
-          <p>Formal contracts and, where applicable, statutory benefits — not informal, undocumented arrangements.</p>
+          <p>Formal contracts, not informal arrangements.</p>
         </article>
-        <article class="service-card">
+        <article class="service-card tone-light">
           <span class="icon-badge"><svg><use href="#icon-payslip"/></svg></span>
           <h3>Digital payslips</h3>
-          <p>Clear, trackable records of what you've earned, so pay is transparent and easy to reference.</p>
+          <p>Clear, trackable records of what you've earned.</p>
         </article>
-        <article class="service-card">
+        <article class="service-card tone-light">
           <span class="icon-badge"><svg><use href="#icon-growth"/></svg></span>
           <h3>A real career path</h3>
-          <p>Progress from Trainee to Certified, Senior and Lead / House Manager as you build experience with Amana.</p>
+          <p>Progress from Trainee to Lead / House Manager.</p>
         </article>
-        <article class="service-card">
+        <article class="service-card tone-light">
           <span class="icon-badge"><svg><use href="#icon-shield"/></svg></span>
           <h3>Ongoing supervision</h3>
-          <p>Our relationship doesn't end at placement — we stay involved and check in as you settle into your role.</p>
+          <p>We stay involved after you're placed.</p>
         </article>
-        <article class="service-card">
+        <article class="service-card tone-light">
           <span class="icon-badge"><svg><use href="#icon-voice"/></svg></span>
           <h3>A channel to be heard</h3>
-          <p>A direct way to raise workplace concerns, so problems get addressed instead of ignored.</p>
+          <p>Raise workplace concerns directly.</p>
         </article>
       </div>
     </div>
@@ -129,30 +138,30 @@
   <section class="section" id="career-path">
     <div class="container">
       <div class="section-head reveal">
-        <h2>Your Career Path with Amana</h2>
-        <p>Through the Amana Academy, you can develop practical skills, earn certifications and progress through a structured career ladder.</p>
+        <h2>Your Career Path</h2>
+        <p>Train, certify, and grow with Amana.</p>
       </div>
 
-      <div class="org-grid reveal">
+      <div class="org-grid reveal-stagger">
         <div class="org-card">
           <span class="step-num">1</span>
           <h3>Trainee</h3>
-          <p>You join the Amana talent pool and complete role-specific training and assessment at the Amana Academy.</p>
+          <p>Join the pool and train at the Amana Academy.</p>
         </div>
         <div class="org-card">
           <span class="step-num">2</span>
           <h3>Certified Professional</h3>
-          <p>Once trained and vetted, you're certified and matched to households looking for your role and experience level.</p>
+          <p>Trained, vetted, and matched to households.</p>
         </div>
         <div class="org-card">
           <span class="step-num">3</span>
           <h3>Senior Professional</h3>
-          <p>With a track record of reliable placements, you take on higher-experience roles and more specialised households.</p>
+          <p>A track record earns more specialised roles.</p>
         </div>
         <div class="org-card">
           <span class="step-num">4</span>
           <h3>Lead / House Manager</h3>
-          <p>Experienced professionals can progress into overseeing other staff, vendors and day-to-day household operations.</p>
+          <p>Oversee staff, vendors and daily operations.</p>
         </div>
       </div>
     </div>
@@ -162,35 +171,35 @@
   <section class="section section-alt" id="how-to-join">
     <div class="container">
       <div class="section-head reveal">
-        <h2>How to Join the Amana Talent Pool</h2>
-        <p>A clear, structured process — from application to your first placement.</p>
+        <h2>How to Join</h2>
+        <p>From application to your first placement.</p>
       </div>
 
-      <ol class="steps reveal">
+      <ol class="steps reveal-stagger">
         <li>
           <span class="step-num">1</span>
           <h3>Apply</h3>
-          <p>Tell us about your experience, the role you're looking for and your availability.</p>
+          <p>Your experience, role and availability.</p>
         </li>
         <li>
           <span class="step-num">2</span>
           <h3>Get verified</h3>
-          <p>We run identity, guarantor, reference and medical checks, plus a role-specific assessment.</p>
+          <p>Identity, guarantor and reference checks.</p>
         </li>
         <li>
           <span class="step-num">3</span>
-          <h3>Train at the Academy</h3>
-          <p>Complete practical training covering the skills and standards your role requires.</p>
+          <h3>Train</h3>
+          <p>Practical skills at the Academy.</p>
         </li>
         <li>
           <span class="step-num">4</span>
           <h3>Get matched</h3>
-          <p>We introduce you to households whose needs, schedule and location fit your profile.</p>
+          <p>Introduced to the right households.</p>
         </li>
         <li>
           <span class="step-num">5</span>
-          <h3>Grow with Amana</h3>
-          <p>Receive ongoing supervision, refresher training and support as you progress in your career.</p>
+          <h3>Grow</h3>
+          <p>Ongoing supervision and support.</p>
         </li>
       </ol>
     </div>
@@ -201,21 +210,20 @@
     <div class="container">
       <div class="section-head reveal">
         <span class="icon-badge center-badge"><svg><use href="#icon-academy"/></svg></span>
-        <h2>What You'll Learn at the Amana Academy</h2>
-        <p>Practical, role-specific training designed to meet the standards modern homes expect.</p>
+        <h2>What You'll Learn</h2>
+        <p>Practical training for the standards modern homes expect.</p>
       </div>
 
-      <ul class="check-list reveal">
-        <li><svg><use href="#icon-check"/></svg>Household hygiene and safety</li>
-        <li><svg><use href="#icon-check"/></svg>Childcare and basic first aid</li>
-        <li><svg><use href="#icon-check"/></svg>Food handling and nutrition basics</li>
+      <ul class="check-list reveal-stagger">
+        <li><svg><use href="#icon-check"/></svg>Hygiene &amp; safety</li>
+        <li><svg><use href="#icon-check"/></svg>Childcare &amp; first aid</li>
+        <li><svg><use href="#icon-check"/></svg>Food handling</li>
         <li><svg><use href="#icon-check"/></svg>Professional conduct</li>
         <li><svg><use href="#icon-check"/></svg>Confidentiality</li>
-        <li><svg><use href="#icon-check"/></svg>Financial honesty and handling household funds</li>
-        <li><svg><use href="#icon-check"/></svg>Defensive driving and vehicle care</li>
-        <li><svg><use href="#icon-check"/></svg>Customer service and household etiquette</li>
+        <li><svg><use href="#icon-check"/></svg>Financial honesty</li>
+        <li><svg><use href="#icon-check"/></svg>Defensive driving</li>
+        <li><svg><use href="#icon-check"/></svg>Household etiquette</li>
       </ul>
-      <p class="center muted reveal">You can also receive refresher training as you continue working with Amana.</p>
     </div>
   </section>
 
@@ -228,32 +236,32 @@
 
       <div class="faq-list reveal">
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">How do I apply to join Amana?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Use the "Join the Amana Talent Pool" button to tell us about your experience, the role you want and your availability. Our team will guide you through verification and training from there.</p></div>
+          <button class="faq-question" aria-expanded="false">How do I apply?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Use "Join the Talent Pool" to tell us your experience, role and availability.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-question" aria-expanded="false">What documents do I need?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>As part of our vetting process you'll typically need valid identification, guarantor details and references. We'll walk you through exactly what's required when you apply.</p></div>
+          <div class="faq-answer"><p>Valid ID, guarantor details and references — we'll guide you through it.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">Do I need experience to apply?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Not necessarily. Training at the Amana Academy is designed to prepare professionals at different experience levels for the standards households expect.</p></div>
+          <button class="faq-question" aria-expanded="false">Do I need experience?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Not necessarily — Academy training prepares professionals at every level.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">How does Amana Academy training work?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Training is practical and role-specific, covering everything from household hygiene and childcare basics to professional conduct and confidentiality. Refresher training is available as you continue working with Amana.</p></div>
+          <button class="faq-question" aria-expanded="false">How does training work?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Practical and role-specific, with refresher training as you continue with Amana.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">How and when do I get paid?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Under Managed Staffing placements, Amana can handle payroll directly with digital payslips. For direct Placement arrangements, pay is agreed between you and the household.</p></div>
+          <button class="faq-question" aria-expanded="false">How do I get paid?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Managed placements run on digital payslips; direct placements are agreed with the household.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">What if I have a concern about my placement?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Amana provides a direct channel for professionals to raise workplace concerns, and we stay involved through ongoing supervision after you start work.</p></div>
+          <button class="faq-question" aria-expanded="false">What if I have a concern?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>You have a direct channel to raise it, with ongoing supervision after you start.</p></div>
         </div>
         <div class="faq-item">
-          <button class="faq-question" aria-expanded="false">Can I move up to a more senior role over time?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
-          <div class="faq-answer"><p>Yes. Amana's career path is designed to let you progress from Trainee to Certified, Senior and eventually Lead / House Manager as you build experience.</p></div>
+          <button class="faq-question" aria-expanded="false">Can I move up over time?<svg class="faq-icon"><use href="#icon-arrow"/></svg></button>
+          <div class="faq-answer"><p>Yes — from Trainee through to Lead / House Manager as you build experience.</p></div>
         </div>
       </div>
     </div>
@@ -265,9 +273,8 @@
       <span class="icon-badge center-badge"><svg><use href="#icon-worker"/></svg></span>
       <h2>Ready to build a recognised career?</h2>
       <p class="lead">Your skills. Your career. Your future.</p>
-      <p>Join a talent pool that trains you, protects you and helps you grow.</p>
       <div class="hero-actions hero-actions-center">
-        <button class="btn btn-primary btn-lg" data-open-modal="professional">Join the Amana Talent Pool</button>
+        <button class="btn btn-primary btn-lg" data-open-modal="professional">Join the Talent Pool</button>
         <a href="index.html" class="btn btn-outline-light btn-lg">Back to Home</a>
       </div>
     </div>
@@ -292,8 +299,8 @@
       </div>
       <div>
         <h4>Company</h4>
-        <a href="professionals.html">Professionals</a>
-        <a href="business.html">Business</a>
+        <a href="professionals.html">For Professionals</a>
+        <a href="business.html">For Business</a>
         <a href="index.html#faq">FAQ</a>
       </div>
       <div>
@@ -308,6 +315,8 @@
     <p>&copy; <span id="year"></span> Amana. All rights reserved.</p>
   </div>
 </footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top"><svg><use href="#icon-up"/></svg></button>
 
 <!-- ============ LEAD MODAL ============ -->
 <div class="modal-overlay" id="modalOverlay">
