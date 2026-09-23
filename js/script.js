@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  document.documentElement.classList.add('js');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   /* ---------- Footer year ---------- */
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -87,7 +90,7 @@
   });
 
   /* ---------- Scroll reveal ---------- */
-  var revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
+  var revealEls = document.querySelectorAll('.reveal, .reveal-stagger, .hero-figure');
   if ('IntersectionObserver' in window && revealEls.length) {
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
@@ -101,6 +104,113 @@
     revealEls.forEach(function (el) { observer.observe(el); });
   } else {
     revealEls.forEach(function (el) { el.classList.add('in-view'); });
+  }
+
+  /* ---------- Split headlines into words ---------- */
+  function splitWords(el) {
+    var i = 0;
+    el.setAttribute('aria-label', el.textContent.replace(/\s+/g, ' ').trim());
+    function walk(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (ch) {
+        if (ch.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          ch.textContent.split(/(\s+)/).forEach(function (p) {
+            if (!p) return;
+            if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(' ')); return; }
+            var w = document.createElement('span');
+            w.className = 'w';
+            w.setAttribute('aria-hidden', 'true');
+            var inner = document.createElement('span');
+            inner.className = 'wi';
+            inner.style.setProperty('--i', i++);
+            inner.textContent = p;
+            w.appendChild(inner);
+            frag.appendChild(w);
+          });
+          node.replaceChild(frag, ch);
+        } else if (ch.nodeType === 1) {
+          walk(ch);
+        }
+      });
+    }
+    walk(el);
+  }
+
+  var splitEls = document.querySelectorAll('h1, .section-head h2, .final-cta h2, .split h2, .trust-statement h2');
+  splitEls.forEach(splitWords);
+  if ('IntersectionObserver' in window) {
+    var splitObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('split-in');
+          splitObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.35 });
+    splitEls.forEach(function (el) { splitObserver.observe(el); });
+  } else {
+    splitEls.forEach(function (el) { el.classList.add('split-in'); });
+  }
+
+  /* ---------- Scroll progress + header hide ---------- */
+  var progressBar = document.createElement('div');
+  progressBar.className = 'scroll-progress';
+  document.body.appendChild(progressBar);
+  var lastY = 0;
+  function onScrollMotion() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    var y = window.scrollY;
+    progressBar.style.transform = 'scaleX(' + (max > 0 ? y / max : 0) + ')';
+    if (header) {
+      var menuOpen = nav && nav.classList.contains('open');
+      if (y > lastY && y > 320 && !menuOpen) header.classList.add('hide');
+      else if (y < lastY) header.classList.remove('hide');
+    }
+    lastY = y;
+  }
+  window.addEventListener('scroll', onScrollMotion, { passive: true });
+  onScrollMotion();
+
+  /* ---------- Parallax ---------- */
+  if (!reduceMotion) {
+    var heroImg = document.querySelector('.hero-media img');
+    var figImgs = Array.prototype.slice.call(document.querySelectorAll('.hero-figure img'));
+    var parTick = false;
+    var runParallax = function () {
+      if (heroImg) heroImg.style.translate = '0 ' + Math.min(window.scrollY * 0.18, 40) + 'px';
+      figImgs.forEach(function (img) {
+        var r = img.parentNode.getBoundingClientRect();
+        var off = (r.top + r.height / 2 - window.innerHeight / 2) * -0.07;
+        img.style.translate = '0 ' + Math.max(-40, Math.min(40, off)) + 'px';
+      });
+      parTick = false;
+    };
+    window.addEventListener('scroll', function () {
+      if (!parTick) { parTick = true; requestAnimationFrame(runParallax); }
+    }, { passive: true });
+    runParallax();
+  }
+
+  /* ---------- Magnetic buttons and card hover ---------- */
+  if (!reduceMotion && window.matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll('.btn-primary, .btn-outline').forEach(function (b) {
+      b.addEventListener('mousemove', function (e) {
+        var r = b.getBoundingClientRect();
+        b.style.translate = ((e.clientX - r.left - r.width / 2) * 0.2) + 'px ' + ((e.clientY - r.top - r.height / 2) * 0.32) + 'px';
+      });
+      b.addEventListener('mouseleave', function () { b.style.translate = ''; });
+    });
+    document.querySelectorAll('.photo-card').forEach(function (c) {
+      c.addEventListener('mousemove', function (e) {
+        var r = c.getBoundingClientRect();
+        c.style.setProperty('--mx', ((e.clientX - r.left) / r.width - 0.5) * 2);
+        c.style.setProperty('--my', ((e.clientY - r.top) / r.height - 0.5) * 2);
+      });
+      c.addEventListener('mouseleave', function () {
+        c.style.setProperty('--mx', 0);
+        c.style.setProperty('--my', 0);
+      });
+    });
   }
 
   /* ---------- Lead modal ---------- */

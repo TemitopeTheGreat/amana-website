@@ -1,5 +1,5 @@
 /* ==================================================
-   AMANA — Design tokens
+   AMANA: Design tokens
    ================================================== */
 :root{
   --navy-950:#0b1d2e;
@@ -183,7 +183,7 @@ section[id]{scroll-margin-top:88px;}
 .nav-toggle.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
 
 /* ==================================================
-   Hero — photographic (homepage)
+   Hero: photographic (homepage)
    ================================================== */
 .hero{position:relative;}
 .hero-photo{
@@ -233,7 +233,7 @@ section[id]{scroll-margin-top:88px;}
 .hero-copy > :nth-child(4), .hero-photo .hero-inner > :nth-child(4){animation-delay:.35s;}
 @keyframes rise{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:none;}}
 
-/* Hero — split (sub pages) */
+/* Hero: split (sub pages) */
 .hero-split{padding:64px 0 0; background:var(--cream);}
 .hero-split-inner{
   display:grid;
@@ -253,7 +253,7 @@ section[id]{scroll-margin-top:88px;}
 .hero-figure img{width:100%; height:100%; object-fit:cover; filter:saturate(.88); transition:transform 1.2s var(--ease);}
 .hero-figure:hover img{transform:scale(1.03);}
 
-/* Trust strip — sits on the hero's lower edge */
+/* Trust strip: sits on the hero's lower edge */
 .trust-strip{
   position:relative;
   z-index:2;
@@ -275,7 +275,7 @@ section[id]{scroll-margin-top:88px;}
 .trust-strip li > span{font-size:.84rem; color:var(--ink-soft);}
 
 /* ==================================================
-   Sections — generic
+   Sections: generic
    ================================================== */
 .section{padding:88px 0;}
 .section-after-hero{padding-top:56px;}
@@ -718,3 +718,77 @@ section[id]{scroll-margin-top:88px;}
   .back-to-top{right:16px; bottom:16px; width:42px; height:42px;}
   .hero-actions{gap:16px;}
 }
+
+/* ==================================================
+   Motion layer
+   ================================================== */
+.scroll-progress{position:fixed; top:0; left:0; right:0; height:3px; background:var(--terracotta); transform-origin:0 50%; transform:scaleX(0); z-index:200; pointer-events:none;}
+.site-header{transition:transform .45s var(--ease), border-color .25s ease, box-shadow .25s ease;}
+.site-header.hide{transform:translateY(-100%);}
+body{animation:pageIn .8s ease both;}
+@keyframes pageIn{from{opacity:0;} to{opacity:1;}}
+
+/* Word-by-word headline reveal */
+.w{display:inline-block; overflow:hidden; vertical-align:top; padding:0 .06em .16em; margin:0 -.06em -.16em;}
+.wi{display:inline-block;}
+.js .wi{transform:translateY(115%); transition:transform 1.05s var(--ease); transition-delay:calc(var(--i,0) * 75ms);}
+.js .split-in .wi{transform:none;}
+.js .hero h1{animation:none; opacity:1;}
+
+/* Image wipe + parallax */
+.hero-figure{background:var(--cream-dark);}
+.js .hero-figure{animation:none;}
+.hero-figure img{scale:1.18; transition:clip-path 1.4s var(--ease), transform 1.2s var(--ease);}
+.js .hero-figure img{clip-path:inset(0 0 100% 0);}
+.js .hero-figure.in-view img{clip-path:inset(0);}
+.hero-media img{position:absolute; inset:-8% 0; width:100%; height:116%; object-fit:cover; animation:heroScale 2.6s var(--ease) both;}
+@keyframes heroScale{from{scale:1.14;} to{scale:1;}}
+
+/* Photo cards */
+.photo-card img{translate:calc(var(--mx,0) * -10px) calc(var(--my,0) * -10px); transition:transform .9s var(--ease), translate .35s ease-out, scale 1.7s var(--ease);}
+.js .reveal-stagger .photo-card img{scale:1.32;}
+.js .reveal-stagger.in-view .photo-card img{scale:1;}
+.photo-card-body{transition:transform .5s var(--ease);}
+.photo-card:hover .photo-card-body{transform:translateY(-6px);}
+
+/* Floating trust chips (homepage hero) */
+.hero-chips{position:absolute; right:max(24px, calc((100vw - var(--container)) / 2 + 24px)); top:50%; transform:translateY(-50%); display:flex; flex-direction:column; align-items:flex-end; gap:16px; z-index:1; pointer-events:none;}
+.chip{display:inline-flex; align-items:center; gap:10px; padding:12px 18px; border-radius:999px; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.3); backdrop-filter:blur(10px); color:var(--white); font-size:.9rem; font-weight:600; opacity:0; animation:chipIn .9s var(--ease) forwards, bob 5.5s ease-in-out infinite;}
+.chip svg{color:var(--gold-soft); width:1.2em; height:1.2em;}
+.chip.c1{animation-delay:1.1s, 2s;}
+.chip.c2{animation-delay:1.4s, 2.6s; margin-right:64px;}
+.chip.c3{animation-delay:1.7s, 3.2s; margin-right:18px;}
+@keyframes chipIn{from{opacity:0; translate:0 24px;} to{opacity:1; translate:0 0;}}
+@keyframes bob{0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);}}
+
+/* Buttons */
+.btn{transition:background .2s ease, color .2s ease, border-color .2s ease, transform .2s var(--ease), box-shadow .2s ease, translate .25s var(--ease);}
+.btn-primary{position:relative; overflow:hidden;}
+.btn-primary::after{content:''; position:absolute; top:0; left:-70%; width:50%; height:100%; background:linear-gradient(100deg, transparent, rgba(255,255,255,.34), transparent); transform:skewX(-20deg); transition:left .8s var(--ease);}
+.btn-primary:hover::after{left:135%;}
+.hero .btn-primary.btn-lg{animation:ring 3.4s ease-out 2.6s infinite;}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(196,83,45,.55);} 70%,100%{box-shadow:0 0 0 18px rgba(196,83,45,0);}}
+
+/* Section heading rule */
+.section-head::before{content:''; display:block; width:0; height:2px; background:var(--terracotta); margin:0 auto 20px; transition:width 1s var(--ease) .2s;}
+.section-head.in-view::before{width:48px;}
+.section-head-left::before{margin-left:0;}
+
+/* Pops and staggers */
+.step-num{transform:scale(0); transition:transform .7s cubic-bezier(.3,1.6,.5,1) .45s;}
+.reveal-stagger.in-view .step-num{transform:scale(1);}
+.check-list svg{transform:scale(0); transition:transform .6s cubic-bezier(.3,1.6,.5,1) .35s;}
+.check-list.in-view svg{transform:scale(1);}
+.pillar-num{transition:transform .6s var(--ease), opacity .6s ease; transform:translateY(-8px); opacity:0;}
+.reveal-stagger.in-view .pillar-num{transform:none; opacity:1; transition-delay:.5s;}
+.trust-strip li{animation:rise .8s var(--ease) both;}
+.trust-strip li:nth-child(1){animation-delay:.75s;}
+.trust-strip li:nth-child(2){animation-delay:.9s;}
+.trust-strip li:nth-child(3){animation-delay:1.05s;}
+.trust-strip li:nth-child(4){animation-delay:1.2s;}
+.final-cta-bg img{animation:kenburns 26s ease-in-out infinite alternate;}
+@keyframes kenburns{from{scale:1;} to{scale:1.14;}}
+.icon-badge{transition:transform .5s cubic-bezier(.3,1.6,.5,1);}
+.service-card:hover .icon-badge, .org-card:hover .icon-badge, .pillar:hover .icon-badge{transform:rotate(-8deg) scale(1.1);}
+
+@media (max-width:1024px){ .hero-chips{display:none;} }
