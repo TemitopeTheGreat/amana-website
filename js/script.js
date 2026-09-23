@@ -4,6 +4,20 @@
   document.documentElement.classList.add('js');
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Set these to enable the WhatsApp button and error fallbacks.
+  // whatsapp: digits only with country code, e.g. '2348012345678'
+  var SITE_CONFIG = { whatsapp: '', email: '' };
+
+  if (SITE_CONFIG.whatsapp) {
+    var wa = document.createElement('a');
+    wa.className = 'wa-float';
+    wa.href = 'https://wa.me/' + SITE_CONFIG.whatsapp + '?text=' + encodeURIComponent('Hello Amana, I would like to find out more.');
+    wa.target = '_blank';
+    wa.rel = 'noopener';
+    wa.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18.2a8.2 8.2 0 01-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1112 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 01-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 00-.7.3 3 3 0 00-.9 2.2c0 1.3.9 2.5 1 2.7.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.7 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>Chat with us';
+    document.body.appendChild(wa);
+  }
+
   /* ---------- Footer year ---------- */
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
@@ -223,6 +237,9 @@
   var modalClose = document.getElementById('modalClose');
   var modalSuccessClose = document.getElementById('modalSuccessClose');
   var lastFocused = null;
+  var currentKind = 'family';
+  var currentPlan = '';
+  var formError = null;
 
   var MODAL_CONTENT = {
     family: {
@@ -250,6 +267,9 @@
 
   function openModal(kind, plan) {
     var content = MODAL_CONTENT[kind] || MODAL_CONTENT.family;
+    currentKind = MODAL_CONTENT[kind] ? kind : 'family';
+    currentPlan = plan || '';
+    if (formError) formError.hidden = true;
     modalTitle.textContent = content.title;
     modalSub.textContent = plan ? content.sub + ' Selected plan: ' + plan + '.' : content.sub;
 
@@ -299,14 +319,57 @@
   });
 
   if (leadForm) {
+    var hp = document.createElement('input');
+    hp.type = 'text';
+    hp.name = 'website';
+    hp.tabIndex = -1;
+    hp.autocomplete = 'off';
+    hp.className = 'hp';
+    hp.setAttribute('aria-hidden', 'true');
+    leadForm.appendChild(hp);
+
+    var submitBtn = leadForm.querySelector('button[type="submit"]');
+    formError = document.createElement('p');
+    formError.className = 'form-error';
+    formError.setAttribute('role', 'alert');
+    formError.hidden = true;
+    leadForm.insertBefore(formError, submitBtn);
+
     leadForm.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!leadForm.checkValidity()) {
         leadForm.reportValidity();
         return;
       }
-      modalForm.hidden = true;
-      modalSuccess.hidden = false;
+      formError.hidden = true;
+      submitBtn.disabled = true;
+      var label = submitBtn.textContent;
+      submitBtn.textContent = 'Sending...';
+
+      var data = {};
+      new FormData(leadForm).forEach(function (v, k) { data[k] = v; });
+      data.kind = currentKind;
+      data.plan = currentPlan;
+      data.page = window.location.pathname;
+
+      fetch('/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }).then(function (r) {
+        if (!r.ok) throw new Error('failed');
+        modalForm.hidden = true;
+        modalSuccess.hidden = false;
+      }).catch(function () {
+        var alt = '';
+        if (SITE_CONFIG.whatsapp) alt = ' You can also <a href="https://wa.me/' + SITE_CONFIG.whatsapp + '" target="_blank" rel="noopener">message us on WhatsApp</a>.';
+        else if (SITE_CONFIG.email) alt = ' You can also email <a href="mailto:' + SITE_CONFIG.email + '">' + SITE_CONFIG.email + '</a>.';
+        formError.innerHTML = 'We could not send your request just now. Please try again in a moment.' + alt;
+        formError.hidden = false;
+      }).then(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = label;
+      });
     });
   }
 })();

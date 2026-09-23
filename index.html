@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Amana | Verified Hands. Trusted Homes.</title>
 <meta name="description" content="Amana connects Nigerian families, diaspora households and organisations with verified, trained and professionally managed domestic staff: nannies, housekeepers, drivers, cooks, house managers and more.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://amana-ng.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Amana">
+<meta property="og:title" content="Amana | Verified Hands. Trusted Homes.">
+<meta property="og:description" content="Amana connects Nigerian families, diaspora households and organisations with verified, trained and professionally managed domestic staff: nannies, housekeepers, drivers, cooks, house managers and more.">
+<meta property="og:url" content="https://amana-ng.vercel.app/">
+<meta property="og:image" content="https://amana-ng.vercel.app/assets/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,11 +49,12 @@
     <a href="index.html" class="brand">Amana</a>
 
     <nav class="nav" id="primary-nav">
+      <a href="family.html">Family</a>
+      <a href="professionals.html">Professionals</a>
+      <a href="business.html">Business</a>
       <a href="index.html#services">Services</a>
       <a href="index.html#academy">Academy</a>
       <a href="index.html#plans">Pricing</a>
-      <a href="professionals.html">Professionals</a>
-      <a href="business.html">Business</a>
       <a href="index.html#faq">FAQ</a>
     </nav>
 
@@ -62,7 +72,7 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero hero-photo">
-    <div class="hero-media"><img src="assets/img/hero-home.jpg" alt="A warm, softly lit living room with layered textiles and natural light"></div>
+    <div class="hero-media"><img src="assets/img/hero-home.webp" alt="A warm, softly lit living room with layered textiles and natural light"></div>
     <div class="hero-chips" aria-hidden="true">
       <span class="chip c1"><svg><use href="#icon-check"/></svg>Identity verified</span>
       <span class="chip c2"><svg><use href="#icon-check"/></svg>References checked</span>
@@ -107,32 +117,32 @@
 
       <div class="photo-grid reveal-stagger">
         <article class="photo-card" data-open-modal="family">
-          <img src="assets/img/nanny.jpg" alt="A mother gently styling her daughter's hair at home" loading="lazy">
+          <img src="assets/img/nanny.webp" alt="A mother gently styling her daughter's hair at home" loading="lazy">
           <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
           <div class="photo-card-body"><h3>Nannies</h3><p>Childcare you can trust</p></div>
         </article>
         <article class="photo-card" data-open-modal="family">
-          <img src="assets/img/cleaning.jpg" alt="A gloved hand mopping a glossy floor" loading="lazy">
+          <img src="assets/img/cleaning.webp" alt="A gloved hand mopping a glossy floor" loading="lazy">
           <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
           <div class="photo-card-body"><h3>Housekeepers &amp; Cleaners</h3><p>Spotless, every time</p></div>
         </article>
         <article class="photo-card" data-open-modal="family">
-          <img src="assets/img/driver.jpg" alt="A driver's hand on the steering wheel at dusk" loading="lazy">
+          <img src="assets/img/driver.webp" alt="A driver's hand on the steering wheel at dusk" loading="lazy">
           <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
           <div class="photo-card-body"><h3>Drivers</h3><p>Safe hands on the road</p></div>
         </article>
         <article class="photo-card" data-open-modal="family">
-          <img src="assets/img/cook.jpg" alt="A cook preparing a meal in a bright home kitchen" loading="lazy">
+          <img src="assets/img/cook.webp" alt="A cook preparing a meal in a bright home kitchen" loading="lazy">
           <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
           <div class="photo-card-body"><h3>Cooks</h3><p>Meals made with care</p></div>
         </article>
         <article class="photo-card" data-open-modal="family">
-          <img src="assets/img/house-manager.jpg" alt="A hand opening a wooden door inside a modern home" loading="lazy">
+          <img src="assets/img/house-manager.webp" alt="A hand opening a wooden door inside a modern home" loading="lazy">
           <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
           <div class="photo-card-body"><h3>House Managers</h3><p>Your home, expertly run</p></div>
         </article>
         <article class="photo-card" data-open-modal="family">
-          <img src="assets/img/companion.jpg" alt="Two people walking arm in arm" loading="lazy">
+          <img src="assets/img/companion.webp" alt="Two people walking arm in arm" loading="lazy">
           <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
           <div class="photo-card-body"><h3>Companions &amp; Carers</h3><p>Compassionate care at home</p></div>
         </article>
@@ -234,7 +244,7 @@
         <h2>More Than a Placement Agency</h2>
         <p class="lead">We stay accountable after the introduction.</p>
         <p>Most agencies stop at the introduction. Amana can stay on: payroll, compliance, supervision and replacement, under one roof. Prefer to manage staff yourself? Our Placement option is a one-time, vetted introduction.</p>
-        <button class="btn btn-primary" data-open-modal="family">Compare Our Services</button>
+        <a href="family.html#compare" class="btn btn-primary">Compare our services</a>
       </div>
       <div class="compare-cards">
         <div class="compare-card">
@@ -258,7 +268,10 @@
         <h2>For Families Abroad</h2>
         <p class="lead">Take care of home, from anywhere.</p>
         <p>Verified staff for your family in Nigeria, with contracts, payroll and supervision handled, wherever you are.</p>
-        <button class="btn btn-outline" data-open-modal="family">Find Staff for My Family</button>
+        <div class="hero-actions">
+          <button class="btn btn-primary" data-open-modal="family">Find staff for my family</button>
+          <a href="family.html#abroad" class="btn-text">More for families <svg><use href="#icon-arrow"/></svg></a>
+        </div>
       </div>
     </div>
   </section>
@@ -266,7 +279,7 @@
   <!-- ============ FOR PROFESSIONALS ============ -->
   <section class="section section-alt reveal">
     <div class="container split reverse">
-      <div class="hero-figure"><img src="assets/img/professional-portrait.jpg" alt="A smiling professional woman seated in a bright office" loading="lazy"></div>
+      <div class="hero-figure"><img src="assets/img/professional-portrait.webp" alt="A smiling professional woman seated in a bright office" loading="lazy"></div>
       <div>
         <h2>Your skills deserve recognition.</h2>
         <p class="lead">Domestic work is work.</p>
@@ -445,7 +458,7 @@
 
   <!-- ============ FINAL CTA ============ -->
   <section class="section final-cta reveal">
-    <div class="final-cta-bg"><img src="assets/img/hero-home.jpg" alt="" loading="lazy"></div>
+    <div class="final-cta-bg"><img src="assets/img/hero-home.webp" alt="" loading="lazy"></div>
     <div class="container center">
       <h2>Someone you trust makes all the difference.</h2>
       <p class="lead">Your home. Your family. Your peace of mind.</p>
@@ -475,6 +488,7 @@
       </div>
       <div>
         <h4>Company</h4>
+        <a href="family.html">For Families</a>
         <a href="professionals.html">For Professionals</a>
         <a href="business.html">For Business</a>
         <a href="index.html#faq">FAQ</a>
