@@ -1,17 +1,15 @@
-// Receives lead form submissions and emails them via Resend.
-// Required env vars (set in Vercel): RESEND_API_KEY, LEAD_TO_EMAIL
-// Optional: LEAD_FROM_EMAIL (defaults to Resend's onboarding sender)
-
-const esc = (v) => String(v == null ? '' : v)
-  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// Validates a form submission and forwards it to the Google Apps Script
+// that files it into the Amana Google Sheet (and saves any CV to Drive).
+// Env vars (set in Vercel): APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
 
 const clip = (v, n) => String(v == null ? '' : v).slice(0, n);
-
-const KINDS = {
-  family: 'Family / household request',
-  professional: 'Professional application',
-  organisation: 'Organisation enquiry',
-};
+const KINDS = ['family', 'professional', 'organisation'];
+const CV_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+const MAX_CV_BASE64 = 3.6 * 1024 * 1024; // about 2.7 MB of file
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -24,56 +22,47 @@ module.exports = async (req, res) => {
   // Honeypot: bots fill this hidden field. Pretend success and drop it.
   if (body.website) return res.status(200).json({ ok: true });
 
-  const name = clip(body.name, 120).trim();
-  const phone = clip(body.phone, 40).trim();
-  const email = clip(body.email, 160).trim();
-  const location = clip(body.location, 160).trim();
-  const need = clip(body.need, 120).trim();
-  const message = clip(body.message, 2000).trim();
-  const kind = KINDS[body.kind] ? body.kind : 'family';
-  const plan = clip(body.plan, 40).trim();
-  const page = clip(body.page, 80).trim();
+  const payload = {
+    kind: KINDS.includes(body.kind) ? body.kind : 'family',
+    name: clip(body.name, 120).trim(),
+    phone: clip(body.phone, 40).trim(),
+    email: clip(body.email, 160).trim(),
+    location: clip(body.location, 160).trim(),
+    need: clip(body.need, 120).trim(),
+    experience: clip(body.experience, 60).trim(),
+    arrangement: clip(body.arrangement, 40).trim(),
+    message: clip(body.message, 2000).trim(),
+    plan: clip(body.plan, 40).trim(),
+  };
 
-  if (!name || !phone || !location || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!payload.name || !payload.phone || !payload.location ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email) || !body.consent) {
     return res.status(400).json({ error: 'invalid_input' });
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.LEAD_TO_EMAIL;
-  if (!apiKey || !to) {
-    return res.status(503).json({ error: 'not_configured' });
+  if (body.cv && body.cv.data) {
+    const cv = body.cv;
+    if (payload.kind !== 'professional' || !CV_TYPES.includes(cv.type) ||
+        typeof cv.data !== 'string' || cv.data.length > MAX_CV_BASE64) {
+      return res.status(400).json({ error: 'invalid_cv' });
+    }
+    payload.cv = { name: clip(cv.name, 120), type: cv.type, data: cv.data };
   }
-  const from = process.env.LEAD_FROM_EMAIL || 'Amana <onboarding@resend.dev>';
 
-  const rows = [
-    ['Type', KINDS[kind]],
-    ['Name', name],
-    ['Phone', phone],
-    ['Email', email],
-    ['Location', location],
-    ['Interest', need],
-    ['Plan', plan],
-    ['Message', message],
-    ['Page', page],
-  ].filter(([, v]) => v);
-
-  const html = '<h2>' + esc(KINDS[kind]) + '</h2><table cellpadding="6">' +
-    rows.map(([k, v]) => '<tr><td><strong>' + esc(k) + '</strong></td><td>' + esc(v) + '</td></tr>').join('') +
-    '</table>';
+  const url = process.env.APPS_SCRIPT_URL;
+  const secret = process.env.APPS_SCRIPT_SECRET;
+  if (!url || !secret) return res.status(503).json({ error: 'not_configured' });
+  payload.secret = secret;
 
   try {
-    const r = await fetch('https://api.resend.com/emails', {
+    const r = await fetch(url, {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from,
-        to: [to],
-        reply_to: email,
-        subject: KINDS[kind] + ': ' + name,
-        html,
-      }),
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      redirect: 'follow',
     });
-    if (!r.ok) return res.status(502).json({ error: 'send_failed' });
+    const out = await r.json().catch(() => null);
+    if (!r.ok || !out || !out.ok) return res.status(502).json({ error: 'send_failed' });
     return res.status(200).json({ ok: true });
   } catch (e) {
     return res.status(502).json({ error: 'send_failed' });

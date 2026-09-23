@@ -34,13 +34,7 @@ Then open `http://localhost:8000`.
 
 ## Setup
 
-**Lead form emails.** The request form posts to `api/lead.js`, which emails each submission through Resend. Set these in Vercel (Project Settings, Environment Variables), then redeploy:
-
-- `RESEND_API_KEY`: your Resend API key
-- `LEAD_TO_EMAIL`: the inbox that should receive leads
-- `LEAD_FROM_EMAIL` (optional): a verified sender, for example `Amana <hello@yourdomain.com>`. Without it, Resend's test sender is used, which only delivers to the Resend account owner.
-
-Until the first two are set, the form shows a "could not send" message instead of a success screen.
+**Lead form and dashboard.** Requests go to `api/lead.js`, which forwards them to a Google Apps Script that files them into your Google Sheet (and saves CVs to Drive). Full steps: [docs/INTAKE_SETUP.md](docs/INTAKE_SETUP.md). Set `APPS_SCRIPT_URL` and `APPS_SCRIPT_SECRET` in Vercel. Until then the form shows a "could not send" message instead of a success screen.
 
 **WhatsApp button.** In `js/script.js`, set `SITE_CONFIG.whatsapp` to the number in digits with country code (for example `2348012345678`). The floating chat button appears once it is set. `SITE_CONFIG.email` adds an email fallback to the form's error message.
 

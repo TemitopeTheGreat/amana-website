@@ -1,5 +1,9 @@
 # Technical Architecture: Amana
 
+## 0. Phase 0: Google Sheet intake
+
+Before the database below exists, intake runs on a Google Sheet through an Apps Script (see [INTAKE_SETUP.md](INTAKE_SETUP.md)). It covers applications with CV upload, family requests, organisation enquiries, a status pipeline, per-stage vetting checkboxes and a Dashboard tab. The columns match the tables in section 3, so the data can be imported when you move to Supabase.
+
 ## 1. Overview
 
 Amana is one brand on a shared backend. Each brand has its own frontend, and every core table carries a `brand_scope` so data and access are isolated per brand.

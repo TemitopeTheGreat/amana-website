@@ -342,6 +342,34 @@
         <label>Anything else we should know?
           <textarea name="message" rows="3" placeholder="Schedule, live-in/live-out, specific requirements..."></textarea>
         </label>
+        <div class="pro-only" hidden>
+          <div class="form-row">
+            <label>Years of experience
+              <select name="experience" disabled>
+                <option>Less than 1 year</option>
+                <option>1 to 2 years</option>
+                <option>3 to 5 years</option>
+                <option>6 to 10 years</option>
+                <option>More than 10 years</option>
+              </select>
+            </label>
+            <label>Live-in or live-out?
+              <select name="arrangement" disabled>
+                <option>Either</option>
+                <option>Live-in</option>
+                <option>Live-out</option>
+              </select>
+            </label>
+          </div>
+          <label>Upload your CV (optional)
+            <input type="file" name="cv" accept=".pdf,.doc,.docx,application/pdf" disabled>
+            <span class="field-hint">PDF or Word, up to 2.5 MB. No CV? No problem, you can still apply.</span>
+          </label>
+        </div>
+        <label class="consent">
+          <input type="checkbox" name="consent" required>
+          <span>I agree that Amana may store my details (and CV, if attached) to process this request.</span>
+        </label>
         <button type="submit" class="btn btn-primary btn-block">Submit Request</button>
       </form>
     </div>

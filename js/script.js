@@ -250,7 +250,7 @@
     },
     professional: {
       title: 'Join the Amana Talent Pool',
-      sub: "Tell us about yourself and we'll guide you through the verification and training process.",
+      sub: "Tell us about yourself and we'll guide you through verification and training. You can attach a CV, but it's optional.",
       needLabel: 'What role are you applying for?',
       needOptions: ['Nanny', 'Housekeeper / Cleaner', 'Driver', 'Cook', 'House Manager', 'Companion / Carer', 'Other']
     },
@@ -278,6 +278,13 @@
       needSelect.innerHTML = content.needOptions.map(function (opt) {
         return '<option>' + opt + '</option>';
       }).join('');
+    }
+
+    var proBlock = leadForm.querySelector('.pro-only');
+    if (proBlock) {
+      var isPro = currentKind === 'professional';
+      proBlock.hidden = !isPro;
+      proBlock.querySelectorAll('input, select').forEach(function (el) { el.disabled = !isPro; });
     }
 
     modalForm.hidden = false;
@@ -335,6 +342,14 @@
     formError.hidden = true;
     leadForm.insertBefore(formError, submitBtn);
 
+    var MAX_CV = 2.5 * 1024 * 1024;
+    var CV_TYPES = { pdf: 'application/pdf', doc: 'application/msword', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' };
+
+    function showError(msg) {
+      formError.innerHTML = msg;
+      formError.hidden = false;
+    }
+
     leadForm.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!leadForm.checkValidity()) {
@@ -342,20 +357,46 @@
         return;
       }
       formError.hidden = true;
-      submitBtn.disabled = true;
-      var label = submitBtn.textContent;
-      submitBtn.textContent = 'Sending...';
 
       var data = {};
-      new FormData(leadForm).forEach(function (v, k) { data[k] = v; });
+      new FormData(leadForm).forEach(function (v, k) {
+        if (!(v instanceof File)) data[k] = v;
+      });
       data.kind = currentKind;
       data.plan = currentPlan;
       data.page = window.location.pathname;
 
-      fetch('/api/lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+      var fileInput = leadForm.querySelector('input[name="cv"]');
+      var file = (currentKind === 'professional' && fileInput && fileInput.files[0]) || null;
+      var cvType = '';
+      if (file) {
+        var ext = (file.name.split('.').pop() || '').toLowerCase();
+        cvType = CV_TYPES[ext] || '';
+        if (!cvType) return showError('Please attach your CV as a PDF or Word file.');
+        if (file.size > MAX_CV) return showError('That CV is over 2.5 MB. Please attach a smaller file, or apply without one.');
+      }
+
+      var label = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+
+      function readCv() {
+        if (!file) return Promise.resolve(null);
+        return new Promise(function (resolve, reject) {
+          var reader = new FileReader();
+          reader.onload = function () { resolve({ name: file.name, type: cvType, data: String(reader.result).split(',')[1] }); };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      readCv().then(function (cv) {
+        if (cv) data.cv = cv;
+        return fetch('/api/lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
       }).then(function (r) {
         if (!r.ok) throw new Error('failed');
         modalForm.hidden = true;
@@ -364,8 +405,7 @@
         var alt = '';
         if (SITE_CONFIG.whatsapp) alt = ' You can also <a href="https://wa.me/' + SITE_CONFIG.whatsapp + '" target="_blank" rel="noopener">message us on WhatsApp</a>.';
         else if (SITE_CONFIG.email) alt = ' You can also email <a href="mailto:' + SITE_CONFIG.email + '">' + SITE_CONFIG.email + '</a>.';
-        formError.innerHTML = 'We could not send your request just now. Please try again in a moment.' + alt;
-        formError.hidden = false;
+        showError('We could not send your request just now. Please try again in a moment.' + alt);
       }).then(function () {
         submitBtn.disabled = false;
         submitBtn.textContent = label;
