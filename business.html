@@ -7,7 +7,7 @@
 <meta name="description" content="Amana partners with residential estates, real estate developers, corporates, embassies and NGOs for managed household staffing — payroll, compliance, supervision and replacement, all in one place.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -54,25 +54,29 @@
 <main>
 
   <!-- ============ HERO ============ -->
-  <section class="hero">
-    <div class="container hero-inner">
-      <p class="eyebrow">Estates · Developers · Corporates · Embassies · NGOs</p>
-      <h1>One trusted <span>staffing partner.</span></h1>
-      <p class="hero-lead">Verified, managed household staffing — at organisation scale.</p>
-      <div class="hero-actions">
-        <button class="btn btn-primary btn-lg" data-open-modal="organisation">Partner With Amana</button>
-        <a href="#how-it-works" class="btn-text">See how it works <svg><use href="#icon-arrow"/></svg></a>
+  <section class="hero hero-split">
+    <div class="container hero-split-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">Estates · Developers · Corporates · Embassies · NGOs</p>
+        <h1>One trusted <em>staffing partner.</em></h1>
+        <p class="hero-lead">Verified, managed household staffing at organisation scale.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" data-open-modal="organisation">Partner with Amana</button>
+          <a href="#how-it-works" class="btn-text">See how it works <svg><use href="#icon-arrow"/></svg></a>
+        </div>
       </div>
-    </div>
-    <div class="container">
-      <ul class="trust-strip">
-        <li><strong>Single</strong><span>Point of accountability</span></li>
-        <li><strong>Managed</strong><span>Payroll &amp; compliance</span></li>
-        <li><strong>Ongoing</strong><span>Supervision &amp; replacement</span></li>
-        <li><strong>Dedicated</strong><span>Relationship management</span></li>
-      </ul>
+      <div class="hero-figure"><img src="assets/img/estate.jpg" alt="A residential apartment block glowing at dusk"></div>
     </div>
   </section>
+
+  <div class="container">
+    <ul class="trust-strip">
+      <li><strong>Single</strong><span>Point of accountability</span></li>
+      <li><strong>Managed</strong><span>Payroll &amp; compliance</span></li>
+      <li><strong>Ongoing</strong><span>Supervision &amp; replacement</span></li>
+      <li><strong>Dedicated</strong><span>Relationship management</span></li>
+    </ul>
+  </div>
 
   <!-- ============ WHO WE WORK WITH ============ -->
   <section class="section trust-statement" id="who-we-serve">
@@ -82,23 +86,23 @@
         <p>Estate-wide and corporate staffing, tailored to you.</p>
       </div>
 
-      <div class="card-grid reveal-stagger">
-        <article class="service-card tone-sky">
+      <div class="org-grid reveal-stagger">
+        <article class="org-card">
           <span class="icon-badge"><svg><use href="#icon-estate"/></svg></span>
           <h3>Residential Estates</h3>
           <p>A trusted staff pool as a standing amenity</p>
         </article>
-        <article class="service-card tone-coral">
+        <article class="org-card">
           <span class="icon-badge"><svg><use href="#icon-developer"/></svg></span>
           <h3>Real Estate Developers</h3>
           <p>Staffing built into the resident experience</p>
         </article>
-        <article class="service-card tone-navy">
+        <article class="org-card">
           <span class="icon-badge"><svg><use href="#icon-corporate"/></svg></span>
           <h3>Corporates</h3>
           <p>Vetted drivers and facility support</p>
         </article>
-        <article class="service-card tone-sage">
+        <article class="org-card">
           <span class="icon-badge"><svg><use href="#icon-embassy"/></svg></span>
           <h3>Embassies &amp; NGOs</h3>
           <p>Documentation that meets institutional standards</p>
@@ -106,13 +110,6 @@
       </div>
     </div>
   </section>
-
-  <div class="marquee">
-    <div class="marquee-track">
-      <span>Estates</span><span>Developers</span><span>Corporates</span><span>Embassies</span><span>NGOs</span>
-      <span>Estates</span><span>Developers</span><span>Corporates</span><span>Embassies</span><span>NGOs</span>
-    </div>
-  </div>
 
   <!-- ============ MANAGED STAFFING FOR ORGS ============ -->
   <section class="section section-dark reveal">
@@ -231,6 +228,7 @@
 
   <!-- ============ FINAL CTA ============ -->
   <section class="section final-cta reveal">
+    <div class="final-cta-bg"><img src="assets/img/estate.jpg" alt="" loading="lazy"></div>
     <div class="container center">
       <span class="icon-badge center-badge"><svg><use href="#icon-building"/></svg></span>
       <h2>Let's build your staffing plan.</h2>

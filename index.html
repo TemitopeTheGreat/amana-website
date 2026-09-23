@@ -7,7 +7,7 @@
 <meta name="description" content="Amana connects Nigerian families, diaspora households and organisations with verified, trained and professionally managed domestic staff — nannies, housekeepers, drivers, cooks, house managers and more.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -61,25 +61,27 @@
 <main>
 
   <!-- ============ HERO ============ -->
-  <section class="hero">
+  <section class="hero hero-photo">
+    <div class="hero-media"><img src="assets/img/hero-home.jpg" alt="A warm, softly lit living room with layered textiles and natural light"></div>
     <div class="container hero-inner">
-      <p class="eyebrow">Nigeria's Trusted Staffing Platform</p>
-      <h1>Verified hands. <span>Trusted homes.</span></h1>
-      <p class="hero-lead">Vetted, trained household staff — matched to your home in days.</p>
+      <p class="eyebrow">Household staffing · Nigeria</p>
+      <h1>Verified hands. <em>Trusted homes.</em></h1>
+      <p class="hero-lead">Vetted, trained household staff, matched to your home in days.</p>
       <div class="hero-actions">
-        <button class="btn btn-primary btn-lg" data-open-modal="family">Find Your Professional</button>
+        <button class="btn btn-primary btn-lg" data-open-modal="family">Find your professional</button>
         <button class="btn-text" data-open-modal="professional">Become a professional <svg><use href="#icon-arrow"/></svg></button>
       </div>
     </div>
-    <div class="container">
-      <ul class="trust-strip">
-        <li><strong><span data-count="8" data-suffix="">0</span>-Stage</strong><span>Vetting process</span></li>
-        <li><strong><span data-count="100" data-suffix="%">0%</span></strong><span>Verified &amp; trained</span></li>
-        <li><strong>30–60 Day</strong><span>Replacement guarantee</span></li>
-        <li><strong>Nationwide</strong><span>Coverage across Nigeria</span></li>
-      </ul>
-    </div>
   </section>
+
+  <div class="container">
+    <ul class="trust-strip">
+      <li><strong><span data-count="8" data-suffix="">8</span>-stage</strong><span>Vetting process</span></li>
+      <li><strong><span data-count="100" data-suffix="%">100%</span></strong><span>Verified &amp; trained</span></li>
+      <li><strong>30–60 day</strong><span>Replacement guarantee</span></li>
+      <li><strong>Nationwide</strong><span>Coverage across Nigeria</span></li>
+    </ul>
+  </div>
 
   <!-- ============ TRUST STATEMENT ============ -->
   <section class="section trust-statement reveal">
@@ -90,57 +92,45 @@
     </div>
   </section>
 
-  <!-- ============ MARQUEE ============ -->
-  <div class="marquee">
-    <div class="marquee-track">
-      <span>Verified</span><span>Trained</span><span>Matched</span><span>Monitored</span><span>Protected</span><span>Replaced</span>
-      <span>Verified</span><span>Trained</span><span>Matched</span><span>Monitored</span><span>Protected</span><span>Replaced</span>
-    </div>
-  </div>
-
   <!-- ============ SERVICES ============ -->
-  <section class="section section-tight" id="services">
+  <section class="section section-alt" id="services">
     <div class="container">
       <div class="section-head reveal">
-        <h2>Find Your Professional</h2>
+        <h2>Find your professional</h2>
         <p>Every role, vetted and trained.</p>
       </div>
 
-      <div class="card-grid reveal-stagger">
-        <article class="service-card tone-sky">
-          <span class="icon-badge"><svg><use href="#icon-nanny"/></svg></span>
-          <h3>Nannies</h3>
-          <p>Childcare you can trust</p>
+      <div class="photo-grid reveal-stagger">
+        <article class="photo-card" data-open-modal="family">
+          <img src="assets/img/nanny.jpg" alt="A mother gently styling her daughter's hair at home" loading="lazy">
+          <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
+          <div class="photo-card-body"><h3>Nannies</h3><p>Childcare you can trust</p></div>
         </article>
-        <article class="service-card tone-coral">
-          <span class="icon-badge"><svg><use href="#icon-broom"/></svg></span>
-          <h3>Housekeepers &amp; Cleaners</h3>
-          <p>Spotless, every time</p>
+        <article class="photo-card" data-open-modal="family">
+          <img src="assets/img/cleaning.jpg" alt="A gloved hand mopping a glossy floor" loading="lazy">
+          <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
+          <div class="photo-card-body"><h3>Housekeepers &amp; Cleaners</h3><p>Spotless, every time</p></div>
         </article>
-        <article class="service-card tone-navy">
-          <span class="icon-badge"><svg><use href="#icon-car"/></svg></span>
-          <h3>Drivers</h3>
-          <p>Safe hands on the road</p>
+        <article class="photo-card" data-open-modal="family">
+          <img src="assets/img/driver.jpg" alt="A driver's hand on the steering wheel at dusk" loading="lazy">
+          <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
+          <div class="photo-card-body"><h3>Drivers</h3><p>Safe hands on the road</p></div>
         </article>
-        <article class="service-card tone-gold">
-          <span class="icon-badge"><svg><use href="#icon-chef"/></svg></span>
-          <h3>Cooks</h3>
-          <p>Meals made with care</p>
+        <article class="photo-card" data-open-modal="family">
+          <img src="assets/img/cook.jpg" alt="A cook preparing a meal in a bright home kitchen" loading="lazy">
+          <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
+          <div class="photo-card-body"><h3>Cooks</h3><p>Meals made with care</p></div>
         </article>
-        <article class="service-card tone-sage">
-          <span class="icon-badge"><svg><use href="#icon-manager"/></svg></span>
-          <h3>House Managers</h3>
-          <p>Your home, expertly run</p>
+        <article class="photo-card" data-open-modal="family">
+          <img src="assets/img/house-manager.jpg" alt="A hand opening a wooden door inside a modern home" loading="lazy">
+          <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
+          <div class="photo-card-body"><h3>House Managers</h3><p>Your home, expertly run</p></div>
         </article>
-        <article class="service-card tone-blush">
-          <span class="icon-badge"><svg><use href="#icon-heart"/></svg></span>
-          <h3>Companions &amp; Carers</h3>
-          <p>Compassionate care at home</p>
+        <article class="photo-card" data-open-modal="family">
+          <img src="assets/img/companion.jpg" alt="Two people walking arm in arm" loading="lazy">
+          <span class="arrow"><svg><use href="#icon-arrow"/></svg></span>
+          <div class="photo-card-body"><h3>Companions &amp; Carers</h3><p>Compassionate care at home</p></div>
         </article>
-      </div>
-
-      <div class="center reveal">
-        <button class="btn btn-outline" data-open-modal="family">Explore All Professionals</button>
       </div>
     </div>
   </section>
@@ -269,10 +259,10 @@
   </section>
 
   <!-- ============ FOR PROFESSIONALS ============ -->
-  <section class="section section-alt split-section reveal">
+  <section class="section section-alt reveal">
     <div class="container split reverse">
+      <div class="hero-figure"><img src="assets/img/professional-portrait.jpg" alt="A smiling professional woman seated in a bright office" loading="lazy"></div>
       <div>
-        <span class="icon-badge"><svg><use href="#icon-worker"/></svg></span>
         <h2>Your skills deserve recognition.</h2>
         <p class="lead">Domestic work is work.</p>
         <p>Free training, fair contracts, digital payslips — and a real career path.</p>
@@ -450,6 +440,7 @@
 
   <!-- ============ FINAL CTA ============ -->
   <section class="section final-cta reveal">
+    <div class="final-cta-bg"><img src="assets/img/hero-home.jpg" alt="" loading="lazy"></div>
     <div class="container center">
       <h2>Someone you trust makes all the difference.</h2>
       <p class="lead">Your home. Your family. Your peace of mind.</p>
