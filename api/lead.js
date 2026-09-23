@@ -2,7 +2,11 @@
 // that files it into the Amana Google Sheet (and saves any CV to Drive).
 // Env vars (set in Vercel): APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
 
-const clip = (v, n) => String(v == null ? '' : v).slice(0, n);
+// Leading = + - @ can make a spreadsheet treat text as a formula, so mark it as plain text.
+const clip = (v, n) => {
+  const t = String(v == null ? '' : v).slice(0, n);
+  return /^\s*[=+\-@]/.test(t) ? "'" + t.trim() : t;
+};
 const KINDS = ['family', 'professional', 'organisation'];
 const CV_TYPES = [
   'application/pdf',
