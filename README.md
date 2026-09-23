@@ -46,4 +46,4 @@ Until the first two are set, the form shows a "could not send" message instead o
 
 **Real photos.** Photos live in `assets/img/` as WebP. To swap one, replace the file and keep the same name. Ideal sizes: `hero-home` 1700px wide, the rest about 1000px.
 
-**Domain.** When you have a custom domain, update the `SITE` constant in nothing but the canonical and `og:` URLs in each page's `<head>`, plus `sitemap.xml` and `robots.txt`.
+**Domain.** When you have a custom domain, replace `https://amana-ng.vercel.app` in each page's canonical and `og:` tags, in `sitemap.xml` and in `robots.txt`.
