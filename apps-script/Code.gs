@@ -78,8 +78,11 @@ function doPost(e) {
     } else {
       row = [id, now, 'New', t(p.name), t(p.phone), t(p.email), t(p.need), t(p.location), t(p.message)];
     }
-    sheet.appendRow(row);
-    const r = sheet.getLastRow();
+    // Write as text (keeps leading zeros in phone numbers, never parses formulas).
+    const r = sheet.getLastRow() + 1;
+    sheet.getRange(r, 1, 1, row.length).setNumberFormat('@');
+    sheet.getRange(r, 2).setNumberFormat('dd mmm yyyy hh:mm');
+    sheet.getRange(r, 1, 1, row.length).setValues([row]);
 
     if (kind === 'professional') {
       const first = TABS.professional.headers.indexOf(STAGES[0]) + 1;
