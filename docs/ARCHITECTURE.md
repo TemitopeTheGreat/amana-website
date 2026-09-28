@@ -149,7 +149,7 @@ export interface MatchRequest {
 
 1. Professional applies. A `professionals` row and `vetting_records` for all eight stages are created.
 2. Smile ID handles the identity stage. Its result is stored on the record and sets the Verified badge.
-3. Staff record the other stages: police character certificate, guarantors, references, medical, assessment, training.
+3. Staff record the other stages: police character certificate, guarantors, references, assessment, training. The medical stage is self-serve: the candidate books and attends it themselves at one of Amana's approved partner hospitals, then shares the result for staff to record.
 4. When every stage passes, `is_verified` is set and the professional enters the matching pool.
 
 ## 7. Notifications

@@ -976,3 +976,30 @@ ol.legal-list.alpha{list-style:lower-alpha;}
   .clause{display:block; min-width:0; margin-bottom:.15em;}
   .fb-links{margin-left:0; display:flex; margin-top:6px;}
 }
+
+/* Plan pricing */
+.plan-price{font-family:var(--font-head); font-size:2.1rem; font-weight:600; color:var(--navy-950); margin:.15em 0 .5em; display:flex; align-items:baseline; gap:8px;}
+.plan-price span{font-family:var(--font-body); font-size:.72rem; font-weight:500; color:var(--ink-soft); white-space:nowrap;}
+.plan-card-featured .plan-price{color:var(--white);}
+.plan-card-featured .plan-price span{color:rgba(255,255,255,.6);}
+
+/* Diaspora highlight banner (homepage) */
+.diaspora-banner{background:var(--navy-950); color:#fff; padding:64px 0;}
+.diaspora-banner-inner{display:grid; grid-template-columns:1.3fr 1fr; gap:48px; align-items:center;}
+.diaspora-banner h2{color:#fff; font-size:clamp(1.9rem,3.2vw,2.5rem);}
+.diaspora-banner p{color:rgba(255,255,255,.72);}
+.diaspora-banner .eyebrow{color:var(--gold-soft);}
+.diaspora-banner-cta{text-align:center; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); border-radius:var(--radius-md); padding:32px 28px;}
+.diaspora-price{font-family:var(--font-head); font-size:2.6rem; font-weight:600; color:var(--gold-soft); margin:0 0 4px;}
+.diaspora-price span{display:block; font-family:var(--font-body); font-size:.8rem; font-weight:500; color:rgba(255,255,255,.6); margin-top:2px;}
+.diaspora-banner-cta .btn{margin-top:14px; width:100%;}
+@media (max-width:900px){
+  .diaspora-banner-inner{grid-template-columns:1fr; gap:28px;}
+  .diaspora-banner{padding:44px 0;}
+}
+
+/* Diaspora package card */
+.diaspora-price-card{max-width:460px; margin:0 auto; background:var(--white); border:1px solid var(--border); border-radius:var(--radius-lg); padding:40px 36px; text-align:left; box-shadow:var(--shadow-md);}
+.diaspora-price-card .plan-price{font-size:2.8rem; margin-bottom:.3em;}
+.diaspora-price-card .plan-features{margin:20px 0 26px;}
+.diaspora-note{font-size:.82rem; color:var(--ink-soft); text-align:center; margin-top:14px;}

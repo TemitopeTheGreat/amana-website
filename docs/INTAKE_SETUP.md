@@ -23,6 +23,29 @@ The browser never sees the Apps Script address. Vercel checks the submission and
 
 If you edit the script later: **Deploy > Manage deployments > Edit > New version**, otherwise the live version stays on the old code.
 
+## Updating the script (already set up once)
+
+`apps-script/Code.gs` in this repo is the source of truth. If it changes (new features, fixes), your live copy needs updating:
+
+1. Open the Apps Script editor, select everything in `Code.gs`, delete it, and paste the current version from the repo.
+2. Click **Save**.
+3. **Deploy > Manage deployments**, click the pencil icon on the existing deployment, set **Version** to **New version**, and click **Deploy**. This keeps the same URL, so nothing on the site needs to change.
+4. If the change added a new script property or config (like `PRESET_SECRET`), run **setup** again. It's safe to re-run; it won't duplicate your data.
+
+## Immediate email notifications
+
+Every submission emails the team straight away, no delay, no separate step. Set `NOTIFY_EMAIL` at the top of `Code.gs`, one address or several separated by commas, e.g. `'hello@amanastaff.com, ops@amanastaff.com'`. Leave it empty to notify whoever owns the script instead.
+
+The person who submitted the form also gets a short confirmation email immediately, letting them know Amana has their request.
+
+## Operations dashboard
+
+`ops.html` on the site is a live, password-gated view of the pipeline: totals, status breakdowns, candidates by role, submissions over the last 8 weeks, and the latest candidates and family requests. It isn't in the nav and isn't indexed by search engines, but it isn't hidden from anyone who has the direct link and the password, so treat the link and password the same way you'd treat any shared login.
+
+Setup: in Vercel, add an environment variable `OPS_PASSWORD` with a password of your choice, then redeploy. The dashboard reads live data through `api/ops.js`, using the same `APPS_SCRIPT_URL` and `APPS_SCRIPT_SECRET` as the lead form, so nothing extra is needed on the Apps Script side beyond having the current `Code.gs` deployed (it adds a `stats` action to `doGet`).
+
+To change the password later, update `OPS_PASSWORD` in Vercel and redeploy; anyone still signed in in their browser stays signed in until they close the tab or click Sign out.
+
 ## What the team sees
 
 | Tab | Holds | Status pipeline |

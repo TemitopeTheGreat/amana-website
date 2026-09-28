@@ -10,7 +10,7 @@ The marketing website (this repo) is static. This document specifies the product
 
 ## 1. Goals
 
-1. **Trust.** Every professional is verified before a client meets them (identity, guarantors, references, police character certificate, medical screening, role assessment, training).
+1. **Trust.** Every professional is verified before a client meets them (identity, guarantors, references, police character certificate, a medical check the candidate completes themselves at an Amana-approved hospital, role assessment, training).
 2. **Accountability after placement.** Amana can stay responsible for payroll, compliance, supervision and replacement (Managed Staffing), or make a one-time vetted introduction (Placement).
 3. **Dignity and career growth for workers.** Formal contracts, digital payslips, Academy training and a career ladder: Trainee, Certified, Senior, Lead / House Manager.
 4. **Shared infrastructure.** Reuse the shared backend (auth, database, Smile ID, Resend) with sister platforms, with strict brand isolation.
@@ -27,11 +27,14 @@ The marketing website (this repo) is static. This document specifies the product
 
 ## 3. Service model
 
-| Plan | For | Includes | Replacement |
-| :--- | :--- | :--- | :--- |
-| Standard | Everyday households | Core verification, role training, matching | 30 days |
-| Premium | Specialised or more experienced staff | Enhanced checks, specialised cooks, multilingual nannies, defensive-driving certified drivers | 60 days |
-| Executive | High-net-worth homes, embassies, principals | Senior house managers, dedicated relationship management, enhanced protection | 60 days |
+| Plan | For | Price | Includes | Replacement |
+| :--- | :--- | :--- | :--- | :--- |
+| Standard | Everyday households | ₦180,000, one-time | Core verification, role training, matching | 30 days |
+| Premium | Specialised or more experienced staff | ₦280,000, one-time | Enhanced checks, specialised cooks, multilingual nannies, defensive-driving certified drivers | 60 days |
+| Executive | High-net-worth homes, embassies, principals | ₦600,000, one-time | Senior house managers, dedicated relationship management, enhanced protection | 60 days |
+| Diaspora | Clients abroad | £400, one-time | Full vetting and training, matching, contract and onboarding, payroll administration, scheduled updates in the client's time zone, dedicated contact | 60 days |
+
+All prices are a one-time service fee. The professional's pay is separate and agreed directly between the professional and the client.
 
 Engagement models: **Placement** (one-time vetted introduction) and **Managed Staffing** (payroll, statutory compliance, supervision, replacement).
 
@@ -42,7 +45,8 @@ Engagement models: **Placement** (one-time vetted introduction) and **Managed St
 | Intake | Client request | Capture role, schedule, live-in or live-out, location, plan and household notes. Works without an account. | P0 |
 | Intake | Professional application | Mobile-first, low-bandwidth application: role, experience, availability, location. | P0 |
 | Verification | Identity | Smile ID verification (NIN, BVN or government ID) with a Verified badge. | P0 |
-| Verification | Vetting pipeline | Track the eight stages per professional: identity, police character certificate, guarantors, references, medical screening, role assessment, training, final approval. Staff can see status and blockers. | P0 |
+| Verification | Vetting pipeline | Track the eight stages per professional: identity, police character certificate, guarantors, references, medical check, role assessment, training, final approval. The medical is self-serve: the candidate books and attends it themselves at one of Amana's approved partner hospitals and shares the result. Staff can see status and blockers. | P0 |
+| Verification | Approved hospital list | Maintain the list of approved partner hospitals candidates can use for their medical, and surface it to candidates once they reach that stage. | P1 |
 | Academy | Training records | Record modules completed, certification level and refresher training. | P1 |
 | Matching | Household matching | Rank verified professionals by role, location, schedule, live-in or live-out, languages, experience and plan tier. Deterministic and explainable. | P0 |
 | Matching | Shortlist review | Client reviews a shortlist of matched professionals. Amana staff approve before it is sent. | P0 |

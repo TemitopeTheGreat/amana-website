@@ -11,7 +11,9 @@
 const CONFIG = {
   SHEET_ID: '1UAz-RnjSZyHeLsM4V06vyy4ZTZISqDfaXCwL-yz9x9c',
   CV_FOLDER_NAME: 'Amana CVs',
-  NOTIFY_EMAIL: '',            // leave empty to notify the script owner
+  // One address, or several separated by commas, e.g. 'hello@amanastaff.com, ops@amanastaff.com'.
+  // Leave empty to notify the script owner instead.
+  NOTIFY_EMAIL: 'hello@amanastaff.com',
   MAX_CV_BYTES: 3 * 1024 * 1024,
 };
 
@@ -45,8 +47,76 @@ const TABS = {
 
 /* ---------------- Web app entry points ---------------- */
 
-function doGet() {
+function doGet(e) {
+  const params = (e && e.parameter) || {};
+  if (params.action === 'stats') return statsResponse_(params.secret);
   return json_({ ok: true, service: 'amana-intake' });
+}
+
+function statsResponse_(secret) {
+  const stored = PropertiesService.getScriptProperties().getProperty('SECRET');
+  if (!stored || secret !== stored) return json_({ ok: false, error: 'unauthorized' });
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+    return json_({
+      ok: true,
+      data: {
+        generatedAt: new Date().toISOString(),
+        candidates: summarizeTab_(ss, 'professional'),
+        families: summarizeTab_(ss, 'family'),
+        organisations: summarizeTab_(ss, 'organisation'),
+      },
+    });
+  } catch (err) {
+    return json_({ ok: false, error: String(err && err.message || err) });
+  }
+}
+
+function summarizeTab_(ss, kind) {
+  const def = TABS[kind];
+  const sheet = ss.getSheetByName(def.name);
+  const idx = {};
+  def.headers.forEach(function (h, i) { idx[h] = i; });
+  const roleKey = idx['Role'] !== undefined ? 'Role' : (idx['Role needed'] !== undefined ? 'Role needed' : 'Organisation type');
+  const tz = Session.getScriptTimeZone();
+
+  const rows = (!sheet || sheet.getLastRow() < 2)
+    ? []
+    : sheet.getRange(2, 1, sheet.getLastRow() - 1, def.headers.length).getValues().filter(function (r) { return r[idx.ID]; });
+
+  const statusCounts = {};
+  def.statuses.forEach(function (s) { statusCounts[s] = 0; });
+  const roleCounts = {};
+  const weekCounts = {};
+
+  rows.forEach(function (r) {
+    const status = r[idx.Status];
+    if (Object.prototype.hasOwnProperty.call(statusCounts, status)) statusCounts[status]++;
+    const role = r[idx[roleKey]];
+    if (role) roleCounts[role] = (roleCounts[role] || 0) + 1;
+    const submitted = r[idx.Submitted];
+    if (submitted instanceof Date) {
+      const monday = new Date(submitted);
+      monday.setHours(0, 0, 0, 0);
+      monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+      const key = Utilities.formatDate(monday, tz, 'yyyy-MM-dd');
+      weekCounts[key] = (weekCounts[key] || 0) + 1;
+    }
+  });
+
+  const latest = rows.slice()
+    .sort(function (a, b) { return new Date(b[idx.Submitted]) - new Date(a[idx.Submitted]); })
+    .slice(0, 8)
+    .map(function (r) {
+      const o = {};
+      def.headers.forEach(function (h, i) {
+        const v = r[i];
+        o[h] = (v instanceof Date) ? Utilities.formatDate(v, tz, 'dd MMM yyyy, HH:mm') : v;
+      });
+      return o;
+    });
+
+  return { total: rows.length, statusCounts: statusCounts, roleCounts: roleCounts, weekCounts: weekCounts, latest: latest };
 }
 
 function doPost(e) {
@@ -95,6 +165,7 @@ function doPost(e) {
     sheet.getRange(r, updatedCol).setValue(now);
 
     notify_(kind, id, p, cvLink, ss.getUrl() + '#gid=' + sheet.getSheetId());
+    confirmSubmitter_(kind, p);
     return json_({ ok: true, id: id });
   } catch (err) {
     return json_({ ok: false, error: String(err && err.message || err) });
@@ -215,7 +286,29 @@ function notify_(kind, id, p, cvLink, sheetUrl) {
   if (cvLink) lines.push('CV: ' + cvLink);
   if (p.message) lines.push('', 'Notes: ' + clean_(p.message));
   lines.push('', 'Open the sheet: ' + sheetUrl);
-  MailApp.sendEmail({ to: to, subject: label + ': ' + clean_(p.name), body: lines.join('\n'), replyTo: clean_(p.email) });
+  MailApp.sendEmail({ to: to, subject: label + ': ' + clean_(p.name), body: lines.join('\n'), replyTo: clean_(p.email), name: 'Amana' });
+}
+
+// A short, immediate "we got it" email to the person who submitted the form.
+function confirmSubmitter_(kind, p) {
+  const email = clean_(p.email);
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+  const first = (clean_(p.name).split(' ')[0]) || 'there';
+  const copy = {
+    professional: {
+      subject: 'Amana: we have your application',
+      body: 'Hi ' + first + ',\n\nThanks for applying to join the Amana talent pool. We have received your details' + (p.cv ? ' and your CV' : '') + ', and our team will be in touch about next steps, including verification and training.\n\nIf anything changes (phone number, availability), just reply to this email.\n\nThe Amana team',
+    },
+    organisation: {
+      subject: 'Amana: we have your enquiry',
+      body: 'Hi ' + first + ',\n\nThanks for reaching out about staffing for your organisation. We have received your request and someone from our team will follow up shortly with next steps.\n\nIf anything changes in the meantime, just reply to this email.\n\nThe Amana team',
+    },
+    family: {
+      subject: 'Amana: we have your request',
+      body: 'Hi ' + first + ',\n\nThanks for your request. We have received your details and our team will be in touch shortly to help find the right professional for your home.\n\nIf anything changes in the meantime, just reply to this email.\n\nThe Amana team',
+    },
+  }[kind];
+  MailApp.sendEmail({ to: email, subject: copy.subject, body: copy.body, name: 'Amana' });
 }
 
 function clean_(v) {
