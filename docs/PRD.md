@@ -29,9 +29,9 @@ The marketing website (this repo) is static. This document specifies the product
 
 | Plan | For | Price | Includes | Replacement |
 | :--- | :--- | :--- | :--- | :--- |
-| Standard | Everyday households | ₦180,000, one-time | Core verification, role training, matching | 30 days |
-| Premium | Specialised or more experienced staff | ₦280,000, one-time | Enhanced checks, specialised cooks, multilingual nannies, defensive-driving certified drivers | 60 days |
-| Executive | High-net-worth homes, embassies, principals | ₦600,000, one-time | Senior house managers, dedicated relationship management, enhanced protection | 60 days |
+| Standard | Everyday households | ₦200,000, one-time | Cleaners, housekeepers, nannies, cooks. Core verification, role training, matching | 30 days |
+| Premium | Specialised or more experienced staff | ₦380,000, one-time | Reliable, experienced cleaners, house managers, governesses, educated nannies, chefs. Enhanced background checks | 60 days |
+| Executive | Fully managed staffing | ₦680,000, one-time | Everything in Premium, plus drivers. Full Managed Staffing: payroll, statutory compliance, ongoing supervision, dedicated relationship management | 60 days |
 | Diaspora | Clients abroad | £400, one-time | Full vetting and training, matching, contract and onboarding, payroll administration, scheduled updates in the client's time zone, dedicated contact | 60 days |
 
 All prices are a one-time service fee. The professional's pay is separate and agreed directly between the professional and the client.

@@ -50,6 +50,7 @@ const TABS = {
 function doGet(e) {
   const params = (e && e.parameter) || {};
   if (params.action === 'stats') return statsResponse_(params.secret);
+  if (params.action === 'materials') return materialsResponse_(params.secret);
   return json_({ ok: true, service: 'amana-intake' });
 }
 
@@ -128,6 +129,8 @@ function doPost(e) {
     const secret = PropertiesService.getScriptProperties().getProperty('SECRET');
     if (!secret || p.secret !== secret) return json_({ ok: false, error: 'unauthorized' });
 
+    if (p.kind === 'training_access') return logTrainingAccess_(p);
+
     const kind = TABS[p.kind] ? p.kind : 'family';
     const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
     const sheet = ensureTab_(ss, kind);
@@ -190,6 +193,7 @@ function setup() {
   }
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
   Object.keys(TABS).forEach(function (k) { ensureTab_(ss, k); });
+  ensureTrainingSheets_(ss);
   polish();
 
   // Remove the default empty tab if it is still there.
@@ -198,6 +202,80 @@ function setup() {
 
   ss.setActiveSheet(ss.getSheetByName('Dashboard'));
   Logger.log('SECRET (add to Vercel as APPS_SCRIPT_SECRET): ' + props.getProperty('SECRET'));
+}
+
+/* ---------------- Academy training portal ---------------- */
+
+const TRAINING_MATERIALS_HEADERS = ['Module', 'Title', 'Type', 'URL', 'Notes'];
+const TRAINING_ACCESS_HEADERS = ['Timestamp', 'Name', 'Email', 'Page'];
+
+// Creates the two training-portal sheets if they don't exist yet. Safe to re-run.
+function ensureTrainingSheets_(ss) {
+  if (!ss.getSheetByName('Training Materials')) {
+    const m = ss.insertSheet('Training Materials');
+    m.getRange(1, 1, 1, TRAINING_MATERIALS_HEADERS.length).setValues([TRAINING_MATERIALS_HEADERS])
+      .setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+    m.setFrozenRows(1);
+    m.setColumnWidths(1, TRAINING_MATERIALS_HEADERS.length, 220);
+    // Example rows so the format is obvious. Replace Module/Title/URL with real content,
+    // then delete these two rows (or leave them, "EXAMPLE" is easy to spot and delete).
+    m.getRange(2, 1, 2, 5).setValues([
+      ['Household hygiene & safety', 'EXAMPLE — Module 1 handbook (PDF)', 'PDF', 'https://drive.google.com/...', 'Replace with your real Drive link'],
+      ['Household hygiene & safety', 'EXAMPLE — Module 1 video walkthrough', 'Video', 'https://youtube.com/...', 'Replace with your real video link'],
+    ]);
+    m.getRange(2, 1, 2, 5).setFontColor('#9a9a9a').setFontStyle('italic');
+    m.getRange(1, 1, 1000, TRAINING_MATERIALS_HEADERS.length).createFilter();
+  }
+  if (!ss.getSheetByName('Training Access')) {
+    const a = ss.insertSheet('Training Access');
+    a.getRange(1, 1, 1, TRAINING_ACCESS_HEADERS.length).setValues([TRAINING_ACCESS_HEADERS])
+      .setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+    a.setFrozenRows(1);
+    a.setColumnWidths(1, TRAINING_ACCESS_HEADERS.length, 200);
+  }
+}
+
+// GET ?action=materials&secret=... — returns the published training materials, grouped by module.
+// Reads the "Training Materials" sheet so Amana staff can add content there directly, without a
+// code change. Rows whose Title starts with "EXAMPLE" are skipped.
+function materialsResponse_(secret) {
+  const stored = PropertiesService.getScriptProperties().getProperty('SECRET');
+  if (!stored || secret !== stored) return json_({ ok: false, error: 'unauthorized' });
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+    const sheet = ss.getSheetByName('Training Materials');
+    const rows = (!sheet || sheet.getLastRow() < 2) ? [] : sheet.getRange(2, 1, sheet.getLastRow() - 1, TRAINING_MATERIALS_HEADERS.length).getValues();
+    const byModule = {};
+    const order = [];
+    rows.forEach(function (r) {
+      const module = String(r[0] || '').trim();
+      const title = String(r[1] || '').trim();
+      if (!module || !title || /^EXAMPLE/i.test(title)) return;
+      if (!byModule[module]) { byModule[module] = []; order.push(module); }
+      byModule[module].push({ title: title, type: String(r[2] || '').trim(), url: String(r[3] || '').trim(), notes: String(r[4] || '').trim() });
+    });
+    const modules = order.map(function (m) { return { module: m, items: byModule[m] }; });
+    return json_({ ok: true, data: { modules: modules } });
+  } catch (err) {
+    return json_({ ok: false, error: String(err && err.message || err) });
+  }
+}
+
+// POST {kind:'training_access', secret, name, email, page} — logs who opened the training portal.
+function logTrainingAccess_(p) {
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+    ensureTrainingSheets_(ss);
+    const sheet = ss.getSheetByName('Training Access');
+    const row = [new Date(), clean_(p.name), clean_(p.email), clean_(p.page)];
+    const r = sheet.getLastRow() + 1;
+    sheet.getRange(r, 1, 1, row.length).setNumberFormat('@');
+    sheet.getRange(r, 1).setNumberFormat('dd mmm yyyy hh:mm');
+    sheet.getRange(r, 1, 1, row.length).setValues([row]);
+    return json_({ ok: true });
+  } catch (err) {
+    return json_({ ok: false, error: String(err && err.message || err) });
+  }
 }
 
 /* ---------------- Helpers ---------------- */

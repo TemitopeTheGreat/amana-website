@@ -1003,3 +1003,25 @@ ol.legal-list.alpha{list-style:lower-alpha;}
 .diaspora-price-card .plan-price{font-size:2.8rem; margin-bottom:.3em;}
 .diaspora-price-card .plan-features{margin:20px 0 26px;}
 .diaspora-note{font-size:.82rem; color:var(--ink-soft); text-align:center; margin-top:14px;}
+.plans-note{text-align:center; font-size:.9rem; color:var(--ink-soft); margin-top:24px;}
+.card-tag{display:inline-block; margin-top:8px; padding:3px 10px; border-radius:999px; background:rgba(255,255,255,.16); backdrop-filter:blur(4px); font-size:.72rem; font-weight:600; letter-spacing:.03em; color:#fff; border:1px solid rgba(255,255,255,.28);}
+
+/* Academy training portal */
+.training-gate{max-width:420px; margin:0 auto; background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:36px 32px; box-shadow:var(--shadow-md);}
+.training-gate form{display:flex; flex-direction:column; gap:16px;}
+.training-gate label{display:flex; flex-direction:column; gap:6px; font-size:.85rem; font-weight:600; color:var(--navy-900);}
+.training-gate input{font-family:inherit; font-size:.95rem; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--radius-sm); background:var(--cream); font-weight:400;}
+.training-gate input:focus{outline:none; border-color:var(--terracotta); box-shadow:0 0 0 3px rgba(196,83,45,.14);}
+.training-help{text-align:center; font-size:.85rem; color:var(--ink-soft); margin:18px 0 0;}
+.training-help a{text-decoration:underline;}
+
+.module-group{margin-bottom:28px;}
+.module-group h3{font-size:1.15rem; margin-bottom:12px;}
+.module-items{display:flex; flex-direction:column; gap:10px;}
+.module-item{display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--white); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px 18px;}
+.module-item-info{min-width:0;}
+.module-item-title{font-weight:600; color:var(--navy-900); font-size:.95rem;}
+.module-item-notes{font-size:.82rem; color:var(--ink-soft); margin-top:2px;}
+.module-type{display:inline-block; font-size:.68rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--terracotta); background:var(--gold-soft); padding:2px 8px; border-radius:4px; margin-right:8px; vertical-align:middle;}
+.module-item .btn{flex-shrink:0;}
+.portal-empty{text-align:center; background:var(--white); border:1px dashed var(--border); border-radius:var(--radius-md); padding:40px 28px; color:var(--ink-soft);}
