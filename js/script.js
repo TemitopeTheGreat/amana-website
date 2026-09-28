@@ -295,6 +295,17 @@
       }).join('');
     }
 
+    var codeLink = document.getElementById('codeOfConductLink');
+    if (codeLink) {
+      if (currentKind === 'professional') {
+        codeLink.href = 'candidate-code-of-conduct.html';
+        codeLink.textContent = 'Candidate Code of Conduct';
+      } else {
+        codeLink.href = 'client-code-of-conduct.html';
+        codeLink.textContent = 'Client Code of Conduct';
+      }
+    }
+
     var proBlock = leadForm.querySelector('.pro-only');
     if (proBlock) {
       var isPro = currentKind === 'professional';
