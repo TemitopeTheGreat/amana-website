@@ -46,4 +46,4 @@ Then open `http://localhost:8000`.
 
 **Real photos.** Photos live in `assets/img/` as WebP. To swap one, replace the file and keep the same name. Ideal sizes: `hero-home` 1700px wide, the rest about 1000px.
 
-**Domain.** When you have a custom domain, replace `https://amana-ng.vercel.app` in each page's canonical and `og:` tags, in `sitemap.xml` and in `robots.txt`.
+**Domain.** The site is live at `https://www.amanastaff.com` (the bare `amanastaff.com` redirects there). If you ever change domains again, update it in each page's canonical and `og:` tags, in `sitemap.xml` and in `robots.txt`.

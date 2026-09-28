@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /ops.html
-Sitemap: https://amana-ng.vercel.app/sitemap.xml
+Sitemap: https://www.amanastaff.com/sitemap.xml
