@@ -1,6 +1,6 @@
-// Password-gated proxy for the internal ops dashboard (ops.html).
+// Password-gated proxy for the internal admin dashboard (admin.html).
 // The Apps Script secret never reaches the browser; only this function holds it.
-// Env vars (set in Vercel): OPS_PASSWORD, APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
+// Env vars (set in Vercel): ADMIN_PASSWORD, APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
   }
 
   const body = typeof req.body === 'string' ? safeParse(req.body) : (req.body || {});
-  const expected = process.env.OPS_PASSWORD;
+  const expected = process.env.ADMIN_PASSWORD;
   if (!expected) return res.status(503).json({ error: 'not_configured' });
 
   const password = String(body.password || '');

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Operations | Amana</title>
+<title>Admin | Amana</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,7 +77,7 @@
 
 <div class="gate" id="gate">
   <div class="gate-box">
-    <p class="tag" style="color:var(--terracotta)">Amana &middot; Operations</p>
+    <p class="tag" style="color:var(--terracotta)">Amana &middot; Admin</p>
     <h1>Sign in</h1>
     <p>Enter the operations password to view the live pipeline.</p>
     <form id="gateForm">
@@ -93,7 +93,7 @@
     <div class="container">
       <div>
         <a href="index.html" class="brand">Amana</a>
-        <div class="tag">Operations dashboard</div>
+        <div class="tag">Admin dashboard</div>
       </div>
       <div class="ops-actions">
         <span class="ops-updated" id="updatedAt"></span>
@@ -259,7 +259,7 @@
   function load(password) {
     loading.hidden = false;
     content.hidden = true;
-    return fetch('/api/ops', {
+    return fetch('/api/admin', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: password }),
     }).then(function (r) {
       if (r.status === 401) { sessionStorage.removeItem(KEY); throw new Error('unauthorized'); }

@@ -12,7 +12,7 @@ Static marketing site for Amana, a Nigerian domestic and household talent platfo
 - `business.html`: for estates, developers, corporates, embassies & NGOs
 - `diaspora.html`: the £400 diaspora package, linked from the homepage and Family page (not in the main nav)
 - `privacy.html`: privacy policy
-- `ops.html`: password-gated internal operations dashboard, not in the nav, not indexed
+- `admin.html`: password-gated internal admin dashboard, not in the nav, not indexed
 
 ## Stack
 
@@ -40,7 +40,7 @@ Then open `http://localhost:8000`.
 
 **Lead form, notifications and dashboard.** Requests go to `api/lead.js`, which forwards them to a Google Apps Script that files them into your Google Sheet (and saves CVs to Drive). Each submission immediately emails the team (`NOTIFY_EMAIL` in `apps-script/Code.gs`, can be several addresses separated by commas) and sends the person who submitted a short confirmation email. Full steps: [docs/INTAKE_SETUP.md](docs/INTAKE_SETUP.md). Set `APPS_SCRIPT_URL` and `APPS_SCRIPT_SECRET` in Vercel. Until then the form shows a "could not send" message instead of a success screen.
 
-**Operations dashboard.** `ops.html` is a password-gated internal page (not in the nav, not indexed) showing live pipeline stats: totals, status breakdowns, candidates by role, weekly submissions and the latest requests. It calls `api/ops.js`, which checks a password against `OPS_PASSWORD` in Vercel, then reads live data from the same Apps Script. Needs `OPS_PASSWORD`, `APPS_SCRIPT_URL` and `APPS_SCRIPT_SECRET` set in Vercel.
+**Admin dashboard.** `admin.html` is a password-gated internal page (not in the nav, not indexed) showing live pipeline stats: totals, status breakdowns, candidates by role, weekly submissions and the latest requests. It calls `api/admin.js`, which checks a password against `ADMIN_PASSWORD` in Vercel, then reads live data from the same Apps Script. Needs `ADMIN_PASSWORD`, `APPS_SCRIPT_URL` and `APPS_SCRIPT_SECRET` set in Vercel.
 
 **WhatsApp button.** In `js/script.js`, set `SITE_CONFIG.whatsapp` to the number in digits with country code (for example `2348012345678`). The floating chat button appears once it is set. `SITE_CONFIG.email` adds an email fallback to the form's error message.
 

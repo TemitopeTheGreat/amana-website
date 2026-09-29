@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /ops.html
+Disallow: /admin.html
 Sitemap: https://www.amanastaff.com/sitemap.xml
