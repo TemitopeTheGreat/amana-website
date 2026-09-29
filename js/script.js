@@ -6,7 +6,7 @@
 
   // Set these to enable the WhatsApp button and error fallbacks.
   // whatsapp: digits only with country code, e.g. '2348012345678'
-  var SITE_CONFIG = { whatsapp: '', email: 'hello@amanastaff.com' };
+  var SITE_CONFIG = { whatsapp: '2349136047586', email: 'hello@amanastaff.com' };
 
   if (SITE_CONFIG.whatsapp) {
     var wa = document.createElement('a');
