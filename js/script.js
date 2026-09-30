@@ -441,4 +441,25 @@
       });
     });
   }
+
+  // Photo-grid scroll arrow
+  document.querySelectorAll('.photo-grid-wrap').forEach(function (wrap) {
+    var grid = wrap.querySelector('.photo-grid');
+    var btn = wrap.querySelector('.photo-scroll-btn');
+    if (!grid || !btn) return;
+
+    function update() {
+      var atEnd = grid.scrollLeft + grid.clientWidth >= grid.scrollWidth - 4;
+      btn.disabled = atEnd;
+    }
+
+    btn.addEventListener('click', function () {
+      var card = grid.querySelector('.photo-card');
+      var step = card ? card.getBoundingClientRect().width + 20 : grid.clientWidth * 0.8;
+      grid.scrollBy({ left: step, behavior: 'smooth' });
+    });
+    grid.addEventListener('scroll', update);
+    window.addEventListener('resize', update);
+    update();
+  });
 })();
