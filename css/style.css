@@ -391,6 +391,7 @@ section[id]{scroll-margin-top:88px;}
 .service-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-md); border-color:transparent;}
 .service-card h3{font-size:1.15rem; margin-bottom:6px;}
 .service-card p{font-size:.93rem; margin:0;}
+.service-card .icon-badge, .org-card .icon-badge, .explore-card .icon-badge, .pillar .icon-badge{display:none;}
 
 /* ==================================================
    Pillars
