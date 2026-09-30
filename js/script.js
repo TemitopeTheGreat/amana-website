@@ -246,13 +246,13 @@
       title: 'Find Your Professional',
       sub: "Tell us about your household and we'll be in touch.",
       needLabel: 'What do you need help with?',
-      needOptions: ['Nanny', 'Governess', 'Babysitter', 'Housekeeper / Cleaner', 'Laundry and ironing', 'Driver', 'Cook', 'Private chef', 'House Manager', 'Companion / Carer', 'Elderly care', 'Gardener', 'Security / Gatekeeper', 'Handyman', 'Errand runner', 'Pool attendant', 'Estate / facility staff', 'Other (tell us)', 'Not sure yet']
+      needOptions: ['Nanny', 'Governess', 'Babysitter', 'Housekeeper / Cleaner', 'Laundry and ironing', 'Cook', 'Private chef', 'House Manager', 'Companion / Carer', 'Elderly care', 'Gardener', 'Security / Gatekeeper', 'Handyman', 'Errand runner', 'Pool attendant', 'Estate / facility staff', 'Other (tell us)', 'Not sure yet']
     },
     professional: {
       title: 'Join the Amana Talent Pool',
       sub: "Tell us about yourself and we'll guide you through verification and training. You can attach a CV, but it's optional.",
       needLabel: 'What role are you applying for?',
-      needOptions: ['Nanny', 'Governess', 'Babysitter', 'Housekeeper / Cleaner', 'Laundry and ironing', 'Driver', 'Cook', 'Private chef', 'House Manager', 'Companion / Carer', 'Elderly care', 'Gardener', 'Security / Gatekeeper', 'Handyman', 'Errand runner', 'Pool attendant', 'Estate / facility staff', 'Other (tell us)']
+      needOptions: ['Nanny', 'Governess', 'Babysitter', 'Housekeeper / Cleaner', 'Laundry and ironing', 'Cook', 'Private chef', 'House Manager', 'Companion / Carer', 'Elderly care', 'Gardener', 'Security / Gatekeeper', 'Handyman', 'Errand runner', 'Pool attendant', 'Estate / facility staff', 'Other (tell us)']
     },
     organisation: {
       title: 'Partner With Amana',
