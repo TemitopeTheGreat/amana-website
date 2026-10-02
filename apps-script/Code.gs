@@ -261,6 +261,22 @@ function handleFindRequestBySession_(p) {
   return json_({ ok: true, record: record });
 }
 
+/**
+ * deleteRequest(): removes a Requests row by Request ID. Secret-gated
+ * like every other action (see doPost) - not exposed to the public
+ * website, only usable by whoever holds APPS_SCRIPT_SECRET. Exists so
+ * test/junk rows (e.g. from end-to-end testing) can be cleaned up
+ * without hand-editing the live sheet every time.
+ */
+function handleDeleteRequest_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureRequestsTab_(ss);
+  const rowNum = findRowByColumnValue_(sheet, 1, p.requestId);
+  if (!rowNum) return json_({ ok: false, error: 'request_not_found' });
+  sheet.deleteRow(rowNum);
+  return json_({ ok: true });
+}
+
 function findDuplicateRequest_(sheet, phone, staffCategory) {
   if (!phone || sheet.getLastRow() < 2) return null;
   const phoneCol = REQUEST_HEADERS.indexOf('Client Phone');
@@ -423,6 +439,7 @@ function doPost(e) {
     if (p.action === 'appendRequest') return handleAppendRequest_(p);
     if (p.action === 'updateRequest') return handleUpdateRequest_(p);
     if (p.action === 'findRequestBySession') return handleFindRequestBySession_(p);
+    if (p.action === 'deleteRequest') return handleDeleteRequest_(p);
     if (p.action === 'appendSession') return handleAppendSession_(p);
     if (p.action === 'updateSession') return handleUpdateSession_(p);
 

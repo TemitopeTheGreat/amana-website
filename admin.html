@@ -304,19 +304,37 @@
     bar(container, obj);
   }
 
+  // Monday of the week containing `d`, matching the week-bucketing Code.gs
+  // uses server-side, so the keys line up with the data it sends.
+  function mondayOf_(d) {
+    var m = new Date(d);
+    m.setHours(0, 0, 0, 0);
+    m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
+    return m;
+  }
+  function dateKey_(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
   function weeksChart(container, counts) {
     container.innerHTML = '';
-    var keys = Object.keys(counts).sort();
-    var last8 = keys.slice(-8);
-    if (!last8.length) { container.innerHTML = '<p class="empty-note">No data yet.</p>'; return; }
-    var top = Math.max.apply(null, last8.map(function (k) { return counts[k]; }), 1);
-    last8.forEach(function (k) {
-      var v = counts[k];
+    // Always render a fixed 8-week grid ending this week, zero-filled where
+    // there's no data - a single real data point should look like one small
+    // bar in an 8-bar chart, not one bar stretched to fill the whole row.
+    var thisMonday = mondayOf_(new Date());
+    var weeks = [];
+    for (var i = 7; i >= 0; i--) {
+      var d = new Date(thisMonday);
+      d.setDate(d.getDate() - i * 7);
+      weeks.push({ key: dateKey_(d), date: d, count: counts[dateKey_(d)] || 0 });
+    }
+    var top = Math.max.apply(null, weeks.map(function (w) { return w.count; }), 1);
+    weeks.forEach(function (w) {
       var wk = document.createElement('div');
       wk.className = 'wk';
-      var d = new Date(k + 'T00:00:00');
-      var label = isNaN(d) ? k : (d.getMonth() + 1) + '/' + d.getDate();
-      wk.innerHTML = '<span class="wk-count">' + v + '</span><span class="wk-bar" style="height:' + Math.max(4, Math.round((v / top) * 88)) + 'px"></span><span class="wk-label">' + label + '</span>';
+      var label = (w.date.getMonth() + 1) + '/' + w.date.getDate();
+      var barHeight = w.count ? Math.max(4, Math.round((w.count / top) * 88)) : 2;
+      wk.innerHTML = '<span class="wk-count">' + w.count + '</span><span class="wk-bar" style="height:' + barHeight + 'px"></span><span class="wk-label">' + label + '</span>';
       container.appendChild(wk);
     });
   }
