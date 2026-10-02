@@ -1,11 +1,76 @@
 # Amana WhatsApp intake
 
-This is **Part 1 ("AMANA")** of the staged brief in
-`Amana_Hiyame_Claude_Code_Prompts.md` (in the user's Downloads folder,
-not in this repo): a WhatsApp Business API bot feeding a recruitment
-pipeline (Intake → Recruitment → Commercial → Fulfilment). Part 2 of
-that brief later connects this to a separate Next.js app called
-Hiyame.
+A WhatsApp Business API bot (not yet built - see below) feeding a
+recruitment pipeline (Intake → Recruitment → Commercial → Fulfilment),
+plus the website form that's the guaranteed intake route until the bot
+exists. Later integrates into a separate app called Hiyame as a
+dedicated domestic-staff portal.
+
+**Governing document, superseding the earlier `Amana_Hiyame_Claude_Code_Prompts.md`:**
+`Amana_Staff_Workflow_Automation_Hiyame_Integration_Team_Brief.docx`
+(user's Downloads folder, not in this repo) - read in full 2 Oct 2026.
+Fixed dates it sets: standalone automation complete Mon 5 Oct COB,
+Hiyame testing complete Wed 7 Oct COB, approval Thu 8 Oct COB, go-live
+Fri 9 Oct 2026. Two decisions made against it that day, below.
+
+## Reconciled against the new brief (2 Oct 2026)
+
+Read the brief in full and cross-checked it against everything already
+built. Almost everything already matched (spreadsheet name, the
+15-value status taxonomy, tab names, the 39-field Requests schema) -
+no changes needed there. Two real conflicts/gaps surfaced, both
+resolved with the user directly rather than guessed:
+
+1. **The brief requires the WhatsApp bot for the 5 Oct milestone -
+   directly contradicting "hold" on Stage A4.** Resolved: WhatsApp
+   Business API credentials are still not set up. The brief's own
+   section 9 fallback clause covers exactly this: *"If production API
+   access or template approval is not available in time, use the
+   website form as the guaranteed intake route and a clearly staffed
+   WhatsApp handoff as fallback. Do not represent an unconnected
+   WhatsApp number as an automated bot."* That's what this is - the
+   website form (Stage A3) is solid and tested, and
+   `SITE_CONFIG.whatsapp` (`js/script.js`) already points at a real,
+   staffed number (0913 604 7586) via the floating chat button on
+   every page. No bot code written. `request-staff.html`'s success and
+   error messages now both surface that WhatsApp number explicitly, so
+   it reads as a real channel, not a decoration.
+2. **The brief's "Candidates" tab spec (marketplace fields: display
+   name, salary expectation, availability, marketplace consent,
+   visibility) collides with the existing live Candidates tab** (same
+   name, different schema, real production data). Resolved: extend the
+   existing tab rather than create a second one - see "Candidates tab
+   extended" below.
+
+Also added, since the brief places them under Section 4 (Stage 1
+scope, not Hiyame-only): empty `Shortlists`, `Placements`, and
+`Lists & Settings` tabs, prepared for when something actually reads/
+writes them (Hiyame integration, or the team by hand) - no UI consumes
+these yet, same "prepare the data model now" approach as the
+marketplace fields below.
+
+### Candidates tab extended, not duplicated
+
+`TABS.professional.headers` in `apps-script/Code.gs` gained five
+columns: `Display Name`, `Salary Expectation`, `Availability`,
+`Marketplace Consent`, `Visibility`. "Display Name" exists because the
+brief's Hiyame-era candidate profile (section 5.1) shows an "approved
+display name," never the candidate's full legal name/phone to a
+browsing client - a real privacy requirement, not a formality. The
+existing `Status` column already serves as vetting status; not
+duplicated.
+
+**The hard part was doing this without breaking the live sheet.**
+`ensureTab_()` used to no-op entirely once a tab already existed - fine
+for tabs whose schema never changes, wrong the moment one needs to
+grow. It now calls a new `migrateTabHeaders_()` on that path: reads
+the sheet's actual header row, appends only the headers that are
+missing as new columns at the end, touches nothing else. Idempotent,
+runs on every request (cheap - one small range read), safe to leave
+running forever. This is also the first tab-schema change since the
+original launch, so it's the first real test of whether a schema can
+evolve under live data without a manual rebuild - worth knowing it
+works now, before a bigger schema change is needed later.
 
 ## Uses the existing Sheet and the existing Apps Script (2 Oct 2026)
 
@@ -131,3 +196,19 @@ Stage A5's WhatsApp-bot scenarios (T02-T05, blocked on Stage A4) and
 all of Part 2 (Hiyame). A4 needs a WhatsApp Business API
 provider, credentials, an approved message template, and the
 15-question wording signed off.
+
+## Known residual risk: the new brief calls this a release blocker
+
+Section 8's "Release blockers" list includes *"A duplicate request...
+created by a retry."* `STAGE_A5_TEST_REPORT.md`'s T06 section already
+documented this exact scenario happening live: the known intermittent
+Apps Script redirect quirk can make a client-side retry create a
+second row, even though duplicate detection correctly flags it for
+human review (same phone + overlapping category within 30 days). That
+flagging is real, tested, and working - it satisfies "detected," but
+not "no silent duplicate record" in the strictest read, since the
+second row does get created, just visibly marked. Closing this
+properly means either an idempotency key the client sends and the
+server checks before writing, or the client refusing to retry on an
+ambiguous response - real work, not done here, flagging it rather than
+leaving it unsaid given the brief names it specifically.

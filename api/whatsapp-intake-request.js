@@ -178,7 +178,7 @@ module.exports = async (req, res) => {
     console.error('whatsapp-intake-request failed:', e.message);
     return res.status(502).json({
       error: 'send_failed',
-      message: 'We could not record your request just now. Please try again in a moment or contact us directly.',
+      message: 'We could not record your request just now. Please try again in a moment.',
     });
   }
 };

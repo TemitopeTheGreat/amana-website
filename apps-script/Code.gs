@@ -29,7 +29,16 @@ const TABS = {
     prefix: 'C',
     statuses: ['New', 'Contacted', 'In verification', 'In training', 'Approved', 'Placed', 'On hold', 'Rejected'],
     headers: ['ID', 'Submitted', 'Status', 'Name', 'Phone', 'Email', 'Role', 'Experience', 'Arrangement', 'Location', 'Notes', 'CV link']
-      .concat(STAGES, ['Vetting progress', 'Assigned to', 'Internal notes', 'Last updated']),
+      .concat(STAGES, ['Vetting progress', 'Assigned to', 'Internal notes', 'Last updated'])
+      // Marketplace fields (Amana_Staff_Workflow_Automation_Hiyame_Integration_Team_Brief.docx,
+      // section 4): the brief's "Candidates" tab spec, merged into this existing tab per the
+      // user's decision rather than creating a second Candidates-named tab. "Display Name" is
+      // the public-facing name shown in the marketplace (never the full legal Name) - the
+      // brief's "Approved display name" (section 5.1) exists precisely so a client browsing
+      // profiles doesn't see a candidate's full legal name. "Status" above already serves as
+      // vetting status - not duplicated here. Empty until someone (Hiyame integration, or the
+      // team by hand) fills them in - existing rows are unaffected (see migrateTabHeaders_).
+      .concat(['Display Name', 'Salary Expectation', 'Availability', 'Marketplace Consent', 'Visibility']),
   },
   family: {
     name: 'Families',
@@ -407,6 +416,60 @@ function ensureAutomationLogTab_(ss) {
   return sheet;
 }
 
+// The brief's remaining Section 4 tabs (Shortlists, Placements, Lists &
+// Settings) - empty data model prepared now, same as Requests/Bot
+// Sessions/Automation Log, ready for when Hiyame integration (or manual
+// recruiter use) starts writing to them. No UI reads/writes these yet.
+const SHORTLIST_HEADERS = ['Shortlist ID', 'Request ID', 'Candidate ID', 'Proposed Date', 'Recruiter', 'Client Response', 'Interview Status'];
+const PLACEMENT_HEADERS = ['Placement ID', 'Request ID', 'Candidate ID', 'Client', 'Start Date', 'Agreed Salary', 'Fee', 'Payment Status', 'Placement Status'];
+const LISTS_SETTINGS_HEADERS = ['List Name', 'Value', 'Notes'];
+
+function ensureShortlistsTab_(ss) {
+  let sheet = ss.getSheetByName('Shortlists');
+  if (sheet) return sheet;
+  sheet = ss.insertSheet('Shortlists');
+  sheet.getRange(1, 1, 1, SHORTLIST_HEADERS.length).setValues([SHORTLIST_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setFrozenRows(1);
+  return sheet;
+}
+
+function ensurePlacementsTab_(ss) {
+  let sheet = ss.getSheetByName('Placements');
+  if (sheet) return sheet;
+  sheet = ss.insertSheet('Placements');
+  sheet.getRange(1, 1, 1, PLACEMENT_HEADERS.length).setValues([PLACEMENT_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setFrozenRows(1);
+  return sheet;
+}
+
+/**
+ * "Lists & Settings" (brief section 4: "Controlled values for dropdowns -
+ * Categories, statuses, states, employment types, urgency levels,
+ * recruiter names"). A simple List Name / Value / Notes layout so the
+ * team can maintain these by hand in the sheet; pre-populated with the
+ * values already hardcoded elsewhere in this script (STAFF_CATEGORIES-
+ * equivalent roles, REQUEST_STATUSES, etc.) so it starts as documentation
+ * of what's already enforced, not a second source of truth the code
+ * would need to read from to stay accurate.
+ */
+function ensureListsSettingsTab_(ss) {
+  let sheet = ss.getSheetByName('Lists & Settings');
+  if (sheet) return sheet;
+  sheet = ss.insertSheet('Lists & Settings');
+  sheet.getRange(1, 1, 1, LISTS_SETTINGS_HEADERS.length).setValues([LISTS_SETTINGS_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setFrozenRows(1);
+
+  const rows = [];
+  ['Nanny', 'Housekeeper', 'Cook', 'Cleaner', 'Driver', 'Other'].forEach(function (v) { rows.push(['Staff Category', v, 'Requests tab - enforced in code (constants.js)']); });
+  REQUEST_STATUSES.forEach(function (v) { rows.push(['Request Status', v, 'Requests tab - enforced in code (REQUEST_STATUSES)']); });
+  TABS.professional.statuses.forEach(function (v) { rows.push(['Candidate Status', v, 'Candidates tab - enforced in code (TABS.professional.statuses)']); });
+  TABS.family.statuses.forEach(function (v) { rows.push(['Family Request Status', v, 'Families tab - enforced in code (TABS.family.statuses)']); });
+  TABS.organisation.statuses.forEach(function (v) { rows.push(['Organisation Status', v, 'Organisations tab - enforced in code (TABS.organisation.statuses)']); });
+  if (rows.length) sheet.getRange(2, 1, rows.length, 3).setValues(rows);
+  sheet.autoResizeColumns(1, 3);
+  return sheet;
+}
+
 function findRowByColumnValue_(sheet, col, value) {
   if (!value || sheet.getLastRow() < 2) return null;
   const values = sheet.getRange(2, col, sheet.getLastRow() - 1, 1).getValues();
@@ -515,6 +578,9 @@ function setup() {
   ensureRequestsTab_(ss);
   ensureBotSessionsTab_(ss);
   ensureAutomationLogTab_(ss);
+  ensureShortlistsTab_(ss);
+  ensurePlacementsTab_(ss);
+  ensureListsSettingsTab_(ss);
   polish();
 
   // Remove the default empty tab if it is still there.
@@ -601,10 +667,12 @@ function logTrainingAccess_(p) {
 
 /* ---------------- Helpers ---------------- */
 
+const CHECKBOX_FIELDS = ['Marketplace Consent', 'Visibility'];
+
 function ensureTab_(ss, kind) {
   const def = TABS[kind];
   let sheet = ss.getSheetByName(def.name);
-  if (sheet) return sheet;
+  if (sheet) { migrateTabHeaders_(sheet, def); return sheet; }
 
   sheet = ss.insertSheet(def.name);
   const n = def.headers.length;
@@ -620,14 +688,19 @@ function ensureTab_(ss, kind) {
   sheet.getRange(2, statusCol, 1000, 1).setDataValidation(rule);
 
   // Plain-text format on user-input columns: values are stored verbatim, never parsed as formulas.
-  const skipText = ['Submitted', 'Status', 'Last updated', 'Vetting progress'].concat(STAGES);
+  const skipText = ['Submitted', 'Status', 'Last updated', 'Vetting progress'].concat(STAGES, CHECKBOX_FIELDS);
   def.headers.forEach(function (h, i) {
     if (skipText.indexOf(h) === -1) sheet.getRange(2, i + 1, 1000, 1).setNumberFormat('@');
+  });
+  CHECKBOX_FIELDS.forEach(function (h) {
+    const i = def.headers.indexOf(h);
+    if (i !== -1) sheet.getRange(2, i + 1, 1000, 1).insertCheckboxes();
   });
 
   const dateFmt = 'dd mmm yyyy hh:mm';
   sheet.getRange(2, 2, 1000, 1).setNumberFormat(dateFmt);
-  sheet.getRange(2, n, 1000, 1).setNumberFormat(dateFmt);
+  const lastUpdatedCol = def.headers.indexOf('Last updated') + 1;
+  if (lastUpdatedCol > 0) sheet.getRange(2, lastUpdatedCol, 1000, 1).setNumberFormat(dateFmt);
 
   const statusRange = sheet.getRange(2, statusCol, 1000, 1);
   const rules = [];
@@ -641,6 +714,35 @@ function ensureTab_(ss, kind) {
 
   sheet.getRange(1, 1, 1000, n).createFilter();
   return sheet;
+}
+
+/**
+ * Appends any headers from `def.headers` that aren't already present in an
+ * EXISTING sheet, as new columns at the end - never touches existing
+ * columns or data. Lets a tab's schema grow (e.g. the Candidates tab
+ * gaining marketplace fields, Amana_Staff_Workflow_Automation_Hiyame_
+ * Integration_Team_Brief.docx section 4) without a destructive rebuild.
+ * Idempotent - safe to call on every request, which is why ensureTab_
+ * calls it unconditionally on its "sheet already exists" path.
+ */
+function migrateTabHeaders_(sheet, def) {
+  const lastCol = Math.max(sheet.getLastColumn(), 1);
+  const existing = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) { return String(h || '').trim(); });
+  const missing = def.headers.filter(function (h) { return existing.indexOf(h) === -1 && h !== ''; });
+  if (!missing.length) return;
+
+  const startCol = lastCol + 1;
+  const range = sheet.getRange(1, startCol, 1, missing.length);
+  range.setValues([missing]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setColumnWidths(startCol, missing.length, 150);
+  missing.forEach(function (h, i) {
+    const col = startCol + i;
+    if (CHECKBOX_FIELDS.indexOf(h) !== -1) {
+      sheet.getRange(2, col, 1000, 1).insertCheckboxes();
+    } else {
+      sheet.getRange(2, col, 1000, 1).setNumberFormat('@');
+    }
+  });
 }
 
 function nextId_(prefix) {

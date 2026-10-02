@@ -321,15 +321,16 @@
         })
         .then(function (result) {
           if (result.status === 200 && result.body.ok) {
-            document.getElementById('successDetail').textContent = result.body.requestId
-              ? 'We\'ve received your request (reference ' + result.body.requestId + '). A member of the Amana team will reach out shortly.'
-              : 'We\'ve received your request. A member of the Amana team will reach out shortly.';
+            var ref = result.body.requestId ? ' (reference ' + result.body.requestId + ')' : '';
+            document.getElementById('successDetail').innerHTML =
+              'We\'ve received your request' + ref + '. A member of the Amana team will reach out shortly. ' +
+              'Need to reach us sooner? <a href="https://wa.me/2349136047586" target="_blank" rel="noopener">Message us on WhatsApp</a>.';
             form.hidden = true;
             successEl.classList.add('visible');
           } else if (result.status === 400) {
             showError('Please check the highlighted fields: ' + (result.body.fields || []).join(', '));
           } else if (result.status === 503 || result.status === 502) {
-            showError(result.body.message || 'This system is not fully set up yet (the backend hasn\'t been deployed). Please contact us directly at hello@amanastaff.com instead.');
+            showError((result.body.message || 'We could not record your request just now.') + ' You can also reach us at hello@amanastaff.com or WhatsApp 0913 604 7586.');
           } else {
             showError('We could not submit your request just now. Please try again in a moment.');
           }
