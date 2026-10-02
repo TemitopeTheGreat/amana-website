@@ -349,7 +349,7 @@
   }
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
+    if (modalOverlay && e.key === 'Escape' && modalOverlay.classList.contains('active')) closeModal();
   });
 
   if (leadForm) {

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request Staff | Amana</title>
+<meta name="description" content="Tell Amana what household or organisational staffing you need and we'll be in touch.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Page-specific only — everything else reuses css/style.css */
+  .intake-main{padding:48px 0 80px;}
+  .intake-form fieldset{border:0; padding:0; margin:0 0 32px;}
+  .intake-form legend{font-family:var(--font-head); font-size:1.2rem; color:var(--navy-950); margin-bottom:14px; padding:0;}
+  .intake-form .form-row{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;}
+  .intake-form label{display:block; font-size:.88rem; font-weight:500; color:var(--ink); margin-bottom:16px;}
+  .intake-form .form-row label{margin-bottom:0;}
+  .intake-form input, .intake-form select, .intake-form textarea{
+    display:block; width:100%; margin-top:6px; padding:11px 13px;
+    border:1px solid var(--border); border-radius:var(--radius-sm);
+    font-family:var(--font-body); font-size:.95rem; color:var(--ink); background:var(--white);
+  }
+  .intake-form .checkbox-row{display:flex; align-items:flex-start; gap:10px; font-size:.88rem; font-weight:400;}
+  .intake-form .checkbox-row input{width:auto; margin-top:3px;}
+  .intake-banner{background:var(--cream-dark); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:32px; font-size:.9rem; color:var(--ink-soft);}
+  .intake-error{color:#b4232c; font-size:.88rem; margin-top:-8px; margin-bottom:20px; display:none;}
+  .intake-error.visible{display:block;}
+  .intake-success{display:none; text-align:center; padding:48px 20px;}
+  .intake-success.visible{display:block;}
+  .intake-success h2{margin-bottom:10px;}
+</style>
+</head>
+<body>
+
+<!-- ============ ICON SPRITE ============ -->
+<svg style="display:none">
+  <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></symbol>
+  <symbol id="icon-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+</svg>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header" id="top">
+  <div class="container header-inner">
+    <a href="index.html" class="brand brand-logo"><img src="assets/img/logo-wordmark.webp" alt="Amana Staff — Trusted Hands" width="400" height="148"></a>
+    <nav class="nav" id="primary-nav">
+      <a href="family.html">Family</a>
+      <a href="diaspora.html">Diaspora</a>
+      <a href="professionals.html">Professionals</a>
+      <a href="business.html">Business</a>
+      <a href="index.html#services">Services</a>
+      <a href="professionals.html#academy">Academy</a>
+      <a href="index.html#faq">FAQ</a>
+    </nav>
+    <div class="header-actions">
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="intake-main">
+  <div class="container narrow">
+    <div class="section-head reveal" style="text-align:left; margin-bottom:28px;">
+      <h1 style="font-size:clamp(1.8rem,3.4vw,2.4rem);">Request Staff</h1>
+      <p>Tell us what you need and we'll be in touch. Every field marked * is required.</p>
+    </div>
+
+    <div class="intake-banner">
+      This form is part of a new intake system still being built (Stage A3 of the Amana WhatsApp-intake project) — not yet linked from the main navigation. Submissions are recorded once the backend is deployed; until then you'll see a clear error rather than a false success.
+    </div>
+
+    <p class="intake-error" id="formError" role="alert"></p>
+
+    <form class="intake-form" id="intakeForm">
+      <!-- Honeypot -->
+      <label style="position:absolute; left:-9999px;" aria-hidden="true">
+        Leave this blank
+        <input type="text" name="website" tabindex="-1" autocomplete="off">
+      </label>
+
+      <fieldset>
+        <legend>Your details</legend>
+        <div class="form-row">
+          <label>Full name *
+            <input type="text" name="clientFullName" required maxlength="120">
+          </label>
+          <label>Phone number *
+            <input type="tel" name="clientPhone" required placeholder="e.g. 0801 234 5678">
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Email address
+            <input type="email" name="clientEmail" maxlength="160">
+          </label>
+          <label>You are *
+            <select name="clientType" required>
+              <option value="Individual / Family">Individual / Family</option>
+              <option value="Business / Organisation">Business / Organisation</option>
+            </select>
+          </label>
+        </div>
+        <label>Preferred contact channel
+          <select name="preferredContactChannel">
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Phone call">Phone call</option>
+            <option value="Email">Email</option>
+            <option value="SMS">SMS</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Role requirements</legend>
+        <div class="form-row">
+          <label>Staff category *
+            <select name="staffCategory" required>
+              <option value="">Select one</option>
+              <option value="Nanny">Nanny</option>
+              <option value="Housekeeper">Housekeeper</option>
+              <option value="Cook">Cook</option>
+              <option value="Cleaner">Cleaner</option>
+              <option value="Driver">Driver</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>Number required *
+            <input type="number" name="numberRequired" min="1" value="1" required>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Employment type
+            <select name="employmentType">
+              <option value="">Not sure yet</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+            </select>
+          </label>
+          <label>Live-in or live-out
+            <select name="liveArrangement">
+              <option value="">Not sure yet</option>
+              <option value="Live-in">Live-in</option>
+              <option value="Live-out">Live-out</option>
+            </select>
+          </label>
+        </div>
+        <label>Main responsibilities
+          <textarea name="responsibilities" rows="3" maxlength="2000"></textarea>
+        </label>
+        <div class="form-row">
+          <label>Required skills
+            <input type="text" name="requiredSkills" maxlength="500">
+          </label>
+          <label>Required experience
+            <input type="text" name="experience" maxlength="500" placeholder="e.g. 2+ years">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Location</legend>
+        <div class="form-row">
+          <label>State *
+            <input type="text" name="state" required maxlength="80">
+          </label>
+          <label>LGA
+            <input type="text" name="lga" maxlength="80">
+          </label>
+        </div>
+        <label>Area / neighbourhood
+          <input type="text" name="area" maxlength="120" placeholder="e.g. Lekki Phase 1">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Salary &amp; timing</legend>
+        <div class="form-row">
+          <label>Salary range minimum (₦)
+            <input type="number" name="salaryMin" min="0">
+          </label>
+          <label>Salary range maximum (₦)
+            <input type="number" name="salaryMax" min="0">
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Preferred start date
+            <input type="date" name="startDate">
+          </label>
+          <label>Urgency
+            <select name="urgency">
+              <option value="">Not sure yet</option>
+              <option value="Immediate (within a week)">Immediate (within a week)</option>
+              <option value="Within a month">Within a month</option>
+              <option value="Flexible / no fixed date">Flexible / no fixed date</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="checkbox-row"><input type="checkbox" name="accommodation"> Accommodation provided</label>
+          <label class="checkbox-row"><input type="checkbox" name="meals"> Meals provided</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Consent</legend>
+        <label class="consent checkbox-row">
+          <input type="checkbox" name="consent" required>
+          <span>I agree that Amana may store my details to process this request. Read our <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+        </label>
+      </fieldset>
+
+      <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Submit Request</button>
+    </form>
+
+    <div class="intake-success" id="intakeSuccess">
+      <span class="icon-badge" style="margin:0 auto 18px;"><svg><use href="#icon-check"/></svg></span>
+      <h2>Thank you</h2>
+      <p id="successDetail">We've received your request. A member of the Amana team will reach out shortly.</p>
+    </div>
+  </div>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <span class="brand brand-logo"><img src="assets/img/logo-navy.webp" alt="Amana Staff — Trusted Hands" width="305" height="258" loading="lazy"></span>
+      <p>Verified Hands. Trusted Homes.</p>
+    </div>
+    <div class="footer-links">
+      <div>
+        <h4>Explore</h4>
+        <a href="index.html#services">Services</a>
+        <a href="family.html#how-it-works">How It Works</a>
+        <a href="professionals.html#academy">Academy</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="family.html">For Families</a>
+        <a href="professionals.html">For Professionals</a>
+        <a href="business.html">For Business</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="candidate-code-of-conduct.html">Candidate Code of Conduct</a>
+        <a href="client-code-of-conduct.html">Client Code of Conduct</a>
+      </div>
+      <div>
+        <h4>Get in touch</h4>
+        <a href="mailto:hello@amanastaff.com">hello@amanastaff.com</a>
+        <a href="mailto:careers@amanastaff.com">careers@amanastaff.com</a>
+        <a href="mailto:hr@amanastaff.com">hr@amanastaff.com</a>
+        <a href="tel:+2349136047586">0913 604 7586</a>
+      </div>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <p>&copy; <span id="year"></span> Amana. All rights reserved. <span class="fb-links"><a href="privacy.html">Privacy Policy</a><a href="mailto:hello@amanastaff.com">hello@amanastaff.com</a></span></p>
+  </div>
+</footer>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top"><svg><use href="#icon-up"/></svg></button>
+
+<script src="js/script.js"></script>
+<script>
+  // Page-specific: posts to the new whatsapp-intake backend, separate
+  // from the shared lead-modal logic in js/script.js (which this page
+  // doesn't use — it has its own form, not the shared modal).
+  (function () {
+    var form = document.getElementById('intakeForm');
+    var errorEl = document.getElementById('formError');
+    var submitBtn = document.getElementById('submitBtn');
+    var successEl = document.getElementById('intakeSuccess');
+
+    function showError(message) {
+      errorEl.textContent = message;
+      errorEl.classList.add('visible');
+    }
+    function clearError() {
+      errorEl.textContent = '';
+      errorEl.classList.remove('visible');
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      clearError();
+
+      if (form.website.value) return; // honeypot
+
+      var data = {};
+      new FormData(form).forEach(function (value, key) {
+        if (key === 'website') return;
+        if (key === 'accommodation' || key === 'meals' || key === 'consent') {
+          data[key] = true;
+        } else {
+          data[key] = value;
+        }
+      });
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+
+      fetch('/api/whatsapp-intake-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+        .then(function (res) {
+          return res.json().then(function (body) { return { status: res.status, body: body }; });
+        })
+        .then(function (result) {
+          if (result.status === 200 && result.body.ok) {
+            document.getElementById('successDetail').textContent =
+              'We\'ve received your request (reference ' + result.body.requestId + '). A member of the Amana team will reach out shortly.';
+            form.hidden = true;
+            successEl.classList.add('visible');
+          } else if (result.status === 400) {
+            showError('Please check the highlighted fields: ' + (result.body.fields || []).join(', '));
+          } else if (result.status === 503 || result.status === 502) {
+            showError(result.body.message || 'This system is not fully set up yet (the backend hasn\'t been deployed). Please contact us directly at hello@amanastaff.com instead.');
+          } else {
+            showError('We could not submit your request just now. Please try again in a moment.');
+          }
+        })
+        .catch(function () {
+          showError('We could not reach the server. Please check your connection and try again.');
+        })
+        .then(function () {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Request';
+        });
+    });
+  })();
+</script>
+</body>
+</html>
