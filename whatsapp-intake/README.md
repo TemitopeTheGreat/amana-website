@@ -60,12 +60,13 @@ changed and isn't meant to.
 
 ## Status (2 Oct 2026)
 
-**Stages A1–A3 built. A4 (WhatsApp bot) and A5 (end-to-end testing
-against a live deployment) not started** — A4 explicitly deferred by
-the user. 28 automated tests passing across three test files, none
-needing live credentials (all mock the network boundary) — see
-"Not yet verified against a live Sheet" below for what that does and
-doesn't cover.
+**Stages A1–A3 built and live. A5 end-to-end testing done against the
+real deployment** (T01/T06/T07/T08 pass, T09 partial — see
+[`STAGE_A5_TEST_REPORT.md`](STAGE_A5_TEST_REPORT.md)). **A4 (WhatsApp
+bot) not started** — explicitly deferred by the user; A5's bot-related
+scenarios (T02-T05) are N/A until it exists. 28 automated unit tests
+also passing across three test files (mocking the network boundary,
+separate from the live T01-T09 checks).
 
 ### Stage A1 — schema, constants, utilities
 - `schema.js` - the `AmanaRequest` field list (JSDoc typedef, not
@@ -115,25 +116,18 @@ resume/correction/handoff logic, and the actual provider integration.
 Needs the WhatsApp Business API account + credentials and the
 signed-off 15-question wording first.
 
-## Not yet verified against a live Sheet
+## Verified against the live Sheet (2 Oct 2026)
 
-Every test here mocks the network/env boundary - none has actually
-round-tripped through a real deployed Apps Script against the real
-spreadsheet yet. Before trusting this in production:
-
-1. Paste the updated `Code.gs` into the Apps Script editor and deploy
-   a new version (see "Uses the existing Sheet" above).
-2. Submit one real test request through `request-staff.html`.
-3. Confirm: a `Requests` tab row appears with a sensible `AM-REQ-####`
-   ID, the admin dashboard's bell badge and Requests section pick it
-   up on refresh, and (if `RESEND_API_KEY` is set) the confirmation
-   email arrives.
-4. If anything fails, check the new `Automation Log` tab before
-   digging into code - that's exactly what it's there for.
+Done - see [`STAGE_A5_TEST_REPORT.md`](STAGE_A5_TEST_REPORT.md) for
+the full pass/fail writeup (T01, T06, T07, T08 pass; T09 partial - a
+real gap around network-level failure logging, documented there; T02-T05
+N/A, Stage A4 on hold). `request-staff.html` is now linked from the
+main nav and footer on every page, indexed (noindex removed), and in
+`sitemap.xml` - it's a real, launched page, not a staging one.
 
 ## Not started
 
-Stage A5 (end-to-end tests - needs the live round-trip above done
-first) and all of Part 2 (Hiyame). A4 needs a WhatsApp Business API
+Stage A5's WhatsApp-bot scenarios (T02-T05, blocked on Stage A4) and
+all of Part 2 (Hiyame). A4 needs a WhatsApp Business API
 provider, credentials, an approved message template, and the
 15-question wording signed off.
