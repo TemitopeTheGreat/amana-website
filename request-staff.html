@@ -321,8 +321,9 @@
         })
         .then(function (result) {
           if (result.status === 200 && result.body.ok) {
-            document.getElementById('successDetail').textContent =
-              'We\'ve received your request (reference ' + result.body.requestId + '). A member of the Amana team will reach out shortly.';
+            document.getElementById('successDetail').textContent = result.body.requestId
+              ? 'We\'ve received your request (reference ' + result.body.requestId + '). A member of the Amana team will reach out shortly.'
+              : 'We\'ve received your request. A member of the Amana team will reach out shortly.';
             form.hidden = true;
             successEl.classList.add('visible');
           } else if (result.status === 400) {
