@@ -1,14 +1,15 @@
-// Node-side client for the WhatsApp-intake Apps Script backend
-// (apps-script/Code.gs in this folder). Same shape as the brief's Stage
+// Node-side client for the WhatsApp-intake request flow, now merged into
+// the EXISTING, already-deployed apps-script/Code.gs at the repo root
+// (per the user, 2 Oct 2026 — reuses the live sheet and deployment
+// instead of a separate one). Same function shapes as the brief's Stage
 // A2 request (appendRequestRow, updateRequestRow, findRequestBySessionId,
-// appendBotSession, updateBotSession) - implemented as calls to the Apps
-// Script web app instead of direct Sheets API REST calls. See README.md
-// for why.
+// appendBotSession, updateBotSession) - implemented as `action`-routed
+// calls to that same Apps Script web app.
 //
-// Env vars required (set in Vercel once the Apps Script is deployed):
-//   WHATSAPP_INTAKE_URL    - the Apps Script web app's /exec URL
-//   WHATSAPP_INTAKE_SECRET - the secret setup() printed in the Apps
-//                            Script execution log
+// Env vars required (already set in Vercel for the existing lead form -
+// nothing new to configure):
+//   APPS_SCRIPT_URL    - the Apps Script web app's /exec URL
+//   APPS_SCRIPT_SECRET - the shared secret
 //
 // Mirrors the existing api/lead.js's fetch-to-Apps-Script pattern.
 
@@ -16,17 +17,17 @@ function requireEnv_(name) {
   const value = process.env[name];
   if (!value) {
     throw new Error(
-      `${name} is not set. This is a Stage A0 blocker: deploy ` +
-      'whatsapp-intake/apps-script/Code.gs as a web app (see its header comment ' +
-      `for steps) and set ${name} in Vercel before this can reach a real Sheet.`
+      `${name} is not set in Vercel. This is the same env var the existing ` +
+      'lead form uses (api/lead.js) - if that form works, this is misconfigured ' +
+      'some other way; if it doesn\'t either, see docs/INTAKE_SETUP.md.'
     );
   }
   return value;
 }
 
 async function callAppsScript_(action, payload) {
-  const url = requireEnv_('WHATSAPP_INTAKE_URL');
-  const secret = requireEnv_('WHATSAPP_INTAKE_SECRET');
+  const url = requireEnv_('APPS_SCRIPT_URL');
+  const secret = requireEnv_('APPS_SCRIPT_SECRET');
 
   const res = await fetch(url, {
     method: 'POST',

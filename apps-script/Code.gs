@@ -66,6 +66,7 @@ function statsResponse_(secret) {
         candidates: summarizeTab_(ss, 'professional'),
         families: summarizeTab_(ss, 'family'),
         organisations: summarizeTab_(ss, 'organisation'),
+        requests: summarizeRequests_(ss),
       },
     });
   } catch (err) {
@@ -120,6 +121,293 @@ function summarizeTab_(ss, kind) {
   return { total: rows.length, statusCounts: statusCounts, roleCounts: roleCounts, weekCounts: weekCounts, latest: latest };
 }
 
+/* ================= WhatsApp-intake "Request Staff" flow ================= */
+/* See whatsapp-intake/README.md. Separate tabs (Requests, Bot Sessions,     */
+/* Automation Log) in this SAME spreadsheet — not a separate project.        */
+/* Request IDs use the same AM-<PREFIX>-#### convention as nextId_() below,  */
+/* via nextId_('REQ'), instead of the AMN-REQ-###### format floated in an    */
+/* earlier draft, so every ID in this sheet looks consistent.                */
+
+const REQUEST_STATUSES = [
+  'Incomplete', 'New', 'Awaiting Clarification', 'Confirmed',
+  'Sourcing', 'Shortlisting', 'Client Review', 'Interview', 'Candidate Selected',
+  'Awaiting Payment', 'Payment Confirmed',
+  'Placement in Progress', 'Fulfilled', 'Cancelled', 'On Hold',
+];
+
+// Column headers, Title Case. Must match whatsapp-intake/schema.js's FIELD_ORDER
+// field-for-field (headerToField_ below converts between the two) — if you add
+// or rename a field there, make the same change here.
+const REQUEST_HEADERS = [
+  'Request ID', 'Created At', 'Source Channel', 'Session ID', 'Status',
+  'Client Full Name', 'Client Phone', 'Client Email', 'Client Type', 'Preferred Contact Channel',
+  'Consent', 'Consent Timestamp',
+  'Staff Category', 'Job Title', 'Number Required', 'Employment Type', 'Live Arrangement',
+  'State', 'LGA', 'Area',
+  'Responsibilities', 'Required Skills', 'Qualifications', 'Experience', 'Languages',
+  'Start Date', 'Urgency', 'Working Days', 'Working Hours', 'Accommodation', 'Meals',
+  'Salary Min', 'Salary Max', 'Currency',
+  'Assigned Recruiter', 'Last Updated At', 'Next Action', 'Notes', 'Closure Reason',
+];
+
+const BOT_SESSION_HEADERS = [
+  'Session ID', 'WhatsApp Number', 'Current Question', 'Captured Answers (JSON)',
+  'Completion Status', 'Last Message Time', 'Handoff Flag',
+];
+
+const AUTOMATION_LOG_HEADERS = ['Timestamp', 'Workflow ID', 'Source Record', 'Error', 'Retry Count'];
+
+function summarizeRequests_(ss) {
+  const sheet = ss.getSheetByName('Requests');
+  const idx = {};
+  REQUEST_HEADERS.forEach(function (h, i) { idx[h] = i; });
+  const tz = Session.getScriptTimeZone();
+
+  const rows = (!sheet || sheet.getLastRow() < 2)
+    ? []
+    : sheet.getRange(2, 1, sheet.getLastRow() - 1, REQUEST_HEADERS.length).getValues().filter(function (r) { return r[idx['Request ID']]; });
+
+  const statusCounts = {};
+  REQUEST_STATUSES.forEach(function (s) { statusCounts[s] = 0; });
+  const categoryCounts = {};
+  const weekCounts = {};
+
+  rows.forEach(function (r) {
+    const status = r[idx['Status']];
+    if (Object.prototype.hasOwnProperty.call(statusCounts, status)) statusCounts[status]++;
+    const cat = r[idx['Staff Category']];
+    if (cat) categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    const created = r[idx['Created At']];
+    const d = created instanceof Date ? created : new Date(created);
+    if (!isNaN(d)) {
+      const monday = new Date(d);
+      monday.setHours(0, 0, 0, 0);
+      monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+      const key = Utilities.formatDate(monday, tz, 'yyyy-MM-dd');
+      weekCounts[key] = (weekCounts[key] || 0) + 1;
+    }
+  });
+
+  const latest = rows.slice()
+    .sort(function (a, b) { return new Date(b[idx['Created At']]) - new Date(a[idx['Created At']]); })
+    .slice(0, 8)
+    .map(function (r) {
+      const o = {};
+      REQUEST_HEADERS.forEach(function (h, i) { o[h] = r[i]; });
+      return o;
+    });
+
+  return { total: rows.length, statusCounts: statusCounts, categoryCounts: categoryCounts, weekCounts: weekCounts, latest: latest };
+}
+
+/**
+ * appendRequestRow(): writes a new Requests row, generating the Request
+ * ID itself via nextId_('REQ') — never trusts a client-supplied one, so
+ * two concurrent callers can't collide. Runs duplicate detection first
+ * (same phone + overlapping staff category within the last 30 days) and
+ * returns the flag rather than blocking — the caller decides what to do
+ * with a flagged duplicate. Notifies NOTIFY_EMAIL and auto-replies to
+ * the client, same as the professional/family/organisation flow above;
+ * the admin dashboard also surfaces new requests on next refresh.
+ */
+function handleAppendRequest_(p) {
+  const record = p.record || {};
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureRequestsTab_(ss);
+
+  const duplicate = findDuplicateRequest_(sheet, record.clientPhone, record.staffCategory);
+  const requestId = nextId_('REQ');
+  record.requestId = requestId;
+  record.createdAt = new Date().toISOString();
+  record.lastUpdatedAt = record.createdAt;
+  if (!record.status) record.status = 'New';
+
+  const row = REQUEST_HEADERS.map(function (h) { return clean_(record[headerToField_(h)]); });
+  const r = sheet.getLastRow() + 1;
+  sheet.getRange(r, 1, 1, row.length).setNumberFormat('@');
+  sheet.getRange(r, 1, 1, row.length).setValues([row]);
+
+  notifyRequest_(requestId, record, ss.getUrl() + '#gid=' + sheet.getSheetId());
+  confirmRequestSubmitter_(record);
+
+  return json_({ ok: true, requestId: requestId, duplicateFlag: !!duplicate, duplicateOf: duplicate || null });
+}
+
+function handleUpdateRequest_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureRequestsTab_(ss);
+  const rowNum = findRowByColumnValue_(sheet, 1, p.requestId);
+  if (!rowNum) return json_({ ok: false, error: 'request_not_found' });
+
+  const current = sheet.getRange(rowNum, 1, 1, REQUEST_HEADERS.length).getValues()[0];
+  const patch = p.patch || {};
+  const updated = REQUEST_HEADERS.map(function (h, i) {
+    const field = headerToField_(h);
+    return Object.prototype.hasOwnProperty.call(patch, field) ? clean_(patch[field]) : current[i];
+  });
+  updated[REQUEST_HEADERS.indexOf('Last Updated At')] = new Date().toISOString();
+  sheet.getRange(rowNum, 1, 1, updated.length).setValues([updated]);
+  return json_({ ok: true });
+}
+
+function handleFindRequestBySession_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureRequestsTab_(ss);
+  const rowNum = findRowByColumnValue_(sheet, REQUEST_HEADERS.indexOf('Session ID') + 1, p.sessionId);
+  if (!rowNum) return json_({ ok: true, record: null });
+  const values = sheet.getRange(rowNum, 1, 1, REQUEST_HEADERS.length).getValues()[0];
+  const record = {};
+  REQUEST_HEADERS.forEach(function (h, i) { record[headerToField_(h)] = values[i]; });
+  return json_({ ok: true, record: record });
+}
+
+function findDuplicateRequest_(sheet, phone, staffCategory) {
+  if (!phone || sheet.getLastRow() < 2) return null;
+  const phoneCol = REQUEST_HEADERS.indexOf('Client Phone');
+  const categoryCol = REQUEST_HEADERS.indexOf('Staff Category');
+  const createdCol = REQUEST_HEADERS.indexOf('Created At');
+  const idCol = REQUEST_HEADERS.indexOf('Request ID');
+  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, REQUEST_HEADERS.length).getValues();
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (r[phoneCol] !== phone) continue;
+    if (staffCategory && r[categoryCol] !== staffCategory) continue;
+    const created = new Date(r[createdCol]);
+    if (!isNaN(created) && created < cutoff) continue;
+    return r[idCol];
+  }
+  return null;
+}
+
+function handleAppendSession_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureBotSessionsTab_(ss);
+  const s = p.session || {};
+  const row = [
+    clean_(s.sessionId), clean_(s.whatsappNumber), clean_(s.currentQuestion),
+    clean_(JSON.stringify(s.capturedAnswers || {})), clean_(s.completionStatus),
+    new Date().toISOString(), !!s.handoffFlag,
+  ];
+  sheet.getRange(sheet.getLastRow() + 1, 1, 1, row.length).setValues([row]);
+  return json_({ ok: true });
+}
+
+function handleUpdateSession_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureBotSessionsTab_(ss);
+  const rowNum = findRowByColumnValue_(sheet, 1, p.sessionId);
+  if (!rowNum) return json_({ ok: false, error: 'session_not_found' });
+
+  const current = sheet.getRange(rowNum, 1, 1, BOT_SESSION_HEADERS.length).getValues()[0];
+  const patch = p.patch || {};
+  const fieldMap = {
+    'Session ID': 'sessionId', 'WhatsApp Number': 'whatsappNumber', 'Current Question': 'currentQuestion',
+    'Captured Answers (JSON)': 'capturedAnswers', 'Completion Status': 'completionStatus',
+    'Last Message Time': 'lastMessageTime', 'Handoff Flag': 'handoffFlag',
+  };
+  const updated = BOT_SESSION_HEADERS.map(function (h, i) {
+    const field = fieldMap[h];
+    if (!Object.prototype.hasOwnProperty.call(patch, field)) return current[i];
+    return field === 'capturedAnswers' ? JSON.stringify(patch[field]) : clean_(patch[field]);
+  });
+  updated[BOT_SESSION_HEADERS.indexOf('Last Message Time')] = new Date().toISOString();
+  sheet.getRange(rowNum, 1, 1, updated.length).setValues([updated]);
+  return json_({ ok: true });
+}
+
+function logAutomationFailure_(workflowId, sourceRecord, err) {
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+    const sheet = ensureAutomationLogTab_(ss);
+    sheet.getRange(sheet.getLastRow() + 1, 1, 1, 5).setValues([[
+      new Date().toISOString(), workflowId, String(sourceRecord || ''), String(err && err.message || err), 0,
+    ]]);
+  } catch (x) {
+    Logger.log('Automation Log write failed: ' + x);
+  }
+}
+
+function notifyRequest_(requestId, record, sheetUrl) {
+  const to = CONFIG.NOTIFY_EMAIL || Session.getEffectiveUser().getEmail();
+  if (!to) return;
+  const lines = [
+    'New staff request (' + requestId + ')', '',
+    'Client: ' + record.clientFullName,
+    'Phone: ' + record.clientPhone,
+    'Type: ' + record.clientType,
+    'Staff category: ' + record.staffCategory + ' x' + record.numberRequired,
+    'Location: ' + [record.area, record.lga, record.state].filter(Boolean).join(', '),
+  ];
+  if (record.urgency) lines.push('Urgency: ' + record.urgency);
+  if (record.notes) lines.push('', 'Notes: ' + record.notes);
+  lines.push('', 'Open the sheet: ' + sheetUrl);
+  MailApp.sendEmail({ to: to, subject: 'New staff request: ' + record.clientFullName, body: lines.join('\n'), name: 'Amana' });
+}
+
+function confirmRequestSubmitter_(record) {
+  const email = clean_(record.clientEmail);
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+  const first = (clean_(record.clientFullName).split(' ')[0]) || 'there';
+  MailApp.sendEmail({
+    to: email,
+    subject: 'Amana — we received your request (' + record.requestId + ')',
+    body: 'Hi ' + first + ',\n\nThanks for your request. Your reference is ' + record.requestId + '. A member of the Amana team will be in touch.\n\nThe Amana team',
+    name: 'Amana',
+  });
+}
+
+function ensureRequestsTab_(ss) {
+  let sheet = ss.getSheetByName('Requests');
+  if (sheet) return sheet;
+  sheet = ss.insertSheet('Requests');
+  const n = REQUEST_HEADERS.length;
+  sheet.getRange(1, 1, 1, n).setValues([REQUEST_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(3);
+  const statusCol = REQUEST_HEADERS.indexOf('Status') + 1;
+  const rule = SpreadsheetApp.newDataValidation().requireValueInList(REQUEST_STATUSES, true).setAllowInvalid(false).build();
+  sheet.getRange(2, statusCol, 1000, 1).setDataValidation(rule);
+  sheet.getRange(1, 1, 1000, n).createFilter();
+  return sheet;
+}
+
+function ensureBotSessionsTab_(ss) {
+  let sheet = ss.getSheetByName('Bot Sessions');
+  if (sheet) return sheet;
+  sheet = ss.insertSheet('Bot Sessions');
+  sheet.getRange(1, 1, 1, BOT_SESSION_HEADERS.length).setValues([BOT_SESSION_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setFrozenRows(1);
+  return sheet;
+}
+
+function ensureAutomationLogTab_(ss) {
+  let sheet = ss.getSheetByName('Automation Log');
+  if (sheet) return sheet;
+  sheet = ss.insertSheet('Automation Log');
+  sheet.getRange(1, 1, 1, AUTOMATION_LOG_HEADERS.length).setValues([AUTOMATION_LOG_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setFrozenRows(1);
+  return sheet;
+}
+
+function findRowByColumnValue_(sheet, col, value) {
+  if (!value || sheet.getLastRow() < 2) return null;
+  const values = sheet.getRange(2, col, sheet.getLastRow() - 1, 1).getValues();
+  for (let i = 0; i < values.length; i++) {
+    if (values[i][0] === value) return i + 2;
+  }
+  return null;
+}
+
+/** 'Client Full Name' -> 'clientFullName', matching whatsapp-intake/schema.js's field names. */
+function headerToField_(header) {
+  const words = header.replace(/[()]/g, '').split(' ');
+  return words[0].toLowerCase() + words.slice(1).map(function (w) {
+    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  }).join('');
+}
+
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
@@ -128,6 +416,15 @@ function doPost(e) {
 
     const secret = PropertiesService.getScriptProperties().getProperty('SECRET');
     if (!secret || p.secret !== secret) return json_({ ok: false, error: 'unauthorized' });
+
+    // WhatsApp-intake "Request Staff" flow (whatsapp-intake/README.md) — routed by
+    // action, not kind, so it doesn't collide with the professional/family/
+    // organisation lead flow below.
+    if (p.action === 'appendRequest') return handleAppendRequest_(p);
+    if (p.action === 'updateRequest') return handleUpdateRequest_(p);
+    if (p.action === 'findRequestBySession') return handleFindRequestBySession_(p);
+    if (p.action === 'appendSession') return handleAppendSession_(p);
+    if (p.action === 'updateSession') return handleUpdateSession_(p);
 
     if (p.kind === 'training_access') return logTrainingAccess_(p);
 
@@ -171,6 +468,10 @@ function doPost(e) {
     confirmSubmitter_(kind, p);
     return json_({ ok: true, id: id });
   } catch (err) {
+    try {
+      const p2 = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+      logAutomationFailure_(p2.action || p2.kind || 'doPost', p2.record && p2.record.clientPhone || p2.phone || '', err);
+    } catch (x) { /* best effort */ }
     return json_({ ok: false, error: String(err && err.message || err) });
   } finally {
     try { lock.releaseLock(); } catch (x) { /* not held */ }
@@ -194,6 +495,9 @@ function setup() {
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
   Object.keys(TABS).forEach(function (k) { ensureTab_(ss, k); });
   ensureTrainingSheets_(ss);
+  ensureRequestsTab_(ss);
+  ensureBotSessionsTab_(ss);
+  ensureAutomationLogTab_(ss);
   polish();
 
   // Remove the default empty tab if it is still there.

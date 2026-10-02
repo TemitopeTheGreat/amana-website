@@ -1,13 +1,17 @@
 // Amana WhatsApp-intake "Request Staff" website form endpoint — Stage A3.
-// Separate from api/lead.js (the existing live lead form) - see
-// whatsapp-intake/README.md for why these are two different systems.
+// Writes into the Requests tab of the SAME Google Sheet and through the
+// SAME Apps Script deployment the existing lead form (api/lead.js) uses
+// - see whatsapp-intake/README.md. Different tab, different schema,
+// same sheet and deployment, no new credentials to provision.
 //
-// Env vars (set in Vercel once whatsapp-intake/apps-script/Code.gs is
-// deployed): WHATSAPP_INTAKE_URL, WHATSAPP_INTAKE_SECRET
+// Env vars (already set in Vercel for the existing lead form):
+// APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
 //
 // On success: sends a client confirmation email directly (MailApp isn't
 // available outside Apps Script, so this uses Resend/SMTP if configured
-// - see sendConfirmationEmail_ below) and logs an internal alert.
+// - see sendConfirmationEmail_ below). The internal alert is the admin
+// dashboard itself (admin.html) - new requests show up there on next
+// load/refresh, no separate notification channel needed.
 // WhatsApp acknowledgement is explicitly stubbed - see Stage A4, left
 // out of this pass on purpose (no WhatsApp Business API account yet).
 
@@ -16,7 +20,13 @@ const constants = require('../whatsapp-intake/constants');
 const utils = require('../whatsapp-intake/utils');
 const sheetsClient = require('../whatsapp-intake/sheets-client');
 
-const clip = (v, n) => String(v == null ? '' : v).slice(0, n).trim();
+// Leading = + - @ can make a spreadsheet treat text as a formula, so mark
+// it as plain text - same guard api/lead.js uses before this payload
+// reaches the same underlying Sheet.
+const clip = (v, n) => {
+  const t = String(v == null ? '' : v).slice(0, n).trim();
+  return /^\s*[=+\-@]/.test(t) ? "'" + t : t;
+};
 const toBool = (v) => v === true || v === 'true' || v === 'on' || v === '1';
 const toNumberOrNull = (v) => {
   if (v === '' || v === null || v === undefined) return null;
@@ -145,16 +155,18 @@ module.exports = async (req, res) => {
     const result = await sheetsClient.appendRequestRow(record);
     record.requestId = result.requestId;
 
-    // Fire confirmation + internal alert, but don't let either failure
-    // turn a successful write into a false "could not submit" to the
-    // client - the row is already safely recorded at this point.
+    // Fire the client confirmation, but don't let its failure turn a
+    // successful write into a false "could not submit" to the client -
+    // the row is already safely recorded at this point. The internal
+    // alert (Stage A3 point 3) is the admin dashboard itself: Code.gs
+    // already emails NOTIFY_EMAIL on every new request (notifyRequest_),
+    // same as the existing candidate/family/org flow, and the request
+    // shows up in admin.html's live stats on next load - no separate
+    // channel needed.
     const [whatsapp, email] = await Promise.all([
       sendWhatsAppAcknowledgement_(record),
       sendConfirmationEmail_(record),
     ]);
-    // TODO(Stage A3 point 3): internal team alert - stubbed until the
-    // internal notification channel (Slack? email list?) is decided.
-    console.log('[TODO] internal team alert not sent:', result.requestId);
 
     return res.status(200).json({
       ok: true,

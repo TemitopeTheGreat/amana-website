@@ -58,12 +58,12 @@ function mockFetch(responder) {
 
 (async () => {
   console.log('sheets-client.js (env var guard)');
-  await checkAsync('appendRequestRow() throws a clear error when WHATSAPP_INTAKE_URL is unset', async () => {
-    delete process.env.WHATSAPP_INTAKE_URL;
-    delete process.env.WHATSAPP_INTAKE_SECRET;
+  await checkAsync('appendRequestRow() throws a clear error when APPS_SCRIPT_URL is unset', async () => {
+    delete process.env.APPS_SCRIPT_URL;
+    delete process.env.APPS_SCRIPT_SECRET;
     delete require.cache[require.resolve('./sheets-client')];
     const client = require('./sheets-client');
-    await assert.rejects(() => client.appendRequestRow({}), /WHATSAPP_INTAKE_URL/);
+    await assert.rejects(() => client.appendRequestRow({}), /APPS_SCRIPT_URL/);
   });
 
   console.log('sheets-client.js (mocked fetch)');
@@ -74,7 +74,7 @@ function mockFetch(responder) {
       json: async () => ({ ok: true, requestId: 'AMN-REQ-000001', duplicateFlag: true, duplicateOf: 'AMN-REQ-000000' }),
     }));
     try {
-      await withEnv({ WHATSAPP_INTAKE_URL: 'https://example.com/exec', WHATSAPP_INTAKE_SECRET: 's3cret' }, async () => {
+      await withEnv({ APPS_SCRIPT_URL: 'https://example.com/exec', APPS_SCRIPT_SECRET: 's3cret' }, async () => {
         delete require.cache[require.resolve('./sheets-client')];
         const client = require('./sheets-client');
         const result = await client.appendRequestRow({ requestId: 'AMN-REQ-000001', clientPhone: '+2348012345678' });
@@ -95,7 +95,7 @@ function mockFetch(responder) {
   await checkAsync('throws when the backend responds ok:false', async () => {
     const mock = mockFetch(async () => ({ ok: true, json: async () => ({ ok: false, error: 'unauthorized' }) }));
     try {
-      await withEnv({ WHATSAPP_INTAKE_URL: 'https://example.com/exec', WHATSAPP_INTAKE_SECRET: 's3cret' }, async () => {
+      await withEnv({ APPS_SCRIPT_URL: 'https://example.com/exec', APPS_SCRIPT_SECRET: 's3cret' }, async () => {
         delete require.cache[require.resolve('./sheets-client')];
         const client = require('./sheets-client');
         await assert.rejects(() => client.updateRequestRow('AMN-REQ-000001', { status: 'New' }), /unauthorized/);
@@ -108,7 +108,7 @@ function mockFetch(responder) {
   await checkAsync('throws when the HTTP response itself is not ok', async () => {
     const mock = mockFetch(async () => ({ ok: false, status: 500 }));
     try {
-      await withEnv({ WHATSAPP_INTAKE_URL: 'https://example.com/exec', WHATSAPP_INTAKE_SECRET: 's3cret' }, async () => {
+      await withEnv({ APPS_SCRIPT_URL: 'https://example.com/exec', APPS_SCRIPT_SECRET: 's3cret' }, async () => {
         delete require.cache[require.resolve('./sheets-client')];
         const client = require('./sheets-client');
         await assert.rejects(() => client.findRequestBySessionId('sess-1'), /HTTP 500/);
@@ -121,7 +121,7 @@ function mockFetch(responder) {
   await checkAsync('findRequestBySessionId() returns null, not a throw, when nothing is found', async () => {
     const mock = mockFetch(async () => ({ ok: true, json: async () => ({ ok: true, record: null }) }));
     try {
-      await withEnv({ WHATSAPP_INTAKE_URL: 'https://example.com/exec', WHATSAPP_INTAKE_SECRET: 's3cret' }, async () => {
+      await withEnv({ APPS_SCRIPT_URL: 'https://example.com/exec', APPS_SCRIPT_SECRET: 's3cret' }, async () => {
         delete require.cache[require.resolve('./sheets-client')];
         const client = require('./sheets-client');
         const result = await client.findRequestBySessionId('no-such-session');

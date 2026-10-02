@@ -1,46 +1,71 @@
-# Amana WhatsApp intake (new, separate system)
+# Amana WhatsApp intake
 
 This is **Part 1 ("AMANA")** of the staged brief in
 `Amana_Hiyame_Claude_Code_Prompts.md` (in the user's Downloads folder,
-not in this repo): a WhatsApp Business API bot + a new Google Sheet,
-feeding a recruitment pipeline (Intake → Recruitment → Commercial →
-Fulfilment). Part 2 of that brief later connects this to a separate
-Next.js app called Hiyame.
+not in this repo): a WhatsApp Business API bot feeding a recruitment
+pipeline (Intake → Recruitment → Commercial → Fulfilment). Part 2 of
+that brief later connects this to a separate Next.js app called
+Hiyame.
 
-## This is not the same system as `docs/INTAKE_SETUP.md`
+## Uses the existing Sheet and the existing Apps Script (2 Oct 2026)
 
-The website already has a working lead-capture pipeline: the lead
-form on every page → `/api/lead.js` → an Apps Script web app → a
-3-tab Google Sheet (Candidates/Families/Organisations), documented in
-[`../docs/INTAKE_SETUP.md`](../docs/INTAKE_SETUP.md) and implemented
-in [`../apps-script/Code.gs`](../apps-script/Code.gs).
+Earlier drafts of this folder built a separate spreadsheet and a
+separate Apps Script project. Per the user: use the existing sheet and
+deploy — so as of 2 Oct 2026, this is folded into
+[`../apps-script/Code.gs`](../apps-script/Code.gs), the same script
+that already runs the live website lead form. New Requests, Bot
+Sessions and Automation Log tabs live in the **same spreadsheet** as
+Candidates/Families/Organisations; everything goes through the
+**same** Vercel env vars (`APPS_SCRIPT_URL`, `APPS_SCRIPT_SECRET`) and
+the **same** deployment. One Apps Script project to maintain, not two.
 
-Per the user (2 Oct 2026): this new system runs **alongside** that
-one, not in place of it. Different schema, different Sheet, different
-IDs (`AMN-REQ-000123` here vs. `AM-C-0001` there), different purpose.
-Do not merge them or point one at the other's Sheet without that
-being a deliberate, separately-confirmed decision - the two status
-taxonomies in particular are not compatible.
+Request IDs use the existing `AM-<PREFIX>-####` convention
+(`nextId_('REQ')` → `AM-REQ-0001`), matching `AM-C-0001` /
+`AM-F-0001` / `AM-O-0001`, not the `AMN-REQ-000123` format floated in
+an earlier draft of this README.
 
-## Architecture decision: Apps Script, not a Sheets-API service account
+**To go live:** paste the updated `apps-script/Code.gs` into the Apps
+Script editor (same one used for the existing lead form), save, then
+**Deploy → Manage deployments → pencil icon → Version: New version →
+Deploy** (same steps as always — see `docs/INTAKE_SETUP.md`). Run
+`setup()` once first if the Requests/Bot Sessions/Automation Log tabs
+don't exist yet in the sheet — it's safe to re-run, existing data
+isn't touched. Nothing needs to change in Vercel; the existing
+`APPS_SCRIPT_URL`/`APPS_SCRIPT_SECRET` already point at the right place.
 
-The brief's Stage A2 describes "a Sheets API client wrapper... using
-service account credentials I'll provide via environment variable."
-That needs a new Google Workspace service account - a Stage A0
-blocker that isn't sorted. Per the user (2 Oct 2026), this reuses the
-Apps-Script-as-web-app pattern the existing system already has proven
-and deployed instead: `apps-script/Code.gs` in this folder implements
-the brief's Stage A2 functions (appendRequestRow, updateRequestRow,
-etc.) as `doPost` actions, and `sheets-client.js` is a thin Node-side
-fetch wrapper calling it - same contract the brief asks for, different
-transport, one fewer credential to provision.
+## Notifications: the admin dashboard, not a separate channel
+
+Per the user: new-request notifications surface on the admin dashboard
+rather than needing a separate internal alert channel (Slack, etc.).
+`admin.html` was redesigned (2 Oct 2026, replacing the old `.ops-*`
+layout) with a sidebar nav, a notification bell showing the live count
+of new/unactioned requests, a "Needs attention" panel listing the
+newest ones, and a full Requests section (status breakdown + latest
+requests table) alongside the existing Candidates/Families/
+Organisations panels — all from real data via the Sheet, nothing
+fabricated. `Code.gs` also still emails `NOTIFY_EMAIL` on every new
+request (`notifyRequest_`), same as the existing candidate/family/org
+flow — belt and braces, not a replacement for the dashboard.
+
+## This is not a separate system from the live lead form anymore
+
+It was, in an earlier draft of this README. Now it's the same
+spreadsheet, same script, same deployment, same dashboard — just a
+different tab (Requests) and a different public form
+(`request-staff.html`) alongside the existing lead-modal flow. Status
+taxonomies are still different (this uses the 4-phase
+Intake/Recruitment/Commercial/Fulfilment list; Candidates/Families/
+Organisations keep their own per-tab status lists) — that part hasn't
+changed and isn't meant to.
 
 ## Status (2 Oct 2026)
 
-**Stages A1–A3 built. A4 (WhatsApp bot) and A5 (end-to-end testing)
-not started - A4 explicitly deferred by the user ("leave out the
-WhatsApp API for now").** 28 tests passing across three test files
-(none need live credentials - all mock the network boundary).
+**Stages A1–A3 built. A4 (WhatsApp bot) and A5 (end-to-end testing
+against a live deployment) not started** — A4 explicitly deferred by
+the user. 28 automated tests passing across three test files, none
+needing live credentials (all mock the network boundary) — see
+"Not yet verified against a live Sheet" below for what that does and
+doesn't cover.
 
 ### Stage A1 — schema, constants, utilities
 - `schema.js` - the `AmanaRequest` field list (JSDoc typedef, not
@@ -48,74 +73,67 @@ WhatsApp API for now").** 28 tests passing across three test files
 - `constants.js` - status/category vocabularies. **Draft, pulled
   straight from the brief's wording - needs business sign-off before
   Stage A4 is built against it.**
-- `utils.js` - `generateRequestReference()` (now mainly for
-  session-local/standalone use - see Stage A2 note below) and
-  `normalizeNigerianPhone()`.
+- `utils.js` - `normalizeNigerianPhone()`. `generateRequestReference()`
+  is now vestigial for the real flow (Code.gs's `nextId_('REQ')` is
+  authoritative) - kept for standalone/session-local use only.
 - `smoke-test.js` - 13 checks. Run: `node whatsapp-intake/smoke-test.js`
 
-### Stage A2 — Sheets register
-- `apps-script/Code.gs` - the backend. Implements `appendRequestRow`
-  (generates the sequential Request ID itself, same approach as
-  `nextId_` in the repo-root Apps Script - a client-supplied ID would
-  risk collisions), `updateRequestRow`, `findRequestBySessionId`,
-  `appendBotSession`, `updateBotSession`, duplicate detection (same
-  phone + overlapping staff category within 30 days - flags, doesn't
-  silently merge), and an Automation Log writer for any failure.
-  **Not deployed yet** - needs a new spreadsheet created, `CONFIG.SHEET_ID`
-  filled in, `setup()` run once, then deployed as a web app. See the
-  file's header comment for exact steps (same shape as
-  `docs/INTAKE_SETUP.md`, different project).
-- `sheets-client.js` - the Node-side caller. Needs `WHATSAPP_INTAKE_URL`
-  and `WHATSAPP_INTAKE_SECRET` in Vercel once deployed; throws a clear,
-  named error if they're missing rather than failing silently.
+### Stage A2 — Sheets register (merged into the existing script)
+- `../apps-script/Code.gs` - `appendRequestRow` (generates the ID via
+  the existing `nextId_('REQ')`), `updateRequestRow`,
+  `findRequestBySessionId`, `appendBotSession`, `updateBotSession`,
+  duplicate detection (same phone + overlapping staff category within
+  30 days - flags, doesn't silently merge), and an Automation Log
+  writer wired into the shared `doPost` catch block. `doGet`'s
+  `?action=stats` now also returns a `requests` summary alongside the
+  existing `candidates`/`families`/`organisations` ones.
+- `sheets-client.js` - the Node-side caller, reading the existing
+  `APPS_SCRIPT_URL`/`APPS_SCRIPT_SECRET`.
 - `sheets-client.smoke-test.js` - 5 checks against a mocked `fetch`.
-  Run: `node whatsapp-intake/sheets-client.smoke-test.js`
 
 ### Stage A3 — website intake form
 - `../request-staff.html` - the form. **Not linked from the main nav
-  yet** (this whole system isn't launched). Grouped sections (contact /
-  role / location / salary & timing / consent) rather than a literal
-  JS step-wizard - a deliberate scope simplification; the data
-  contract is what has the real acceptance-test stakes, and the
-  backend doesn't care whether the UI is paginated. Shows a clear
-  error, never a false success, when the backend isn't configured yet.
-- `../api/whatsapp-intake-request.js` - the endpoint. Validates,
-  normalizes the phone number, calls `sheets-client.appendRequestRow()`,
-  then fires a confirmation email (via Resend if `RESEND_API_KEY` is
-  set, otherwise logs and reports unsent) and a WhatsApp acknowledgement
-  stub (see below). `buildRequestFromBody()` is exported separately so
-  the validation logic is tested without mocking HTTP.
-- `../api/whatsapp-intake-request.test.js` - 10 checks on validation
-  logic. Run: `node api/whatsapp-intake-request.test.js`
-- Internal team alert (brief's Stage A3 point 3): stubbed, logs a
-  `[TODO]` line - no internal notification channel (Slack? email
-  list?) has been decided.
+  yet.** Grouped sections rather than a literal JS step-wizard - the
+  data contract is what has the real acceptance-test stakes.
+- `../api/whatsapp-intake-request.js` - validates, normalizes the
+  phone number (and now also formula-injection-guards every field the
+  same way `api/lead.js` does, before it reaches the same Sheet),
+  calls `sheets-client.appendRequestRow()`, sends a confirmation email
+  (Resend, if `RESEND_API_KEY` is set) and a stubbed WhatsApp
+  acknowledgement.
+- `../api/whatsapp-intake-request.test.js` - 10 checks on validation logic.
 
 ## Stage A4 — explicitly deferred
 
 Per the user: build everything except the WhatsApp API integration
 itself. `sendWhatsAppAcknowledgement_()` in `api/whatsapp-intake-request.js`
-is a one-function stub (logs, reports `sent: false`) - swapping in a
-real WhatsApp Business API call later means replacing that function's
-body alone, nothing else in the request flow changes.
+is a one-function stub - swapping in a real WhatsApp Business API call
+later means replacing that function's body alone.
 
 **Not built**: the 15-question conversation state machine, session
-resume/correction/handoff logic, and the actual provider integration
-(Twilio/Meta/360dialog - still unchosen). This needs the WhatsApp
-Business API account + credentials (Stage A0) and the signed-off
-15-question wording the brief calls for before it's worth writing -
-coding the conversation flow against unconfirmed question wording
-would mean rewriting it once that sign-off happens anyway.
+resume/correction/handoff logic, and the actual provider integration.
+Needs the WhatsApp Business API account + credentials and the
+signed-off 15-question wording first.
+
+## Not yet verified against a live Sheet
+
+Every test here mocks the network/env boundary - none has actually
+round-tripped through a real deployed Apps Script against the real
+spreadsheet yet. Before trusting this in production:
+
+1. Paste the updated `Code.gs` into the Apps Script editor and deploy
+   a new version (see "Uses the existing Sheet" above).
+2. Submit one real test request through `request-staff.html`.
+3. Confirm: a `Requests` tab row appears with a sensible `AM-REQ-####`
+   ID, the admin dashboard's bell badge and Requests section pick it
+   up on refresh, and (if `RESEND_API_KEY` is set) the confirmation
+   email arrives.
+4. If anything fails, check the new `Automation Log` tab before
+   digging into code - that's exactly what it's there for.
 
 ## Not started
 
-Stage A5 (end-to-end tests against a real deployment - needs Stage A2
-actually deployed first) and all of Part 2 (Hiyame). Each needs
-something from Stage A0 that isn't sorted:
-
-- A2 going live needs the spreadsheet created and the Apps Script deployed.
-- A3 going live needs `RESEND_API_KEY` (or an alternative email
-  sender) and a decision on whether this form gets linked from the
-  real site nav or stays a standalone page.
-- A4 needs a WhatsApp Business API provider, credentials, an approved
-  message template, and the 15-question wording signed off.
+Stage A5 (end-to-end tests - needs the live round-trip above done
+first) and all of Part 2 (Hiyame). A4 needs a WhatsApp Business API
+provider, credentials, an approved message template, and the
+15-question wording signed off.
