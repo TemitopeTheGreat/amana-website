@@ -155,25 +155,25 @@ module.exports = async (req, res) => {
     const result = await sheetsClient.appendRequestRow(record);
     record.requestId = result.requestId;
 
-    // Fire the client confirmation, but don't let its failure turn a
-    // successful write into a false "could not submit" to the client -
-    // the row is already safely recorded at this point. The internal
-    // alert (Stage A3 point 3) is the admin dashboard itself: Code.gs
-    // already emails NOTIFY_EMAIL on every new request (notifyRequest_),
-    // same as the existing candidate/family/org flow, and the request
-    // shows up in admin.html's live stats on next load - no separate
-    // channel needed.
-    const [whatsapp, email] = await Promise.all([
+    // Respond immediately - the row is safely recorded at this point.
+    // Everything below runs AFTER the browser already has its response,
+    // so the person submitting the form never waits on the admin-alert
+    // and confirmation emails (previously several extra seconds; see
+    // Code.gs's handleNotifyRequestSubmitted_ and sheets-client.js's
+    // notifyRequestSubmitted). sendWhatsAppAcknowledgement_ is currently a
+    // stub (Stage A4 not built); sendConfirmationEmail_ only does real
+    // work once RESEND_API_KEY is set - Code.gs's MailApp-based
+    // confirmation is what actually reaches the client today.
+    res.status(200).json({ ok: true, requestId: result.requestId, duplicateFlag: result.duplicateFlag });
+
+    await Promise.all([
       sendWhatsAppAcknowledgement_(record),
       sendConfirmationEmail_(record),
+      sheetsClient.notifyRequestSubmitted(record).catch((e) => {
+        console.error('notifyRequestSubmitted failed:', e.message);
+      }),
     ]);
-
-    return res.status(200).json({
-      ok: true,
-      requestId: result.requestId,
-      duplicateFlag: result.duplicateFlag,
-      confirmation: { whatsapp, email },
-    });
+    return;
   } catch (e) {
     console.error('whatsapp-intake-request failed:', e.message);
     return res.status(502).json({

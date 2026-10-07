@@ -1,6 +1,14 @@
-// Password-gated proxy for the internal admin dashboard (admin.html).
-// The Apps Script secret never reaches the browser; only this function holds it.
-// Env vars (set in Vercel): ADMIN_PASSWORD, APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
+// Session-gated proxy for the internal admin dashboard (admin.html).
+// The Apps Script secret never reaches the browser; only this function
+// holds it. Auth is a signed session cookie from api/admin-login.js, not
+// a password sent on every request (see api/_lib/adminSession.js for why).
+// Any signed-in role (super or general) can view the dashboard; role-
+// gating happens on the actions that change or export sensitive data
+// (api/admin-delete-request.js, api/admin-sync-candidate.js, the
+// admin-*-user.js endpoints).
+// Env vars (set in Vercel): APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
+
+const { verifySession } = require('./_lib/adminSession');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -8,16 +16,8 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'method_not_allowed' });
   }
 
-  const body = typeof req.body === 'string' ? safeParse(req.body) : (req.body || {});
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return res.status(503).json({ error: 'not_configured' });
-
-  const password = String(body.password || '');
-  if (!password || password !== expected) {
-    // Small delay to slow down naive brute-forcing of a single password.
-    await new Promise((r) => setTimeout(r, 400));
-    return res.status(401).json({ error: 'unauthorized' });
-  }
+  const session = verifySession(req);
+  if (!session) return res.status(401).json({ error: 'unauthorized' });
 
   const url = process.env.APPS_SCRIPT_URL;
   const secret = process.env.APPS_SCRIPT_SECRET;
@@ -27,12 +27,8 @@ module.exports = async (req, res) => {
     const r = await fetch(url + '?action=stats&secret=' + encodeURIComponent(secret), { redirect: 'follow' });
     const out = await r.json().catch(() => null);
     if (!r.ok || !out || !out.ok) return res.status(502).json({ error: 'fetch_failed' });
-    return res.status(200).json({ ok: true, data: out.data });
+    return res.status(200).json({ ok: true, data: out.data, role: session.role, username: session.username });
   } catch (e) {
     return res.status(502).json({ error: 'fetch_failed' });
   }
 };
-
-function safeParse(s) {
-  try { return JSON.parse(s); } catch (e) { return {}; }
-}

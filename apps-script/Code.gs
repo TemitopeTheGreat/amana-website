@@ -172,6 +172,20 @@ const BOT_SESSION_HEADERS = [
 
 const AUTOMATION_LOG_HEADERS = ['Timestamp', 'Workflow ID', 'Source Record', 'Error', 'Retry Count'];
 
+/* ================= Admin accounts (super / general roles) ================= */
+/* A named account per staff member, instead of one shared ADMIN_PASSWORD.    */
+/* Only a hash+salt (Node's scrypt, computed in api/admin-login.js) is ever   */
+/* stored here - this script never sees or stores a plaintext password.      */
+/* The "owner" break-glass login (api/admin-login.js) still uses             */
+/* ADMIN_PASSWORD directly and never touches this tab, so the business       */
+/* owner can always get in even if this tab or a named account has a         */
+/* problem.                                                                  */
+
+const ADMIN_USER_HEADERS = [
+  'Username', 'Role', 'Password Hash', 'Password Salt', 'Active',
+  'Failed Attempts', 'Locked Until', 'Created At', 'Created By', 'Last Login At',
+];
+
 function summarizeRequests_(ss) {
   const sheet = ss.getSheetByName('Requests');
   const idx = {};
@@ -242,9 +256,11 @@ function handleAppendRequest_(p) {
   sheet.getRange(r, 1, 1, row.length).setNumberFormat('@');
   sheet.getRange(r, 1, 1, row.length).setValues([row]);
 
-  notifyRequest_(requestId, record, ss.getUrl() + '#gid=' + sheet.getSheetId());
-  confirmRequestSubmitter_(record);
-
+  // Email sending moved to the separate notifyRequestSubmitted action
+  // (see handleNotifyRequestSubmitted_) - same reasoning as the
+  // professional/family/organisation flow's handleNotifySubmission_: two
+  // synchronous MailApp sends here were adding real seconds to every
+  // Request Staff submission before the visitor saw "success."
   return json_({ ok: true, requestId: requestId, duplicateFlag: !!duplicate, duplicateOf: duplicate || null });
 }
 
@@ -308,6 +324,169 @@ function handleMarkCandidateSynced_(p) {
   if (!rowNum) return json_({ ok: false, error: 'candidate_not_found' });
   const syncCol = TABS.professional.headers.indexOf('CRM Synced At') + 1;
   sheet.getRange(rowNum, syncCol).setValue(new Date().toISOString());
+  return json_({ ok: true });
+}
+
+/**
+ * notifySubmission(): sends the admin-alert + submitter-confirmation
+ * emails for a professional/family/organisation row that's already been
+ * written. Split out from the main doPost flow (see the comment at its
+ * `return json_({ ok: true, id: id, cvLink: cvLink })` line) purely for
+ * speed - api/lead.js calls this AFTER it has already responded to the
+ * browser, so the two MailApp sends never make a visitor wait. Secret-
+ * gated like every other action; best-effort - the row this refers to
+ * is already safely saved by the time this runs, so a failure here just
+ * means a missed email, not lost data.
+ */
+function handleNotifySubmission_(p) {
+  const kind = TABS[p.kind] ? p.kind : 'family';
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ss.getSheetByName(TABS[kind].name);
+  const sheetUrl = sheet ? ss.getUrl() + '#gid=' + sheet.getSheetId() : ss.getUrl();
+  notify_(kind, p.id, p, p.cvLink || '', sheetUrl);
+  confirmSubmitter_(kind, p);
+  return json_({ ok: true });
+}
+
+/** Same idea as handleNotifySubmission_, for the Request Staff flow. */
+function handleNotifyRequestSubmitted_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureRequestsTab_(ss);
+  const record = p.record || {};
+  notifyRequest_(record.requestId, record, ss.getUrl() + '#gid=' + sheet.getSheetId());
+  confirmRequestSubmitter_(record);
+  return json_({ ok: true });
+}
+
+function ensureAdminUsersTab_(ss) {
+  let sheet = ss.getSheetByName('Admin Users');
+  if (sheet) return sheet;
+  sheet = ss.insertSheet('Admin Users');
+  const n = ADMIN_USER_HEADERS.length;
+  sheet.getRange(1, 1, 1, n).setValues([ADMIN_USER_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setFrozenRows(1);
+  sheet.getRange(2, ADMIN_USER_HEADERS.indexOf('Active') + 1, 1000, 1).insertCheckboxes();
+  const roleRule = SpreadsheetApp.newDataValidation().requireValueInList(['super', 'general'], true).setAllowInvalid(false).build();
+  sheet.getRange(2, ADMIN_USER_HEADERS.indexOf('Role') + 1, 1000, 1).setDataValidation(roleRule);
+  sheet.setColumnWidths(1, n, 150);
+  return sheet;
+}
+
+// Returns { role, passwordHash, passwordSalt, active, lockedUntil } for a
+// username, or { user: null } if no such account exists. Usernames are
+// always stored and looked up lower-cased, so lookups are case-insensitive
+// without needing a separate search helper. api/admin-login.js does the
+// actual password comparison - this never receives a plaintext password.
+function handleGetAdminUser_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureAdminUsersTab_(ss);
+  const username = String(p.username || '').trim().toLowerCase();
+  const rowNum = findRowByColumnValue_(sheet, ADMIN_USER_HEADERS.indexOf('Username') + 1, username);
+  if (!rowNum) return json_({ ok: true, user: null });
+  const values = sheet.getRange(rowNum, 1, 1, ADMIN_USER_HEADERS.length).getValues()[0];
+  const idx = {};
+  ADMIN_USER_HEADERS.forEach(function (h, i) { idx[h] = i; });
+  const lockedUntilRaw = values[idx['Locked Until']];
+  const lockedUntil = lockedUntilRaw ? new Date(lockedUntilRaw).getTime() : null;
+  return json_({
+    ok: true,
+    user: {
+      role: values[idx['Role']],
+      passwordHash: values[idx['Password Hash']],
+      passwordSalt: values[idx['Password Salt']],
+      active: values[idx['Active']] === true,
+      lockedUntil: (lockedUntil && !isNaN(lockedUntil)) ? lockedUntil : null,
+    },
+  });
+}
+
+// Creates a named admin account. `passwordHash`/`passwordSalt` must
+// already be computed (Node's scrypt, in api/admin-login.js's sibling
+// api/admin-create-user.js) - this script only ever stores them.
+function handleCreateAdminUser_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureAdminUsersTab_(ss);
+  const username = String(p.username || '').trim().toLowerCase();
+  if (!username) return json_({ ok: false, error: 'username_required' });
+  if (findRowByColumnValue_(sheet, ADMIN_USER_HEADERS.indexOf('Username') + 1, username)) {
+    return json_({ ok: false, error: 'username_taken' });
+  }
+  const role = p.role === 'super' ? 'super' : 'general';
+  const row = ADMIN_USER_HEADERS.map(function (h) {
+    if (h === 'Username') return username;
+    if (h === 'Role') return role;
+    if (h === 'Password Hash') return p.passwordHash;
+    if (h === 'Password Salt') return p.passwordSalt;
+    if (h === 'Active') return true;
+    if (h === 'Failed Attempts') return 0;
+    if (h === 'Created At') return new Date().toISOString();
+    if (h === 'Created By') return clean_(p.createdBy);
+    return '';
+  });
+  // Checkboxes for the Active column were already applied to rows 2-1000
+  // when the tab was created (ensureAdminUsersTab_), so a new row inside
+  // that range renders correctly without redoing it here.
+  const r = sheet.getLastRow() + 1;
+  sheet.getRange(r, 1, 1, row.length).setNumberFormat('@');
+  sheet.getRange(r, 1, 1, row.length).setValues([row]);
+  return json_({ ok: true });
+}
+
+// Lists every admin account for the Manage Users page - deliberately
+// excludes Password Hash/Salt, since this response is relayed to the
+// browser (api/admin-list-users.js).
+function handleListAdminUsers_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureAdminUsersTab_(ss);
+  const idx = {};
+  ADMIN_USER_HEADERS.forEach(function (h, i) { idx[h] = i; });
+  const rows = sheet.getLastRow() < 2 ? [] : sheet.getRange(2, 1, sheet.getLastRow() - 1, ADMIN_USER_HEADERS.length).getValues();
+  const toIso = function (v) { return v instanceof Date ? v.toISOString() : (v || ''); };
+  const users = rows.filter(function (r) { return r[idx['Username']]; }).map(function (r) {
+    return {
+      username: r[idx['Username']],
+      role: r[idx['Role']],
+      active: r[idx['Active']] === true,
+      createdAt: toIso(r[idx['Created At']]),
+      createdBy: r[idx['Created By']],
+      lastLoginAt: toIso(r[idx['Last Login At']]),
+    };
+  });
+  return json_({ ok: true, users: users });
+}
+
+function handleSetAdminUserActive_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureAdminUsersTab_(ss);
+  const username = String(p.username || '').trim().toLowerCase();
+  const rowNum = findRowByColumnValue_(sheet, ADMIN_USER_HEADERS.indexOf('Username') + 1, username);
+  if (!rowNum) return json_({ ok: false, error: 'user_not_found' });
+  sheet.getRange(rowNum, ADMIN_USER_HEADERS.indexOf('Active') + 1).setValue(!!p.active);
+  return json_({ ok: true });
+}
+
+// Tracks failed logins per account and locks it for 15 minutes after 5
+// in a row - resets on any successful login. Only applies to named
+// accounts; the "owner" break-glass login has no sheet row to track
+// against (api/admin-login.js throttles it with a fixed delay instead).
+function handleRecordLoginAttempt_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureAdminUsersTab_(ss);
+  const username = String(p.username || '').trim().toLowerCase();
+  const rowNum = findRowByColumnValue_(sheet, ADMIN_USER_HEADERS.indexOf('Username') + 1, username);
+  if (!rowNum) return json_({ ok: true });
+  const col = function (h) { return ADMIN_USER_HEADERS.indexOf(h) + 1; };
+  if (p.success) {
+    sheet.getRange(rowNum, col('Failed Attempts')).setValue(0);
+    sheet.getRange(rowNum, col('Locked Until')).setValue('');
+    sheet.getRange(rowNum, col('Last Login At')).setValue(new Date().toISOString());
+  } else {
+    const attempts = Number(sheet.getRange(rowNum, col('Failed Attempts')).getValue() || 0) + 1;
+    sheet.getRange(rowNum, col('Failed Attempts')).setValue(attempts);
+    if (attempts >= 5) {
+      sheet.getRange(rowNum, col('Locked Until')).setValue(new Date(Date.now() + 15 * 60 * 1000).toISOString());
+    }
+  }
   return json_({ ok: true });
 }
 
@@ -531,6 +710,13 @@ function doPost(e) {
     if (p.action === 'appendSession') return handleAppendSession_(p);
     if (p.action === 'updateSession') return handleUpdateSession_(p);
     if (p.action === 'markCandidateSynced') return handleMarkCandidateSynced_(p);
+    if (p.action === 'notifySubmission') return handleNotifySubmission_(p);
+    if (p.action === 'notifyRequestSubmitted') return handleNotifyRequestSubmitted_(p);
+    if (p.action === 'getAdminUser') return handleGetAdminUser_(p);
+    if (p.action === 'createAdminUser') return handleCreateAdminUser_(p);
+    if (p.action === 'listAdminUsers') return handleListAdminUsers_(p);
+    if (p.action === 'setAdminUserActive') return handleSetAdminUserActive_(p);
+    if (p.action === 'recordLoginAttempt') return handleRecordLoginAttempt_(p);
 
     if (p.kind === 'training_access') return logTrainingAccess_(p);
 
@@ -570,9 +756,14 @@ function doPost(e) {
     const updatedCol = TABS[kind].headers.length;
     sheet.getRange(r, updatedCol).setValue(now);
 
-    notify_(kind, id, p, cvLink, ss.getUrl() + '#gid=' + sheet.getSheetId());
-    confirmSubmitter_(kind, p);
-    return json_({ ok: true, id: id });
+    // Email sending moved out of this request (see handleNotifySubmission_
+    // below) - MailApp.sendEmail is a real network round trip, and doing
+    // two of them here before responding was adding multiple seconds to
+    // every form submission that the visitor had to sit through for no
+    // benefit to them. The row is already safely written at this point;
+    // api/lead.js fires the notification as a second, separate call after
+    // it has already told the browser the submission succeeded.
+    return json_({ ok: true, id: id, cvLink: cvLink });
   } catch (err) {
     try {
       const p2 = JSON.parse((e && e.postData && e.postData.contents) || '{}');
@@ -607,6 +798,7 @@ function setup() {
   ensureShortlistsTab_(ss);
   ensurePlacementsTab_(ss);
   ensureListsSettingsTab_(ss);
+  ensureAdminUsersTab_(ss);
   polish();
 
   // Remove the default empty tab if it is still there.

@@ -1,6 +1,7 @@
-// Password-gated "Sync to CRM" action for the admin dashboard (admin.html).
-// Same auth pattern as api/admin.js and api/admin-delete-request.js -
-// ADMIN_PASSWORD never reaches a third party, only this function holds it.
+// "Sync to CRM" action for the admin dashboard (admin.html) - super
+// admins only, since it sends candidate data to an external system.
+// Session-gated (api/admin-login.js); the Apps Script secret never
+// reaches a third party.
 //
 // Forwards one candidate's record to the company CRM's inbound webhook and,
 // on success, tells Apps Script to stamp 'CRM Synced At' on that row so the
@@ -13,8 +14,10 @@
 // "build everything, stub only the third-party credential" shape as
 // sendWhatsAppAcknowledgement_ and sendConfirmationEmail_ elsewhere in this
 // codebase - the gap is reported to the caller, never silently swallowed.
-// Env vars (set in Vercel): ADMIN_PASSWORD, APPS_SCRIPT_URL, APPS_SCRIPT_SECRET,
+// Env vars (set in Vercel): APPS_SCRIPT_URL, APPS_SCRIPT_SECRET,
 // CRM_WEBHOOK_URL, CRM_API_KEY (optional bearer token for the webhook)
+
+const { verifySession } = require('./_lib/adminSession');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -22,16 +25,11 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'method_not_allowed' });
   }
 
+  const session = verifySession(req);
+  if (!session) return res.status(401).json({ error: 'unauthorized' });
+  if (session.role !== 'super') return res.status(403).json({ error: 'forbidden' });
+
   const body = typeof req.body === 'string' ? safeParse(req.body) : (req.body || {});
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return res.status(503).json({ error: 'not_configured' });
-
-  const password = String(body.password || '');
-  if (!password || password !== expected) {
-    await new Promise((r) => setTimeout(r, 400));
-    return res.status(401).json({ error: 'unauthorized' });
-  }
-
   const candidateId = String(body.candidateId || '').trim();
   if (!/^AM-C-\d+$/.test(candidateId)) {
     return res.status(400).json({ error: 'invalid_candidate_id' });

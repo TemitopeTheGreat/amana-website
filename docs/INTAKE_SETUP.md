@@ -40,11 +40,26 @@ The person who submitted the form also gets a short confirmation email immediate
 
 ## Admin dashboard
 
-`admin.html` on the site is a live, password-gated view of the pipeline, split into its own page per sidebar item (Overview, Candidates, Families & Orgs, Requests) rather than one long scroll - each has its own search box and status filter, and an "Export CSV" button for offline use. It isn't in the nav and isn't indexed by search engines, but it isn't hidden from anyone who has the direct link and the password, so treat the link and password the same way you'd treat any shared login.
+`admin.html` on the site is a live view of the pipeline, split into its own page per sidebar item (Overview, Candidates, Families & Orgs, Diaspora, Requests) rather than one long scroll - each has its own search box and status filter, and an "Export CSV" button for offline use. It isn't in the nav and isn't indexed by search engines, but it isn't hidden from anyone who has the direct link, so treat the link the same way you'd treat a shared login page.
 
-Setup: in Vercel, add an environment variable `ADMIN_PASSWORD` with a password of your choice, then redeploy. The dashboard reads live data through `api/admin.js`, using the same `APPS_SCRIPT_URL` and `APPS_SCRIPT_SECRET` as the lead form, so nothing extra is needed on the Apps Script side beyond having the current `Code.gs` deployed (it adds a `stats` action to `doGet`).
+Setup: in Vercel, add an environment variable `ADMIN_PASSWORD` with a password of your choice, then redeploy. The dashboard reads live data through `api/admin.js`, using the same `APPS_SCRIPT_URL` and `APPS_SCRIPT_SECRET` as the lead form, so nothing extra is needed on the Apps Script side beyond having the current `Code.gs` deployed.
 
-To change the password later, update `ADMIN_PASSWORD` in Vercel and redeploy; anyone still signed in in their browser stays signed in until they close the tab or click Sign out.
+### Signing in: named accounts with super/general roles
+
+There's no single shared password any more. Two kinds of login:
+
+1. **The "owner" account** - username `owner`, password is whatever `ADMIN_PASSWORD` is set to in Vercel. This always works, independent of everything else below, so the business owner can never be locked out. Always full ("super") access.
+2. **Named accounts** - created from the dashboard's "Manage Users" page (visible only to super admins), with a username, a temporary password, and a role:
+   - **Super**: everything a general admin can do, plus deleting a staff request, syncing a candidate to the CRM, and managing other admin accounts (create, disable/re-enable).
+   - **General**: can view and search every page (Candidates, Families & Orgs, Diaspora, Requests) and export CSVs, but cannot delete anything, cannot sync to the CRM, and doesn't see the Manage Users page at all.
+
+A session is a signed cookie, not something stored in the browser's own storage - closing the tab doesn't sign you out (it lasts 12 hours), but nothing about it is readable or usable by a script running on the page, unlike the old shared-password approach.
+
+Accounts, password hashes (never plaintext), and lockout state live in a new **Admin Users** tab in the same Google Sheet - `setup()` in `Code.gs` creates it. Five failed logins in a row locks a named account for 15 minutes; the "owner" account has no such lock (it's throttled with a fixed delay instead) since there's no sheet row to track it against.
+
+Optional: set `ADMIN_SESSION_SECRET` in Vercel to any long random string, for defense-in-depth (session cookies are currently signed with `ADMIN_PASSWORD` itself if this isn't set - fine to start, but a dedicated secret means a session token can't be forged by anyone who only knows the login password).
+
+To change the owner password later, update `ADMIN_PASSWORD` in Vercel and redeploy.
 
 ### Candidate CVs
 
@@ -52,9 +67,17 @@ Every candidate who uploads a CV through the application form gets it saved to a
 
 ### Syncing a candidate to the CRM
 
-The Candidates page has a "Sync to CRM" button per row (and a "Sync all unsynced to CRM" button above the table). It isn't wired to a real CRM yet - `CRM_WEBHOOK_URL` is unset until you add it in Vercel, so clicking it today shows "CRM not connected yet" and nothing is sent anywhere.
+The Candidates page has a "Sync to CRM" button per row (and a "Sync all unsynced to CRM" button above the table) - visible and usable by super admins only; general admins don't see this column at all. It isn't wired to a real CRM yet - `CRM_WEBHOOK_URL` is unset until you add it in Vercel, so clicking it today shows "CRM not connected yet" and nothing is sent anywhere.
 
 To connect it: set `CRM_WEBHOOK_URL` in Vercel to your CRM's inbound-webhook URL (HubSpot, Zoho, Pipedrive and most others accept a plain webhook; if yours needs a bearer token, also set `CRM_API_KEY`). `api/admin-sync-candidate.js` then POSTs a JSON payload (name, phone, email, role, experience, location, status, CV link) to that URL, and on success asks `Code.gs` to stamp a "CRM Synced At" timestamp on that candidate's row so the button shows "Synced" afterwards instead of offering to resend it. Salesforce typically needs a proper OAuth connection rather than a static webhook URL - if that's your CRM, this will need a small follow-up change rather than just an env var.
+
+### Why form submissions used to feel slow
+
+Both the website's "Become a Staff" and "Request Staff" forms used to send two emails (an internal alert + a confirmation to the person who submitted) *before* responding to the browser - each `MailApp.sendEmail()` call is a real network round trip, and doing two of them before saying "success" was adding several extra seconds to every submission. Both forms now get a response the moment their row is safely written; the two emails still send, just via a second call that happens after the browser already has its answer (`handleNotifySubmission_` / `handleNotifyRequestSubmitted_` in `Code.gs`). CV uploads still take a little longer than a request with no attachment - that part is just the cost of uploading a file to Drive, not something this fixed.
+
+### Security headers
+
+`vercel.json` sets a Content-Security-Policy, HSTS, `X-Frame-Options: DENY`, and a few other standard headers on every response - mainly to stop the site (and especially `admin.html`) from being embedded in another page (clickjacking) and to restrict what a browser will load or connect to if a script was ever injected somewhere. It allows Google Fonts and nothing else external, since that's the only third-party resource any page actually loads.
 
 ## What the team sees
 

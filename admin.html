@@ -158,17 +158,19 @@
   <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
   <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 010 18 14 14 0 010-18z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.2c0 4.6-3 8.4-7 9.8-4-1.4-7-5.2-7-9.8V6l7-3z"/><circle cx="12" cy="10.5" r="2.2"/><path d="M8.5 15.5c.6-1.6 2-2.5 3.5-2.5s2.9.9 3.5 2.5"/></symbol>
 </svg>
 
 <div class="gate" id="gate">
   <div class="gate-box">
     <p class="tag" style="color:var(--accent); font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; font-weight:600;">Amana &middot; Admin</p>
     <h1>Sign in</h1>
-    <p>Enter the operations password to view the live pipeline.</p>
+    <p>Sign in with your admin account to view the live pipeline.</p>
     <form id="gateForm">
-      <input type="password" id="pw" placeholder="Password" autocomplete="off" required>
+      <input type="text" id="gateUsername" placeholder="Username" autocomplete="username" required>
+      <input type="password" id="pw" placeholder="Password" autocomplete="current-password" required>
       <p class="gate-error" id="gateError"></p>
-      <button type="submit" class="btn btn-primary btn-block">View dashboard</button>
+      <button type="submit" class="btn btn-primary btn-block">Sign in</button>
     </form>
   </div>
 </div>
@@ -185,6 +187,7 @@
       <button type="button" data-page="families"><svg><use href="#i-home"/></svg>Families &amp; Orgs<span class="nav-count" id="navCountFamilies" hidden>0</span></button>
       <button type="button" data-page="diaspora"><svg><use href="#i-globe"/></svg>Diaspora<span class="nav-count" id="navCountDiaspora" hidden>0</span></button>
       <button type="button" data-page="requests"><svg><use href="#i-clipboard"/></svg>Requests<span class="nav-count" id="navCountRequests" hidden>0</span></button>
+      <button type="button" data-page="users" id="navUsers" hidden><svg><use href="#i-shield"/></svg>Manage Users</button>
     </nav>
     <div class="sidebar-section-label">Account</div>
     <div class="sidebar-foot">
@@ -200,6 +203,7 @@
         <p id="pageSubtitle">Live view of candidates, families, organisations and staff requests.</p>
       </div>
       <div class="app-topbar-actions">
+        <span class="updated-at" id="signedInAs"></span>
         <span class="updated-at" id="updatedAt"></span>
         <button class="bell-btn" id="bellBtn" type="button" aria-label="New requests needing attention" title="New requests needing attention">
           <svg><use href="#i-bell"/></svg>
@@ -378,6 +382,43 @@
         </div>
       </section>
 
+      <!-- ============ MANAGE USERS (super admins only) ============ -->
+      <section class="page" id="page-users" data-page="users" hidden>
+        <div class="page-head">
+          <div>
+            <h2>Admin accounts</h2>
+            <p class="panel-sub">Super admins see and manage everything below; general admins can view the dashboard but not delete requests, sync to the CRM, or manage accounts.</p>
+          </div>
+        </div>
+        <div class="panel" style="margin-bottom:20px;">
+          <h2>Create an account</h2>
+          <p class="panel-sub">Password must be at least 10 characters. The person can change it later by asking a super admin to create a new one - there's no self-service reset yet.</p>
+          <form id="createUserForm" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+            <div>
+              <label for="newUsername" style="display:block; font-size:.78rem; color:var(--ink-soft); margin-bottom:4px;">Username</label>
+              <input type="text" id="newUsername" autocomplete="off" required style="padding:9px 12px; border:1.5px solid #e1e5ec; border-radius:9px; font-family:var(--font-body); font-size:.86rem;">
+            </div>
+            <div>
+              <label for="newPassword" style="display:block; font-size:.78rem; color:var(--ink-soft); margin-bottom:4px;">Temporary password</label>
+              <input type="password" id="newPassword" autocomplete="new-password" minlength="10" required style="padding:9px 12px; border:1.5px solid #e1e5ec; border-radius:9px; font-family:var(--font-body); font-size:.86rem;">
+            </div>
+            <div>
+              <label for="newRole" style="display:block; font-size:.78rem; color:var(--ink-soft); margin-bottom:4px;">Role</label>
+              <select id="newRole" style="padding:9px 12px; border:1.5px solid #e1e5ec; border-radius:9px; font-family:var(--font-body); font-size:.86rem;">
+                <option value="general">General</option>
+                <option value="super">Super</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding:10px 20px;">Create account</button>
+          </form>
+          <p class="gate-error" id="createUserError" style="margin-top:10px;"></p>
+        </div>
+        <div class="panel table-wrap">
+          <h2>Existing accounts</h2>
+          <div id="usersTable"></div>
+        </div>
+      </section>
+
     </div>
   </main>
 </div>
@@ -389,10 +430,18 @@
   var dash = document.getElementById('dash');
   var gateForm = document.getElementById('gateForm');
   var gateError = document.getElementById('gateError');
+  var usernameInput = document.getElementById('gateUsername');
   var pwInput = document.getElementById('pw');
   var loading = document.getElementById('loading');
   var content = document.getElementById('content');
-  var KEY = 'amana_ops_pw';
+
+  // No password is ever stored client-side any more - the session lives
+  // only in a signed, HttpOnly cookie the browser sends automatically
+  // (api/admin-login.js, api/_lib/adminSession.js). SESSION just remembers
+  // the signed-in user's role for the current page view, to show/hide
+  // super-only UI (Manage Users, CRM sync, delete) - losing it on refresh
+  // is fine, the next load() call gets it again from api/admin.
+  var SESSION = { username: '', role: '' };
 
   // Full "latest" rows for each tab, kept client-side so the dedicated nav
   // pages can search/filter without another round trip - the Overview page
@@ -405,6 +454,7 @@
     families: { title: 'Families & Organisations', subtitle: 'Household and business enquiries.' },
     diaspora: { title: 'Diaspora', subtitle: 'Clients living abroad who chose the Diaspora package.' },
     requests: { title: 'Staff requests', subtitle: 'Submitted through the Request Staff form on the website.' },
+    users: { title: 'Manage Users', subtitle: 'Admin accounts - who can sign in, and with what access.' },
   };
 
   function statusClass(s) { return 'st-' + String(s || '').replace(/\s+/g, '-'); }
@@ -414,6 +464,7 @@
 
   function switchPage(name) {
     if (!PAGE_META[name]) name = 'overview';
+    if (name === 'users' && SESSION.role !== 'super') name = 'overview';
     Object.keys(PAGE_META).forEach(function (p) {
       var el = document.getElementById('page-' + p);
       if (el) el.hidden = (p !== name);
@@ -426,6 +477,7 @@
     content.scrollTop = 0;
     window.scrollTo(0, 0);
     try { history.replaceState(null, '', '#' + name); } catch (e) {}
+    if (name === 'users' && SESSION.role === 'super') loadUsers();
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('#sidebarNav button'), function (b) {
@@ -682,6 +734,79 @@
     ]);
   });
 
+  /* ---------------- Manage Users (super admins only) ---------------- */
+
+  function loadUsers() {
+    var container = document.getElementById('usersTable');
+    container.innerHTML = '<p class="empty-note">Loading&hellip;</p>';
+    fetch('/api/admin-list-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+      .then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.out.ok) { container.innerHTML = '<p class="empty-note">Could not load accounts.</p>'; return; }
+        renderUsersTable(res.out.users || []);
+      })
+      .catch(function () { container.innerHTML = '<p class="empty-note">Could not load accounts.</p>'; });
+  }
+
+  function renderUsersTable(users) {
+    var container = document.getElementById('usersTable');
+    var rows = [{ username: 'owner', role: 'super', active: true, createdAt: '', createdBy: 'built-in', lastLoginAt: '', builtIn: true }].concat(users);
+    var body = rows.map(function (u) {
+      var statusPill = u.active ? '<span class="pill st-Approved">Active</span>' : '<span class="pill st-Rejected">Disabled</span>';
+      var action = u.builtIn
+        ? '<span class="no-cv">Built-in</span>'
+        : '<button type="button" class="sync-btn" data-toggle-user="' + esc(u.username) + '" data-active="' + (u.active ? '0' : '1') + '">' + (u.active ? 'Disable' : 'Enable') + '</button>';
+      return '<tr><td>' + esc(u.username) + '</td><td>' + esc(u.role) + '</td><td>' + statusPill + '</td>' +
+        '<td>' + (u.lastLoginAt ? esc(String(u.lastLoginAt).slice(0, 16).replace('T', ' ')) : '<span class="no-cv">Never</span>') + '</td>' +
+        '<td>' + esc(u.createdBy || '') + '</td><td>' + action + '</td></tr>';
+    }).join('');
+    container.innerHTML = '<table class="data-table"><thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Last login</th><th>Created by</th><th></th></tr></thead><tbody>' + body + '</tbody></table>';
+  }
+
+  document.getElementById('usersTable').addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('[data-toggle-user]') : null;
+    if (!btn) return;
+    var username = btn.getAttribute('data-toggle-user');
+    var nextActive = btn.getAttribute('data-active') === '1';
+    btn.disabled = true;
+    fetch('/api/admin-toggle-user', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, active: nextActive }),
+    }).then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.out.ok) { btn.disabled = false; return; }
+        loadUsers();
+      }).catch(function () { btn.disabled = false; });
+  });
+
+  document.getElementById('createUserForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var errorEl = document.getElementById('createUserError');
+    errorEl.textContent = '';
+    var username = document.getElementById('newUsername').value.trim();
+    var password = document.getElementById('newPassword').value;
+    var role = document.getElementById('newRole').value;
+    fetch('/api/admin-create-user', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, password: password, role: role }),
+    }).then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.out.ok) {
+          var errors = {
+            invalid_username: 'Usernames are 3-40 letters, numbers, dots, dashes or underscores.',
+            username_reserved: '"owner" is reserved for the built-in account.',
+            username_taken: 'That username already exists.',
+            password_too_short: 'Password must be at least 10 characters.',
+            forbidden: 'Only super admins can create accounts.',
+          };
+          errorEl.textContent = errors[res.out.error] || 'Could not create that account.';
+          return;
+        }
+        document.getElementById('createUserForm').reset();
+        loadUsers();
+      }).catch(function () { errorEl.textContent = 'Could not create that account.'; });
+  });
+
   /* ---------------- Render ---------------- */
 
   function render(data) {
@@ -738,10 +863,15 @@
     wireTable({
       rows: STATE.candidates, tableId: 'candidatesTable', searchId: 'candidateSearch', statusFilterId: 'candidateStatusFilter', countId: 'candidateCount',
       matchFields: ['Name', 'Phone', 'Email', 'Role', 'Location'],
-      cols: ['ID', 'Name', 'Phone', 'Role', 'Location', 'Status', 'CV', 'CRM'],
+      // CRM sync is a super-only action (see applyRoleUi) - the column
+      // itself is left out entirely for a general admin rather than shown
+      // and disabled, so there's nothing on screen that hints at a CRM
+      // integration a general admin has no reason to know about.
+      cols: ['ID', 'Name', 'Phone', 'Role', 'Location', 'Status', 'CV'].concat(SESSION.role === 'super' ? ['CRM'] : []),
       renderRow: function (r) {
         return '<tr><td>' + esc(r.ID) + '</td><td>' + esc(r.Name) + '</td><td>' + esc(r.Phone) + '</td><td>' + esc(r.Role) + '</td><td>' + esc(r.Location) + '</td>' +
-          '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td><td>' + cvCell(r) + '</td><td>' + syncCell(r) + '</td></tr>';
+          '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td><td>' + cvCell(r) + '</td>' +
+          (SESSION.role === 'super' ? '<td>' + syncCell(r) + '</td>' : '') + '</tr>';
       },
     });
 
@@ -800,16 +930,34 @@
     return out;
   }
 
-  function load(password) {
+  // Shows/hides the UI that only makes sense for a super admin: the
+  // Manage Users nav page, and the "important things" the brief asked to
+  // restrict - deleting a request and syncing a candidate to the CRM.
+  // This is a UX convenience, not the real boundary - every one of those
+  // actions is also enforced server-side (403) regardless of what the
+  // browser shows, so hiding a button here is never the only thing
+  // standing between a general admin and a super-only action.
+  function applyRoleUi() {
+    var isSuper = SESSION.role === 'super';
+    var usersNav = document.getElementById('navUsers');
+    if (usersNav) usersNav.hidden = !isSuper;
+    document.getElementById('syncAllBtn').hidden = !isSuper;
+    document.getElementById('signedInAs').textContent = SESSION.username ? ('Signed in as ' + SESSION.username + ' (' + SESSION.role + ')') : '';
+  }
+
+  function load() {
     loading.hidden = false;
     content.hidden = true;
     return fetch('/api/admin', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: password }),
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
     }).then(function (r) {
-      if (r.status === 401) { sessionStorage.removeItem(KEY); throw new Error('unauthorized'); }
+      if (r.status === 401) throw new Error('unauthorized');
       if (!r.ok) throw new Error('failed');
       return r.json();
     }).then(function (out) {
+      SESSION.username = out.username || '';
+      SESSION.role = out.role || '';
+      applyRoleUi();
       gate.hidden = true;
       dash.hidden = false;
       render(out.data);
@@ -822,24 +970,34 @@
     gate.hidden = false;
     dash.hidden = true;
     gateError.textContent = msg || '';
-    setTimeout(function () { pwInput.focus(); }, 50);
+    setTimeout(function () { usernameInput.focus(); }, 50);
   }
+
+  var LOGIN_ERRORS = {
+    account_locked: 'Too many failed attempts — this account is temporarily locked. Try again in 15 minutes.',
+    account_disabled: 'This account has been disabled. Ask a super admin to re-enable it.',
+    not_configured: 'The dashboard is not set up yet.',
+    invalid_credentials: 'Wrong username or password.',
+  };
 
   gateForm.addEventListener('submit', function (e) {
     e.preventDefault();
     gateError.textContent = '';
-    var pw = pwInput.value;
-    load(pw).then(function () {
-      try { sessionStorage.setItem(KEY, pw); } catch (err) {}
-    }).catch(function () {
-      showGate('Wrong password, or the dashboard is not set up yet.');
-    });
+    var username = usernameInput.value.trim();
+    var password = pwInput.value;
+    fetch('/api/admin-login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username, password: password }),
+    }).then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out || {} }; }); })
+      .then(function (res) {
+        if (!res.ok || !res.out.ok) throw new Error(LOGIN_ERRORS[res.out.error] || 'Sign in failed.');
+        pwInput.value = '';
+        return load();
+      })
+      .catch(function (err) { showGate(err.message); });
   });
 
   document.getElementById('refreshBtn').addEventListener('click', function () {
-    var pw = sessionStorage.getItem(KEY);
-    if (!pw) return showGate('');
-    load(pw).catch(function () { showGate('Session expired, please sign in again.'); });
+    load().catch(function () { showGate('Session expired, please sign in again.'); });
   });
 
   document.getElementById('bellBtn').addEventListener('click', function () {
@@ -847,17 +1005,16 @@
   });
 
   document.getElementById('signOutBtn').addEventListener('click', function () {
-    sessionStorage.removeItem(KEY);
-    pwInput.value = '';
-    showGate('');
+    fetch('/api/admin-logout', { method: 'POST' }).catch(function () {}).then(function () {
+      pwInput.value = '';
+      usernameInput.value = '';
+      showGate('');
+    });
   });
 
-  var saved = null;
-  try { saved = sessionStorage.getItem(KEY); } catch (err) {}
-  if (saved) {
-    gate.hidden = true;
-    load(saved).catch(function () { showGate('Session expired, please sign in again.'); });
-  }
+  // Try to resume a session on load - the signed cookie (if any) is sent
+  // automatically by the browser, nothing to read from storage any more.
+  load().catch(function () { showGate(''); });
 })();
 </script>
 

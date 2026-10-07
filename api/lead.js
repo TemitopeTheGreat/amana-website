@@ -67,7 +67,28 @@ module.exports = async (req, res) => {
     });
     const out = await r.json().catch(() => null);
     if (!r.ok || !out || !out.ok) return res.status(502).json({ error: 'send_failed' });
-    return res.status(200).json({ ok: true });
+
+    // Respond immediately - the row is safely saved at this point. The
+    // admin-alert and confirmation emails are sent as a second, separate
+    // call below, AFTER the browser already has its response, so the
+    // person submitting the form never waits on two MailApp round trips
+    // (previously several extra seconds; see Code.gs's handleNotifySubmission_).
+    res.status(200).json({ ok: true });
+    try {
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          action: 'notifySubmission', secret, kind: payload.kind, id: out.id, cvLink: out.cvLink,
+          name: payload.name, phone: payload.phone, email: payload.email, need: payload.need,
+          location: payload.location, plan: payload.plan, message: payload.message,
+        }),
+        redirect: 'follow',
+      });
+    } catch (e) {
+      // Best-effort - the submission itself already succeeded and was reported above.
+    }
+    return;
   } catch (e) {
     return res.status(502).json({ error: 'send_failed' });
   }

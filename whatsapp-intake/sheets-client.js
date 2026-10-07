@@ -103,10 +103,24 @@ async function updateBotSession(sessionId, patch) {
   await callAppsScript_('updateSession', { sessionId, patch });
 }
 
+/**
+ * Sends the admin-alert + submitter-confirmation emails for a request
+ * that's already been written via appendRequestRow() - deliberately
+ * separate so the caller can respond to its own client first, then call
+ * this without the visitor waiting on two MailApp round trips (see
+ * Code.gs's handleNotifyRequestSubmitted_). Best-effort - the row is
+ * already safely saved by the time this runs.
+ * @param {import('./schema').AmanaRequest} record
+ */
+async function notifyRequestSubmitted(record) {
+  await callAppsScript_('notifyRequestSubmitted', { record });
+}
+
 module.exports = {
   appendRequestRow,
   updateRequestRow,
   findRequestBySessionId,
   appendBotSession,
   updateBotSession,
+  notifyRequestSubmitted,
 };

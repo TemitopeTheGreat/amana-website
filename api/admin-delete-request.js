@@ -1,11 +1,12 @@
-// Password-gated proxy to delete a single Requests-tab row by Request ID.
-// Same auth pattern as api/admin.js (ADMIN_PASSWORD, never reaches the
-// browser or this function's caller - only this function holds the Apps
-// Script secret). Exists so test/junk rows created during verification
-// (e.g. Stage A5 testing) can be cleaned up without pulling production
-// secrets to a local machine or asking a human to edit the sheet by hand
-// every time - see whatsapp-intake/README.md.
-// Env vars (set in Vercel): ADMIN_PASSWORD, APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
+// Deletes a single Requests-tab row by Request ID - super admins only
+// (a destructive, irreversible action). Session-gated (api/admin-login.js),
+// the Apps Script secret never reaches the browser. Exists so test/junk
+// rows created during verification can be cleaned up without pulling
+// production secrets to a local machine or asking a human to edit the
+// sheet by hand every time - see whatsapp-intake/README.md.
+// Env vars (set in Vercel): APPS_SCRIPT_URL, APPS_SCRIPT_SECRET
+
+const { verifySession } = require('./_lib/adminSession');
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -13,16 +14,11 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'method_not_allowed' });
   }
 
+  const session = verifySession(req);
+  if (!session) return res.status(401).json({ error: 'unauthorized' });
+  if (session.role !== 'super') return res.status(403).json({ error: 'forbidden' });
+
   const body = typeof req.body === 'string' ? safeParse(req.body) : (req.body || {});
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return res.status(503).json({ error: 'not_configured' });
-
-  const password = String(body.password || '');
-  if (!password || password !== expected) {
-    await new Promise((r) => setTimeout(r, 400));
-    return res.status(401).json({ error: 'unauthorized' });
-  }
-
   const requestId = String(body.requestId || '').trim();
   if (!/^AM-REQ-\d+$/.test(requestId)) {
     return res.status(400).json({ error: 'invalid_request_id' });
