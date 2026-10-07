@@ -312,6 +312,7 @@
           <div class="toolbar">
             <input type="search" id="familySearch" placeholder="Search by name, phone, role, location&hellip;">
             <select id="familyStatusFilter"><option value="">All statuses</option></select>
+            <select id="familyPlanFilter"><option value="">All plans</option></select>
           </div>
           <p class="count-note" id="familyCount"></p>
           <div class="panel table-wrap">
@@ -498,21 +499,34 @@
   // dataset, re-rendering only the matching rows. `renderRow` builds one
   // <tr>'s innerHTML; `matchFields` lists which record keys the search box
   // checks against.
+  // `extraFilterId` + `extraFilterField` wire up one more <select> (e.g. the
+  // Families page's Plan filter, so Diaspora/Standard/Premium/Executive
+  // leads can be isolated from plain family requests) - optional, the other
+  // three tables just omit them.
   function wireTable(opts) {
     var rows = opts.rows;
     var container = document.getElementById(opts.tableId);
     var searchEl = document.getElementById(opts.searchId);
     var statusEl = document.getElementById(opts.statusFilterId);
     var countEl = document.getElementById(opts.countId);
+    var extraEl = opts.extraFilterId ? document.getElementById(opts.extraFilterId) : null;
 
     var statuses = Array.from(new Set(rows.map(function (r) { return r.Status; }).filter(Boolean)));
     statusEl.innerHTML = '<option value="">All statuses</option>' + statuses.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join('');
 
+    if (extraEl) {
+      var extraLabel = opts.extraFilterLabel || 'All';
+      var extras = Array.from(new Set(rows.map(function (r) { return r[opts.extraFilterField]; }).filter(Boolean)));
+      extraEl.innerHTML = '<option value="">' + esc(extraLabel) + '</option>' + extras.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + '</option>'; }).join('');
+    }
+
     function draw() {
       var q = (searchEl.value || '').trim().toLowerCase();
       var statusQ = statusEl.value;
+      var extraQ = extraEl ? extraEl.value : '';
       var filtered = rows.filter(function (r) {
         if (statusQ && r.Status !== statusQ) return false;
+        if (extraQ && r[opts.extraFilterField] !== extraQ) return false;
         if (!q) return true;
         return opts.matchFields.some(function (f) { return String(r[f] || '').toLowerCase().indexOf(q) !== -1; });
       });
@@ -525,6 +539,7 @@
 
     searchEl.addEventListener('input', draw);
     statusEl.addEventListener('change', draw);
+    if (extraEl) extraEl.addEventListener('change', draw);
     draw();
 
     return { redraw: draw };
@@ -623,7 +638,7 @@
   document.getElementById('exportFamiliesBtn').addEventListener('click', function () {
     exportCsv('amana-families.csv', STATE.families, [
       { key: 'ID', label: 'ID' }, { key: 'Name', label: 'Name' }, { key: 'Phone', label: 'Phone' }, { key: 'Email', label: 'Email' },
-      { key: 'Role needed', label: 'Role needed' }, { key: 'Location', label: 'Location' }, { key: 'Status', label: 'Status' },
+      { key: 'Role needed', label: 'Role needed' }, { key: 'Location', label: 'Location' }, { key: 'Plan', label: 'Plan' }, { key: 'Status', label: 'Status' },
     ]);
   });
   document.getElementById('exportOrgsBtn').addEventListener('click', function () {
@@ -702,10 +717,12 @@
 
     wireTable({
       rows: STATE.families, tableId: 'familiesTable', searchId: 'familySearch', statusFilterId: 'familyStatusFilter', countId: 'familyCount',
-      matchFields: ['Name', 'Phone', 'Email', 'Role needed', 'Location'],
-      cols: ['ID', 'Name', 'Phone', 'Role needed', 'Location', 'Status'],
+      extraFilterId: 'familyPlanFilter', extraFilterField: 'Plan', extraFilterLabel: 'All plans',
+      matchFields: ['Name', 'Phone', 'Email', 'Role needed', 'Location', 'Plan'],
+      cols: ['ID', 'Name', 'Phone', 'Role needed', 'Location', 'Plan', 'Status'],
       renderRow: function (r) {
         return '<tr><td>' + esc(r.ID) + '</td><td>' + esc(r.Name) + '</td><td>' + esc(r.Phone) + '</td><td>' + esc(r['Role needed']) + '</td><td>' + esc(r.Location) + '</td>' +
+          '<td>' + (r.Plan ? esc(r.Plan) : '<span class="no-cv">General</span>') + '</td>' +
           '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td></tr>';
       },
     });
