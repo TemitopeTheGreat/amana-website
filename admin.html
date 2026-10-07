@@ -307,7 +307,7 @@
           <div class="page-head">
             <div>
               <h2>Family requests</h2>
-              <p class="panel-sub">Enquiries from the legacy "Find a Professional" modal.</p>
+              <p class="panel-sub">Household enquiries from the website.</p>
             </div>
             <button class="btn-ghost-sm" id="exportFamiliesBtn" type="button"><svg width="14" height="14" style="vertical-align:-2px; margin-right:4px;"><use href="#i-download"/></svg>Export CSV</button>
           </div>
@@ -345,7 +345,7 @@
         <div class="page-head">
           <div>
             <h2>Diaspora clients</h2>
-            <p class="panel-sub">Family requests that picked the Diaspora plan (diaspora.html).</p>
+            <p class="panel-sub">Clients living abroad who chose the Diaspora package.</p>
           </div>
           <button class="btn-ghost-sm" id="exportDiasporaBtn" type="button"><svg width="14" height="14" style="vertical-align:-2px; margin-right:4px;"><use href="#i-download"/></svg>Export CSV</button>
         </div>
@@ -364,7 +364,7 @@
         <div class="page-head">
           <div>
             <h2>Staff requests</h2>
-            <p class="panel-sub">From the Request Staff form (whatsapp-intake).</p>
+            <p class="panel-sub">Submitted through the Request Staff form on the website.</p>
           </div>
           <button class="btn-ghost-sm" id="exportRequestsBtn" type="button"><svg width="14" height="14" style="vertical-align:-2px; margin-right:4px;"><use href="#i-download"/></svg>Export CSV</button>
         </div>
@@ -403,8 +403,8 @@
     overview: { title: 'Dashboard', subtitle: 'Live view of candidates, families, organisations and staff requests.' },
     candidates: { title: 'Candidates', subtitle: 'Every applicant in the talent pool.' },
     families: { title: 'Families & Organisations', subtitle: 'Household and business enquiries.' },
-    diaspora: { title: 'Diaspora', subtitle: 'Family requests that picked the Diaspora plan.' },
-    requests: { title: 'Staff requests', subtitle: 'Submissions from the Request Staff form.' },
+    diaspora: { title: 'Diaspora', subtitle: 'Clients living abroad who chose the Diaspora package.' },
+    requests: { title: 'Staff requests', subtitle: 'Submitted through the Request Staff form on the website.' },
   };
 
   function statusClass(s) { return 'st-' + String(s || '').replace(/\s+/g, '-'); }
@@ -613,7 +613,7 @@
           btn.disabled = true;
         } else if (res.ok && res.out.reason === 'crm_not_configured') {
           document.getElementById('crmNote').hidden = false;
-          document.getElementById('crmNote').textContent = 'CRM not connected yet — ask your developer to set CRM_WEBHOOK_URL. This candidate has not been synced.';
+          document.getElementById('crmNote').textContent = 'CRM sync isn’t connected yet, so this candidate hasn’t been sent. Reach out to your admin to finish setting it up.';
           btn.className = 'sync-btn';
           btn.textContent = 'Sync to CRM';
           btn.disabled = false;
