@@ -157,6 +157,7 @@
   <symbol id="i-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.2c0 4.6-3 8.4-7 9.8-4-1.4-7-5.2-7-9.8V6l7-3z"/><path d="M9.2 12l1.9 1.9 3.7-3.9"/></symbol>
   <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
   <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 010 18 14 14 0 010-18z"/></symbol>
 </svg>
 
 <div class="gate" id="gate">
@@ -182,6 +183,7 @@
       <button type="button" data-page="overview" class="active"><svg><use href="#i-grid"/></svg>Overview</button>
       <button type="button" data-page="candidates"><svg><use href="#i-users"/></svg>Candidates<span class="nav-count" id="navCountCandidates" hidden>0</span></button>
       <button type="button" data-page="families"><svg><use href="#i-home"/></svg>Families &amp; Orgs<span class="nav-count" id="navCountFamilies" hidden>0</span></button>
+      <button type="button" data-page="diaspora"><svg><use href="#i-globe"/></svg>Diaspora<span class="nav-count" id="navCountDiaspora" hidden>0</span></button>
       <button type="button" data-page="requests"><svg><use href="#i-clipboard"/></svg>Requests<span class="nav-count" id="navCountRequests" hidden>0</span></button>
     </nav>
     <div class="sidebar-section-label">Account</div>
@@ -338,6 +340,25 @@
         </div>
       </section>
 
+      <!-- ============ DIASPORA ============ -->
+      <section class="page" id="page-diaspora" data-page="diaspora" hidden>
+        <div class="page-head">
+          <div>
+            <h2>Diaspora clients</h2>
+            <p class="panel-sub">Family requests that picked the Diaspora plan (diaspora.html).</p>
+          </div>
+          <button class="btn-ghost-sm" id="exportDiasporaBtn" type="button"><svg width="14" height="14" style="vertical-align:-2px; margin-right:4px;"><use href="#i-download"/></svg>Export CSV</button>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="diasporaSearch" placeholder="Search by name, phone, role, location&hellip;">
+          <select id="diasporaStatusFilter"><option value="">All statuses</option></select>
+        </div>
+        <p class="count-note" id="diasporaCount"></p>
+        <div class="panel table-wrap">
+          <div id="diasporaTable"></div>
+        </div>
+      </section>
+
       <!-- ============ REQUESTS ============ -->
       <section class="page" id="page-requests" data-page="requests" hidden>
         <div class="page-head">
@@ -376,12 +397,13 @@
   // Full "latest" rows for each tab, kept client-side so the dedicated nav
   // pages can search/filter without another round trip - the Overview page
   // only ever reads the aggregate counts, not these arrays.
-  var STATE = { candidates: [], families: [], organisations: [], requests: [] };
+  var STATE = { candidates: [], families: [], organisations: [], diaspora: [], requests: [] };
 
   var PAGE_META = {
     overview: { title: 'Dashboard', subtitle: 'Live view of candidates, families, organisations and staff requests.' },
     candidates: { title: 'Candidates', subtitle: 'Every applicant in the talent pool.' },
     families: { title: 'Families & Organisations', subtitle: 'Household and business enquiries.' },
+    diaspora: { title: 'Diaspora', subtitle: 'Family requests that picked the Diaspora plan.' },
     requests: { title: 'Staff requests', subtitle: 'Submissions from the Request Staff form.' },
   };
 
@@ -641,6 +663,12 @@
       { key: 'Role needed', label: 'Role needed' }, { key: 'Location', label: 'Location' }, { key: 'Plan', label: 'Plan' }, { key: 'Status', label: 'Status' },
     ]);
   });
+  document.getElementById('exportDiasporaBtn').addEventListener('click', function () {
+    exportCsv('amana-diaspora.csv', STATE.diaspora, [
+      { key: 'ID', label: 'ID' }, { key: 'Name', label: 'Name' }, { key: 'Phone', label: 'Phone' }, { key: 'Email', label: 'Email' },
+      { key: 'Role needed', label: 'Role needed' }, { key: 'Location', label: 'Location' }, { key: 'Status', label: 'Status' },
+    ]);
+  });
   document.getElementById('exportOrgsBtn').addEventListener('click', function () {
     exportCsv('amana-organisations.csv', STATE.organisations, [
       { key: 'ID', label: 'ID' }, { key: 'Name', label: 'Name' }, { key: 'Phone', label: 'Phone' }, { key: 'Email', label: 'Email' },
@@ -664,6 +692,7 @@
     STATE.families = f.latest || [];
     STATE.organisations = o.latest || [];
     STATE.requests = req.latest || [];
+    STATE.diaspora = STATE.families.filter(function (r) { return r.Plan === 'Diaspora'; });
 
     var openF = f.total - (f.statusCounts.Placed || 0) - (f.statusCounts.Lost || 0);
     var openO = o.total - (o.statusCounts.Won || 0) - (o.statusCounts.Lost || 0);
@@ -698,6 +727,7 @@
 
     var navC = document.getElementById('navCountCandidates'); navC.textContent = c.total; navC.hidden = !c.total;
     var navF = document.getElementById('navCountFamilies'); navF.textContent = f.total + o.total; navF.hidden = !(f.total + o.total);
+    var navD = document.getElementById('navCountDiaspora'); navD.textContent = STATE.diaspora.length; navD.hidden = !STATE.diaspora.length;
     var navR = document.getElementById('navCountRequests'); navR.textContent = req.total; navR.hidden = !req.total;
 
     bar(document.getElementById('candStatus'), c.statusCounts);
@@ -723,6 +753,16 @@
       renderRow: function (r) {
         return '<tr><td>' + esc(r.ID) + '</td><td>' + esc(r.Name) + '</td><td>' + esc(r.Phone) + '</td><td>' + esc(r['Role needed']) + '</td><td>' + esc(r.Location) + '</td>' +
           '<td>' + (r.Plan ? esc(r.Plan) : '<span class="no-cv">General</span>') + '</td>' +
+          '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td></tr>';
+      },
+    });
+
+    wireTable({
+      rows: STATE.diaspora, tableId: 'diasporaTable', searchId: 'diasporaSearch', statusFilterId: 'diasporaStatusFilter', countId: 'diasporaCount',
+      matchFields: ['Name', 'Phone', 'Email', 'Role needed', 'Location'],
+      cols: ['ID', 'Name', 'Phone', 'Role needed', 'Location', 'Status'],
+      renderRow: function (r) {
+        return '<tr><td>' + esc(r.ID) + '</td><td>' + esc(r.Name) + '</td><td>' + esc(r.Phone) + '</td><td>' + esc(r['Role needed']) + '</td><td>' + esc(r.Location) + '</td>' +
           '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td></tr>';
       },
     });
