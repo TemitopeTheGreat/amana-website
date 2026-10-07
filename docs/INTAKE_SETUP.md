@@ -40,11 +40,21 @@ The person who submitted the form also gets a short confirmation email immediate
 
 ## Admin dashboard
 
-`admin.html` on the site is a live, password-gated view of the pipeline: totals, status breakdowns, candidates by role, submissions over the last 8 weeks, and the latest candidates and family requests. It isn't in the nav and isn't indexed by search engines, but it isn't hidden from anyone who has the direct link and the password, so treat the link and password the same way you'd treat any shared login.
+`admin.html` on the site is a live, password-gated view of the pipeline, split into its own page per sidebar item (Overview, Candidates, Families & Orgs, Requests) rather than one long scroll - each has its own search box and status filter, and an "Export CSV" button for offline use. It isn't in the nav and isn't indexed by search engines, but it isn't hidden from anyone who has the direct link and the password, so treat the link and password the same way you'd treat any shared login.
 
 Setup: in Vercel, add an environment variable `ADMIN_PASSWORD` with a password of your choice, then redeploy. The dashboard reads live data through `api/admin.js`, using the same `APPS_SCRIPT_URL` and `APPS_SCRIPT_SECRET` as the lead form, so nothing extra is needed on the Apps Script side beyond having the current `Code.gs` deployed (it adds a `stats` action to `doGet`).
 
 To change the password later, update `ADMIN_PASSWORD` in Vercel and redeploy; anyone still signed in in their browser stays signed in until they close the tab or click Sign out.
+
+### Candidate CVs
+
+Every candidate who uploads a CV through the application form gets it saved to a Google Drive folder named "Amana CVs" (`saveCv_()` in `Code.gs`), with the file's Drive link stored in the Candidates tab's "CV link" column. The admin dashboard's Candidates page surfaces this as a "View CV" link per row - no separate file storage was added, it's reading the same Drive link that was already being written to the sheet.
+
+### Syncing a candidate to the CRM
+
+The Candidates page has a "Sync to CRM" button per row (and a "Sync all unsynced to CRM" button above the table). It isn't wired to a real CRM yet - `CRM_WEBHOOK_URL` is unset until you add it in Vercel, so clicking it today shows "CRM not connected yet" and nothing is sent anywhere.
+
+To connect it: set `CRM_WEBHOOK_URL` in Vercel to your CRM's inbound-webhook URL (HubSpot, Zoho, Pipedrive and most others accept a plain webhook; if yours needs a bearer token, also set `CRM_API_KEY`). `api/admin-sync-candidate.js` then POSTs a JSON payload (name, phone, email, role, experience, location, status, CV link) to that URL, and on success asks `Code.gs` to stamp a "CRM Synced At" timestamp on that candidate's row so the button shows "Synced" afterwards instead of offering to resend it. Salesforce typically needs a proper OAuth connection rather than a static webhook URL - if that's your CRM, this will need a small follow-up change rather than just an env var.
 
 ## What the team sees
 

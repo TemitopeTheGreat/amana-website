@@ -22,14 +22,16 @@
 
   /* ---- App shell: sidebar + main ---- */
   .app-shell{display:grid; grid-template-columns:240px 1fr; min-height:100vh;}
-  .sidebar{background:#fff; border-right:1px solid #e8eaef; padding:24px 18px; display:flex; flex-direction:column;}
+  .sidebar{background:#fff; border-right:1px solid #e8eaef; padding:24px 18px; display:flex; flex-direction:column; position:sticky; top:0; height:100vh; overflow-y:auto;}
   .sidebar-brand{display:flex; align-items:center; gap:10px; margin-bottom:26px; padding:0 6px;}
   .sidebar-brand img{height:30px; width:auto;}
   .sidebar-nav{display:flex; flex-direction:column; gap:2px;}
-  .sidebar-nav a{display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; color:#5b6472; font-size:.92rem; font-weight:500; font-family:var(--font-body);}
-  .sidebar-nav a svg{width:18px; height:18px; flex-shrink:0;}
-  .sidebar-nav a:hover{background:#f4f6f9; color:var(--navy-950);}
-  .sidebar-nav a.active{background:var(--navy-950); color:#fff;}
+  .sidebar-nav button{display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; color:#5b6472; font-size:.92rem; font-weight:500; font-family:var(--font-body); background:none; border:0; cursor:pointer; text-align:left; width:100%;}
+  .sidebar-nav button svg{width:18px; height:18px; flex-shrink:0;}
+  .sidebar-nav button:hover{background:#f4f6f9; color:var(--navy-950);}
+  .sidebar-nav button.active{background:var(--navy-950); color:#fff;}
+  .nav-count{margin-left:auto; font-size:.72rem; font-weight:700; background:#eef1f6; color:#5b6472; border-radius:999px; padding:1px 8px; min-width:20px; text-align:center;}
+  .sidebar-nav button.active .nav-count{background:rgba(255,255,255,.2); color:#fff;}
   .sidebar-section-label{font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#9aa2b1; margin:20px 0 6px; padding:0 12px;}
   .sidebar-foot{margin-top:auto; padding-top:16px; border-top:1px solid #e8eaef;}
   .sidebar-foot button{width:100%; justify-content:flex-start; display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px; color:#5b6472; font-size:.92rem; font-weight:500; background:none; border:0; cursor:pointer; font-family:var(--font-body);}
@@ -47,9 +49,13 @@
   .bell-badge{position:absolute; top:-3px; right:-3px; min-width:17px; height:17px; padding:0 4px; border-radius:999px; background:#e04848; color:#fff; font-size:.66rem; font-weight:700; display:flex; align-items:center; justify-content:center; border:2px solid #f4f6f9;}
   .bell-badge[hidden]{display:none;}
 
+  /* ---- Pages ---- */
+  .page[hidden]{display:none !important;}
+
   /* ---- KPI cards ---- */
   .kpis{display:grid; grid-template-columns:repeat(6,1fr); gap:16px; margin-bottom:28px;}
-  .kpi-card{background:#fff; border:1px solid #e8eaef; border-radius:14px; padding:18px 18px 16px;}
+  .kpi-card{background:#fff; border:1px solid #e8eaef; border-radius:14px; padding:18px 18px 16px; cursor:pointer; transition:box-shadow .15s ease, transform .15s ease;}
+  .kpi-card:hover{box-shadow:var(--shadow-md); transform:translateY(-1px);}
   .kpi-top{display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px;}
   .kpi-label{font-size:.78rem; color:var(--ink-soft); font-weight:500;}
   .kpi-icon{width:38px; height:38px; border-radius:10px; background:#eaf0fe; color:#3b5ee8; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
@@ -59,7 +65,7 @@
   .kpi-num{font-family:var(--font-head); font-size:1.7rem; font-weight:600; color:var(--navy-950); margin-bottom:8px;}
   .kpi-track{height:5px; background:#eef1f6; border-radius:4px; overflow:hidden;}
   .kpi-fill{display:block; height:100%; background:#3b5ee8; border-radius:4px;}
-  .kpi-icon.good ~ .kpi-num + .kpi-track .kpi-fill, .kpi-fill.good{background:#1f9254;}
+  .kpi-fill.good{background:#1f9254;}
   .kpi-fill.warn{background:var(--accent);}
   .kpi-sub{font-size:.76rem; color:var(--ink-soft); margin-top:6px;}
 
@@ -81,9 +87,22 @@
   .weeks .wk-label{font-size:.68rem; color:var(--ink-soft);}
   .weeks .wk-count{font-size:.72rem; font-weight:600; color:var(--navy-900);}
 
+  /* ---- Page header + toolbar (search/filter/export) ---- */
+  .page-head{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap;}
+  .page-head h2{font-size:1.15rem;}
+  .toolbar{display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .toolbar input[type="search"], .toolbar select{font-family:var(--font-body); font-size:.86rem; padding:9px 12px; border:1.5px solid #e1e5ec; border-radius:9px; background:#fff; color:var(--ink);}
+  .toolbar input[type="search"]{min-width:220px; flex:1 1 220px;}
+  .toolbar input[type="search"]:focus, .toolbar select:focus{outline:none; border-color:var(--accent);}
+  .count-note{font-size:.8rem; color:var(--ink-soft); margin:-6px 0 14px;}
+  .btn-ghost-sm{font-family:var(--font-body); font-size:.82rem; font-weight:600; padding:9px 14px; border-radius:9px; border:1.5px solid #e1e5ec; background:#fff; color:var(--navy-950); cursor:pointer; white-space:nowrap;}
+  .btn-ghost-sm:hover{background:#f4f6f9;}
+  .btn-ghost-sm:disabled{opacity:.55; cursor:default;}
+
+  .table-wrap{overflow-x:auto;}
   .data-table{width:100%; border-collapse:collapse; font-size:.85rem;}
-  .data-table th{text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); padding:0 10px 10px; border-bottom:1px solid #eef1f6; font-weight:600;}
-  .data-table td{padding:11px 10px; border-bottom:1px solid #f3f5f8; color:var(--ink);}
+  .data-table th{text-align:left; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); padding:0 10px 10px; border-bottom:1px solid #eef1f6; font-weight:600; white-space:nowrap;}
+  .data-table td{padding:11px 10px; border-bottom:1px solid #f3f5f8; color:var(--ink); white-space:nowrap;}
   .pill{display:inline-block; padding:3px 11px; border-radius:999px; font-size:.75rem; font-weight:600; background:#fdecc8; color:#7a4b00;}
   .pill.st-Contacted, .pill.st-Awaiting-Clarification{background:#dbeafe; color:#1e40af;}
   .pill.st-In-verification, .pill.st-Quote-sent, .pill.st-Proposal-sent, .pill.st-Sourcing, .pill.st-Shortlisting{background:#ede9fe; color:#5b21b6;}
@@ -92,6 +111,17 @@
   .pill.st-Placed, .pill.st-Won, .pill.st-Fulfilled{background:#14532d; color:#fff;}
   .pill.st-Rejected, .pill.st-Lost, .pill.st-Cancelled{background:#fee2e2; color:#991b1b;}
   .pill.st-On-hold, .pill.st-On-Hold, .pill.st-Incomplete{background:#e5e7eb; color:#374151;}
+
+  .cv-link{color:#1d4ed8; font-weight:600; font-size:.82rem; text-decoration:none; display:inline-flex; align-items:center; gap:4px;}
+  .cv-link:hover{text-decoration:underline;}
+  .cv-link svg{width:13px; height:13px;}
+  .no-cv{color:#b5bcc8; font-size:.8rem;}
+
+  .sync-btn{font-family:var(--font-body); font-size:.76rem; font-weight:700; padding:6px 12px; border-radius:999px; border:1px solid #cdd7f5; background:#eef1ff; color:#3b5ee8; cursor:pointer; white-space:nowrap;}
+  .sync-btn:hover{background:#e3e8ff;}
+  .sync-btn:disabled{cursor:default; opacity:.7;}
+  .sync-btn.synced{background:#e4f6ea; color:#1f9254; border-color:#bfe8cd;}
+  .sync-btn.sync-err{background:#fde8e8; color:#b4232c; border-color:#f3c6c6;}
 
   .empty-note{color:var(--ink-soft); font-size:.88rem; padding:8px 0;}
   .loading-note{text-align:center; padding:80px 0; color:var(--ink-soft);}
@@ -105,6 +135,10 @@
   .attention-item .at-badge{font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:999px; background:#fdf0e0; color:var(--accent-dark); white-space:nowrap;}
   .attention-item .at-detail{font-size:.8rem; color:var(--ink-soft); margin-bottom:8px;}
   .attention-item .at-meta{font-size:.74rem; color:#9aa2b1;}
+
+  /* ---- Families & Orgs: two sub-panels stacked full width ---- */
+  .subsection{margin-bottom:28px;}
+  .subsection:last-child{margin-bottom:0;}
 
   @media (max-width:1180px){ .kpis{grid-template-columns:repeat(3,1fr);} .app-grid, .two-col{grid-template-columns:1fr;} }
   @media (max-width:860px){ .app-shell{grid-template-columns:1fr;} .sidebar{display:none;} .kpis{grid-template-columns:repeat(2,1fr);} }
@@ -121,6 +155,8 @@
   <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 10-2.6 6.4"/><path d="M21 5v6h-6"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 10a6 6 0 1112 0c0 4 1.5 5.5 1.5 5.5h-15S6 14 6 10z"/><path d="M10 19a2 2 0 004 0"/></symbol>
   <symbol id="i-logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.2c0 4.6-3 8.4-7 9.8-4-1.4-7-5.2-7-9.8V6l7-3z"/><path d="M9.2 12l1.9 1.9 3.7-3.9"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></symbol>
 </svg>
 
 <div class="gate" id="gate">
@@ -142,11 +178,11 @@
       <span style="color:var(--navy-950);"><svg width="26" height="26"><use href="#i-logo"/></svg></span>
       <strong style="font-family:var(--font-head); font-size:1.05rem; color:var(--navy-950);">Amana Admin</strong>
     </div>
-    <nav class="sidebar-nav">
-      <a href="#overview" class="active"><svg><use href="#i-grid"/></svg>Overview</a>
-      <a href="#candidates"><svg><use href="#i-users"/></svg>Candidates</a>
-      <a href="#families"><svg><use href="#i-home"/></svg>Families &amp; Orgs</a>
-      <a href="#requests"><svg><use href="#i-clipboard"/></svg>Requests</a>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <button type="button" data-page="overview" class="active"><svg><use href="#i-grid"/></svg>Overview</button>
+      <button type="button" data-page="candidates"><svg><use href="#i-users"/></svg>Candidates<span class="nav-count" id="navCountCandidates" hidden>0</span></button>
+      <button type="button" data-page="families"><svg><use href="#i-home"/></svg>Families &amp; Orgs<span class="nav-count" id="navCountFamilies" hidden>0</span></button>
+      <button type="button" data-page="requests"><svg><use href="#i-clipboard"/></svg>Requests<span class="nav-count" id="navCountRequests" hidden>0</span></button>
     </nav>
     <div class="sidebar-section-label">Account</div>
     <div class="sidebar-foot">
@@ -158,8 +194,8 @@
   <main class="app-main">
     <div class="app-topbar">
       <div>
-        <h1 id="overview">Dashboard</h1>
-        <p>Live view of candidates, families, organisations and staff requests.</p>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle">Live view of candidates, families, organisations and staff requests.</p>
       </div>
       <div class="app-topbar-actions">
         <span class="updated-at" id="updatedAt"></span>
@@ -173,96 +209,153 @@
     <div class="loading-note" id="loading">Loading the latest data&hellip;</div>
 
     <div id="content" hidden>
-      <div class="kpis">
-        <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">Candidates</span><span class="kpi-icon"><svg><use href="#i-users"/></svg></span></div>
-          <div class="kpi-num" id="kCandidates">0</div>
-          <div class="kpi-track"><span class="kpi-fill" id="kCandidatesFill" style="width:0%"></span></div>
-          <div class="kpi-sub" id="kCandidatesSub"></div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">In the pool</span><span class="kpi-icon good"><svg><use href="#i-users"/></svg></span></div>
-          <div class="kpi-num" id="kApproved">0</div>
-          <div class="kpi-track"><span class="kpi-fill good" id="kApprovedFill" style="width:0%"></span></div>
-          <div class="kpi-sub">Approved, ready to place</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">Placed</span><span class="kpi-icon good"><svg><use href="#i-users"/></svg></span></div>
-          <div class="kpi-num" id="kPlaced">0</div>
-          <div class="kpi-track"><span class="kpi-fill good" id="kPlacedFill" style="width:0%"></span></div>
-          <div class="kpi-sub">Candidates in households</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">Family requests</span><span class="kpi-icon"><svg><use href="#i-home"/></svg></span></div>
-          <div class="kpi-num" id="kFamilies">0</div>
-          <div class="kpi-track"><span class="kpi-fill" id="kFamiliesFill" style="width:0%"></span></div>
-          <div class="kpi-sub" id="kFamiliesSub"></div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">Organisations</span><span class="kpi-icon"><svg><use href="#i-home"/></svg></span></div>
-          <div class="kpi-num" id="kOrgs">0</div>
-          <div class="kpi-track"><span class="kpi-fill" id="kOrgsFill" style="width:0%"></span></div>
-          <div class="kpi-sub" id="kOrgsSub"></div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">Staff requests</span><span class="kpi-icon warn"><svg><use href="#i-clipboard"/></svg></span></div>
-          <div class="kpi-num" id="kRequests">0</div>
-          <div class="kpi-track"><span class="kpi-fill warn" id="kRequestsFill" style="width:0%"></span></div>
-          <div class="kpi-sub" id="kRequestsSub"></div>
-        </div>
-      </div>
 
-      <div class="app-grid">
-        <div class="panel">
-          <h2>Submissions, last 8 weeks</h2>
-          <p class="panel-sub">Candidates, families, organisations and requests combined</p>
-          <div class="weeks" id="weeks"></div>
+      <!-- ============ OVERVIEW ============ -->
+      <section class="page" id="page-overview" data-page="overview">
+        <div class="kpis">
+          <div class="kpi-card" data-go="candidates">
+            <div class="kpi-top"><span class="kpi-label">Candidates</span><span class="kpi-icon"><svg><use href="#i-users"/></svg></span></div>
+            <div class="kpi-num" id="kCandidates">0</div>
+            <div class="kpi-track"><span class="kpi-fill" id="kCandidatesFill" style="width:0%"></span></div>
+            <div class="kpi-sub" id="kCandidatesSub"></div>
+          </div>
+          <div class="kpi-card" data-go="candidates">
+            <div class="kpi-top"><span class="kpi-label">In the pool</span><span class="kpi-icon good"><svg><use href="#i-users"/></svg></span></div>
+            <div class="kpi-num" id="kApproved">0</div>
+            <div class="kpi-track"><span class="kpi-fill good" id="kApprovedFill" style="width:0%"></span></div>
+            <div class="kpi-sub">Approved, ready to place</div>
+          </div>
+          <div class="kpi-card" data-go="candidates">
+            <div class="kpi-top"><span class="kpi-label">Placed</span><span class="kpi-icon good"><svg><use href="#i-users"/></svg></span></div>
+            <div class="kpi-num" id="kPlaced">0</div>
+            <div class="kpi-track"><span class="kpi-fill good" id="kPlacedFill" style="width:0%"></span></div>
+            <div class="kpi-sub">Candidates in households</div>
+          </div>
+          <div class="kpi-card" data-go="families">
+            <div class="kpi-top"><span class="kpi-label">Family requests</span><span class="kpi-icon"><svg><use href="#i-home"/></svg></span></div>
+            <div class="kpi-num" id="kFamilies">0</div>
+            <div class="kpi-track"><span class="kpi-fill" id="kFamiliesFill" style="width:0%"></span></div>
+            <div class="kpi-sub" id="kFamiliesSub"></div>
+          </div>
+          <div class="kpi-card" data-go="families">
+            <div class="kpi-top"><span class="kpi-label">Organisations</span><span class="kpi-icon"><svg><use href="#i-home"/></svg></span></div>
+            <div class="kpi-num" id="kOrgs">0</div>
+            <div class="kpi-track"><span class="kpi-fill" id="kOrgsFill" style="width:0%"></span></div>
+            <div class="kpi-sub" id="kOrgsSub"></div>
+          </div>
+          <div class="kpi-card" data-go="requests">
+            <div class="kpi-top"><span class="kpi-label">Staff requests</span><span class="kpi-icon warn"><svg><use href="#i-clipboard"/></svg></span></div>
+            <div class="kpi-num" id="kRequests">0</div>
+            <div class="kpi-track"><span class="kpi-fill warn" id="kRequestsFill" style="width:0%"></span></div>
+            <div class="kpi-sub" id="kRequestsSub"></div>
+          </div>
         </div>
-        <div class="panel">
-          <h2>Needs attention</h2>
-          <p class="panel-sub">Newest staff requests not yet contacted</p>
-          <div class="attention-list" id="attentionList"></div>
-        </div>
-      </div>
 
-      <div class="two-col">
-        <div class="panel">
-          <h2>Candidate pipeline</h2>
-          <div id="candStatus"></div>
+        <div class="app-grid">
+          <div class="panel">
+            <h2>Submissions, last 8 weeks</h2>
+            <p class="panel-sub">Candidates, families, organisations and requests combined</p>
+            <div class="weeks" id="weeks"></div>
+          </div>
+          <div class="panel">
+            <h2>Needs attention</h2>
+            <p class="panel-sub">Newest staff requests not yet contacted</p>
+            <div class="attention-list" id="attentionList"></div>
+          </div>
         </div>
-        <div class="panel">
-          <h2>Candidates by role</h2>
-          <div id="candRoles"></div>
-        </div>
-      </div>
 
-      <div class="panel" id="candidates" style="margin-bottom:20px;">
-        <h2>Latest candidates</h2>
-        <div id="latestCand"></div>
-      </div>
-
-      <div class="two-col" id="families">
-        <div class="panel">
-          <h2>Family requests by status</h2>
-          <div id="famStatus"></div>
-          <h2 style="margin-top:22px;">Latest family requests</h2>
-          <div id="latestFam"></div>
+        <div class="two-col">
+          <div class="panel">
+            <h2>Candidate pipeline</h2>
+            <div id="candStatus"></div>
+          </div>
+          <div class="panel">
+            <h2>Candidates by role</h2>
+            <div id="candRoles"></div>
+          </div>
         </div>
-        <div class="panel">
-          <h2>Organisations by status</h2>
-          <div id="orgStatus"></div>
-          <h2 style="margin-top:22px;">Latest organisation enquiries</h2>
-          <div id="latestOrg"></div>
-        </div>
-      </div>
+      </section>
 
-      <div class="panel" id="requests">
-        <h2>Staff requests by status</h2>
-        <p class="panel-sub">From the Request Staff form (whatsapp-intake)</p>
-        <div id="reqStatus"></div>
-        <h2 style="margin-top:22px;">Latest staff requests</h2>
-        <div id="latestReq"></div>
-      </div>
+      <!-- ============ CANDIDATES ============ -->
+      <section class="page" id="page-candidates" data-page="candidates" hidden>
+        <div class="page-head">
+          <div>
+            <h2>Candidates</h2>
+            <p class="panel-sub">Every applicant in the talent pool, with CVs and CRM sync status.</p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-ghost-sm" id="syncAllBtn" type="button">Sync all unsynced to CRM</button>
+            <button class="btn-ghost-sm" id="exportCandidatesBtn" type="button"><svg width="14" height="14" style="vertical-align:-2px; margin-right:4px;"><use href="#i-download"/></svg>Export CSV</button>
+          </div>
+        </div>
+        <p class="empty-note" id="crmNote" hidden></p>
+        <div class="toolbar">
+          <input type="search" id="candidateSearch" placeholder="Search by name, phone, role, location&hellip;">
+          <select id="candidateStatusFilter"><option value="">All statuses</option></select>
+        </div>
+        <p class="count-note" id="candidateCount"></p>
+        <div class="panel table-wrap">
+          <div id="candidatesTable"></div>
+        </div>
+      </section>
+
+      <!-- ============ FAMILIES & ORGS ============ -->
+      <section class="page" id="page-families" data-page="families" hidden>
+        <div class="subsection">
+          <div class="page-head">
+            <div>
+              <h2>Family requests</h2>
+              <p class="panel-sub">Enquiries from the legacy "Find a Professional" modal.</p>
+            </div>
+            <button class="btn-ghost-sm" id="exportFamiliesBtn" type="button"><svg width="14" height="14" style="vertical-align:-2px; margin-right:4px;"><use href="#i-download"/></svg>Export CSV</button>
+          </div>
+          <div class="toolbar">
+            <input type="search" id="familySearch" placeholder="Search by name, phone, role, location&hellip;">
+            <select id="familyStatusFilter"><option value="">All statuses</option></select>
+          </div>
+          <p class="count-note" id="familyCount"></p>
+          <div class="panel table-wrap">
+            <div id="familiesTable"></div>
+          </div>
+        </div>
+        <div class="subsection">
+          <div class="page-head">
+            <div>
+              <h2>Organisations</h2>
+              <p class="panel-sub">Business and partnership enquiries.</p>
+            </div>
+            <button class="btn-ghost-sm" id="exportOrgsBtn" type="button"><svg width="14" height="14" style="vertical-align:-2px; margin-right:4px;"><use href="#i-download"/></svg>Export CSV</button>
+          </div>
+          <div class="toolbar">
+            <input type="search" id="orgSearch" placeholder="Search by name, phone, type, location&hellip;">
+            <select id="orgStatusFilter"><option value="">All statuses</option></select>
+          </div>
+          <p class="count-note" id="orgCount"></p>
+          <div class="panel table-wrap">
+            <div id="orgsTable"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ REQUESTS ============ -->
+      <section class="page" id="page-requests" data-page="requests" hidden>
+        <div class="page-head">
+          <div>
+            <h2>Staff requests</h2>
+            <p class="panel-sub">From the Request Staff form (whatsapp-intake).</p>
+          </div>
+          <button class="btn-ghost-sm" id="exportRequestsBtn" type="button"><svg width="14" height="14" style="vertical-align:-2px; margin-right:4px;"><use href="#i-download"/></svg>Export CSV</button>
+        </div>
+        <div class="toolbar">
+          <input type="search" id="requestSearch" placeholder="Search by name, phone, category, state&hellip;">
+          <select id="requestStatusFilter"><option value="">All statuses</option></select>
+        </div>
+        <p class="count-note" id="requestCount"></p>
+        <div class="panel table-wrap">
+          <div id="requestsTable"></div>
+        </div>
+      </section>
+
     </div>
   </main>
 </div>
@@ -279,7 +372,47 @@
   var content = document.getElementById('content');
   var KEY = 'amana_ops_pw';
 
+  // Full "latest" rows for each tab, kept client-side so the dedicated nav
+  // pages can search/filter without another round trip - the Overview page
+  // only ever reads the aggregate counts, not these arrays.
+  var STATE = { candidates: [], families: [], organisations: [], requests: [] };
+
+  var PAGE_META = {
+    overview: { title: 'Dashboard', subtitle: 'Live view of candidates, families, organisations and staff requests.' },
+    candidates: { title: 'Candidates', subtitle: 'Every applicant in the talent pool.' },
+    families: { title: 'Families & Organisations', subtitle: 'Household and business enquiries.' },
+    requests: { title: 'Staff requests', subtitle: 'Submissions from the Request Staff form.' },
+  };
+
   function statusClass(s) { return 'st-' + String(s || '').replace(/\s+/g, '-'); }
+  function esc(v) { return (v == null ? '' : String(v)).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  /* ---------------- Page switching ---------------- */
+
+  function switchPage(name) {
+    if (!PAGE_META[name]) name = 'overview';
+    Object.keys(PAGE_META).forEach(function (p) {
+      var el = document.getElementById('page-' + p);
+      if (el) el.hidden = (p !== name);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#sidebarNav button'), function (b) {
+      b.classList.toggle('active', b.getAttribute('data-page') === name);
+    });
+    document.getElementById('pageTitle').textContent = PAGE_META[name].title;
+    document.getElementById('pageSubtitle').textContent = PAGE_META[name].subtitle;
+    content.scrollTop = 0;
+    window.scrollTo(0, 0);
+    try { history.replaceState(null, '', '#' + name); } catch (e) {}
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('#sidebarNav button'), function (b) {
+    b.addEventListener('click', function () { switchPage(b.getAttribute('data-page')); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-go]'), function (el) {
+    el.addEventListener('click', function () { switchPage(el.getAttribute('data-go')); });
+  });
+
+  /* ---------------- Shared render helpers ---------------- */
 
   function bar(container, counts, max) {
     container.innerHTML = '';
@@ -292,7 +425,7 @@
     entries.forEach(function (e) {
       var row = document.createElement('div');
       row.className = 'bar-row';
-      row.innerHTML = '<span class="bl">' + e[0] + '</span><span class="bar-track"><span class="bar-fill" style="width:' + Math.round((e[1] / top) * 100) + '%"></span></span><span class="bn">' + e[1] + '</span>';
+      row.innerHTML = '<span class="bl">' + esc(e[0]) + '</span><span class="bar-track"><span class="bar-fill" style="width:' + Math.round((e[1] / top) * 100) + '%"></span></span><span class="bn">' + e[1] + '</span>';
       container.appendChild(row);
     });
   }
@@ -318,9 +451,6 @@
 
   function weeksChart(container, counts) {
     container.innerHTML = '';
-    // Always render a fixed 8-week grid ending this week, zero-filled where
-    // there's no data - a single real data point should look like one small
-    // bar in an 8-bar chart, not one bar stretched to fill the whole row.
     var thisMonday = mondayOf_(new Date());
     var weeks = [];
     for (var i = 7; i >= 0; i--) {
@@ -339,18 +469,6 @@
     });
   }
 
-  function table(container, rows, cols) {
-    if (!rows.length) { container.innerHTML = '<p class="empty-note">Nothing yet.</p>'; return; }
-    var head = cols.map(function (c) { return '<th>' + c.label + '</th>'; }).join('');
-    var body = rows.map(function (r) {
-      return '<tr>' + cols.map(function (c) {
-        if (c.key === 'Status') return '<td><span class="pill ' + statusClass(r[c.key]) + '">' + (r[c.key] || '') + '</span></td>';
-        return '<td>' + (r[c.key] == null ? '' : r[c.key]) + '</td>';
-      }).join('') + '</tr>';
-    }).join('');
-    container.innerHTML = '<table class="data-table"><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>';
-  }
-
   function fill(elId, pct) {
     var el = document.getElementById(elId);
     if (el) el.style.width = Math.max(2, Math.min(100, Math.round(pct))) + '%';
@@ -367,16 +485,170 @@
     container.innerHTML = items.map(function (r) {
       var location = [r.Area, r.LGA, r.State].filter(Boolean).join(', ');
       return '<div class="attention-item">' +
-        '<div class="at-top"><span class="at-name">' + (r['Client Full Name'] || 'Unnamed') + '</span><span class="at-badge">' + (r.Status || '') + '</span></div>' +
-        '<div class="at-detail">' + (r['Staff Category'] || 'Role TBC') + (r['Number Required'] ? ' &times;' + r['Number Required'] : '') + (location ? ' &middot; ' + location : '') + '</div>' +
-        '<div class="at-meta">' + (r['Request ID'] || '') + '</div>' +
+        '<div class="at-top"><span class="at-name">' + esc(r['Client Full Name'] || 'Unnamed') + '</span><span class="at-badge">' + esc(r.Status || '') + '</span></div>' +
+        '<div class="at-detail">' + esc(r['Staff Category'] || 'Role TBC') + (r['Number Required'] ? ' &times;' + esc(r['Number Required']) : '') + (location ? ' &middot; ' + esc(location) : '') + '</div>' +
+        '<div class="at-meta">' + esc(r['Request ID'] || '') + '</div>' +
         '</div>';
     }).join('');
   }
 
+  /* ---------------- Generic searchable/filterable table ---------------- */
+
+  // Wires a search box + status <select> + CSV export button to a full
+  // dataset, re-rendering only the matching rows. `renderRow` builds one
+  // <tr>'s innerHTML; `matchFields` lists which record keys the search box
+  // checks against.
+  function wireTable(opts) {
+    var rows = opts.rows;
+    var container = document.getElementById(opts.tableId);
+    var searchEl = document.getElementById(opts.searchId);
+    var statusEl = document.getElementById(opts.statusFilterId);
+    var countEl = document.getElementById(opts.countId);
+
+    var statuses = Array.from(new Set(rows.map(function (r) { return r.Status; }).filter(Boolean)));
+    statusEl.innerHTML = '<option value="">All statuses</option>' + statuses.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + '</option>'; }).join('');
+
+    function draw() {
+      var q = (searchEl.value || '').trim().toLowerCase();
+      var statusQ = statusEl.value;
+      var filtered = rows.filter(function (r) {
+        if (statusQ && r.Status !== statusQ) return false;
+        if (!q) return true;
+        return opts.matchFields.some(function (f) { return String(r[f] || '').toLowerCase().indexOf(q) !== -1; });
+      });
+      countEl.textContent = 'Showing ' + filtered.length + ' of ' + rows.length;
+      if (!filtered.length) { container.innerHTML = '<p class="empty-note">Nothing matches yet.</p>'; return; }
+      var body = filtered.map(opts.renderRow).join('');
+      container.innerHTML = '<table class="data-table"><thead><tr>' + opts.cols.map(function (c) { return '<th>' + c + '</th>'; }).join('') + '</tr></thead><tbody>' + body + '</tbody></table>';
+      if (opts.afterDraw) opts.afterDraw(container);
+    }
+
+    searchEl.addEventListener('input', draw);
+    statusEl.addEventListener('change', draw);
+    draw();
+
+    return { redraw: draw };
+  }
+
+  function exportCsv(filename, rows, cols) {
+    var esc2 = function (v) { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    var lines = [cols.map(function (c) { return esc2(c.label); }).join(',')];
+    rows.forEach(function (r) { lines.push(cols.map(function (c) { return esc2(r[c.key]); }).join(',')); });
+    var blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* ---------------- Candidates page (CV + CRM sync) ---------------- */
+
+  function cvCell(r) {
+    var url = r['CV link'];
+    if (!url) return '<span class="no-cv">No CV</span>';
+    return '<a class="cv-link" href="' + esc(url) + '" target="_blank" rel="noopener"><svg><use href="#i-file"/></svg>View CV</a>';
+  }
+
+  function syncCell(r) {
+    var synced = r['CRM Synced At'];
+    if (synced) {
+      return '<button type="button" class="sync-btn synced" disabled>Synced ' + esc(String(synced).slice(0, 10)) + '</button>';
+    }
+    return '<button type="button" class="sync-btn" data-sync-id="' + esc(r.ID) + '">Sync to CRM</button>';
+  }
+
+  function doSync(candidateId, btn) {
+    var pw = sessionStorage.getItem(KEY);
+    var record = STATE.candidates.filter(function (c) { return c.ID === candidateId; })[0];
+    if (!record || !pw) return;
+    btn.disabled = true;
+    btn.textContent = 'Syncing…';
+    return fetch('/api/admin-sync-candidate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, candidateId: candidateId, candidate: record }),
+    }).then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out }; }); })
+      .then(function (res) {
+        if (res.ok && res.out.synced) {
+          record['CRM Synced At'] = new Date().toISOString();
+          btn.className = 'sync-btn synced';
+          btn.textContent = 'Synced just now';
+          btn.disabled = true;
+        } else if (res.ok && res.out.reason === 'crm_not_configured') {
+          document.getElementById('crmNote').hidden = false;
+          document.getElementById('crmNote').textContent = 'CRM not connected yet — ask your developer to set CRM_WEBHOOK_URL. This candidate has not been synced.';
+          btn.className = 'sync-btn';
+          btn.textContent = 'Sync to CRM';
+          btn.disabled = false;
+        } else {
+          btn.className = 'sync-btn sync-err';
+          btn.textContent = 'Sync failed, retry';
+          btn.disabled = false;
+        }
+      })
+      .catch(function () {
+        btn.className = 'sync-btn sync-err';
+        btn.textContent = 'Sync failed, retry';
+        btn.disabled = false;
+      });
+  }
+
+  document.getElementById('candidatesTable').addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('[data-sync-id]') : null;
+    if (btn) doSync(btn.getAttribute('data-sync-id'), btn);
+  });
+
+  document.getElementById('syncAllBtn').addEventListener('click', function () {
+    var btn = this;
+    var targets = Array.prototype.slice.call(document.querySelectorAll('#candidatesTable [data-sync-id]'));
+    if (!targets.length) return;
+    btn.disabled = true;
+    var i = 0;
+    function next() {
+      if (i >= targets.length) { btn.disabled = false; btn.textContent = 'Sync all unsynced to CRM'; return; }
+      var t = targets[i++];
+      doSync(t.getAttribute('data-sync-id'), t).then(next);
+    }
+    btn.textContent = 'Syncing…';
+    next();
+  });
+
+  document.getElementById('exportCandidatesBtn').addEventListener('click', function () {
+    exportCsv('amana-candidates.csv', STATE.candidates, [
+      { key: 'ID', label: 'ID' }, { key: 'Name', label: 'Name' }, { key: 'Phone', label: 'Phone' }, { key: 'Email', label: 'Email' },
+      { key: 'Role', label: 'Role' }, { key: 'Location', label: 'Location' }, { key: 'Status', label: 'Status' },
+      { key: 'CV link', label: 'CV link' }, { key: 'CRM Synced At', label: 'CRM Synced At' },
+    ]);
+  });
+  document.getElementById('exportFamiliesBtn').addEventListener('click', function () {
+    exportCsv('amana-families.csv', STATE.families, [
+      { key: 'ID', label: 'ID' }, { key: 'Name', label: 'Name' }, { key: 'Phone', label: 'Phone' }, { key: 'Email', label: 'Email' },
+      { key: 'Role needed', label: 'Role needed' }, { key: 'Location', label: 'Location' }, { key: 'Status', label: 'Status' },
+    ]);
+  });
+  document.getElementById('exportOrgsBtn').addEventListener('click', function () {
+    exportCsv('amana-organisations.csv', STATE.organisations, [
+      { key: 'ID', label: 'ID' }, { key: 'Name', label: 'Name' }, { key: 'Phone', label: 'Phone' }, { key: 'Email', label: 'Email' },
+      { key: 'Organisation type', label: 'Type' }, { key: 'Location', label: 'Location' }, { key: 'Status', label: 'Status' },
+    ]);
+  });
+  document.getElementById('exportRequestsBtn').addEventListener('click', function () {
+    exportCsv('amana-requests.csv', STATE.requests, [
+      { key: 'Request ID', label: 'Request ID' }, { key: 'Client Full Name', label: 'Client' }, { key: 'Client Phone', label: 'Phone' },
+      { key: 'Staff Category', label: 'Category' }, { key: 'State', label: 'State' }, { key: 'Urgency', label: 'Urgency' }, { key: 'Status', label: 'Status' },
+    ]);
+  });
+
+  /* ---------------- Render ---------------- */
+
   function render(data) {
     var c = data.candidates, f = data.families, o = data.organisations;
     var req = data.requests || { total: 0, statusCounts: {}, categoryCounts: {}, weekCounts: {}, latest: [] };
+
+    STATE.candidates = c.latest || [];
+    STATE.families = f.latest || [];
+    STATE.organisations = o.latest || [];
+    STATE.requests = req.latest || [];
 
     var openF = f.total - (f.statusCounts.Placed || 0) - (f.statusCounts.Lost || 0);
     var openO = o.total - (o.statusCounts.Won || 0) - (o.statusCounts.Lost || 0);
@@ -409,26 +681,54 @@
     if (newRequests > 0) { bellBadge.textContent = newRequests > 99 ? '99+' : String(newRequests); bellBadge.hidden = false; }
     else { bellBadge.hidden = true; }
 
+    var navC = document.getElementById('navCountCandidates'); navC.textContent = c.total; navC.hidden = !c.total;
+    var navF = document.getElementById('navCountFamilies'); navF.textContent = f.total + o.total; navF.hidden = !(f.total + o.total);
+    var navR = document.getElementById('navCountRequests'); navR.textContent = req.total; navR.hidden = !req.total;
+
     bar(document.getElementById('candStatus'), c.statusCounts);
     roleBar(document.getElementById('candRoles'), c.roleCounts);
-    bar(document.getElementById('famStatus'), f.statusCounts);
-    bar(document.getElementById('orgStatus'), o.statusCounts);
-    bar(document.getElementById('reqStatus'), req.statusCounts);
     weeksChart(document.getElementById('weeks'), mergeWeeks_(c.weekCounts, f.weekCounts, o.weekCounts, req.weekCounts));
     attention(document.getElementById('attentionList'), req.latest);
 
-    table(document.getElementById('latestCand'), c.latest, [
-      { key: 'Name', label: 'Name' }, { key: 'Role', label: 'Role' }, { key: 'Location', label: 'Location' }, { key: 'Status', label: 'Status' },
-    ]);
-    table(document.getElementById('latestFam'), f.latest, [
-      { key: 'Name', label: 'Name' }, { key: 'Role needed', label: 'Role needed' }, { key: 'Location', label: 'Location' }, { key: 'Status', label: 'Status' },
-    ]);
-    table(document.getElementById('latestOrg'), o.latest, [
-      { key: 'Name', label: 'Name' }, { key: 'Organisation type', label: 'Type' }, { key: 'Location', label: 'Location' }, { key: 'Status', label: 'Status' },
-    ]);
-    table(document.getElementById('latestReq'), req.latest, [
-      { key: 'Client Full Name', label: 'Client' }, { key: 'Staff Category', label: 'Role' }, { key: 'State', label: 'State' }, { key: 'Status', label: 'Status' },
-    ]);
+    wireTable({
+      rows: STATE.candidates, tableId: 'candidatesTable', searchId: 'candidateSearch', statusFilterId: 'candidateStatusFilter', countId: 'candidateCount',
+      matchFields: ['Name', 'Phone', 'Email', 'Role', 'Location'],
+      cols: ['ID', 'Name', 'Phone', 'Role', 'Location', 'Status', 'CV', 'CRM'],
+      renderRow: function (r) {
+        return '<tr><td>' + esc(r.ID) + '</td><td>' + esc(r.Name) + '</td><td>' + esc(r.Phone) + '</td><td>' + esc(r.Role) + '</td><td>' + esc(r.Location) + '</td>' +
+          '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td><td>' + cvCell(r) + '</td><td>' + syncCell(r) + '</td></tr>';
+      },
+    });
+
+    wireTable({
+      rows: STATE.families, tableId: 'familiesTable', searchId: 'familySearch', statusFilterId: 'familyStatusFilter', countId: 'familyCount',
+      matchFields: ['Name', 'Phone', 'Email', 'Role needed', 'Location'],
+      cols: ['ID', 'Name', 'Phone', 'Role needed', 'Location', 'Status'],
+      renderRow: function (r) {
+        return '<tr><td>' + esc(r.ID) + '</td><td>' + esc(r.Name) + '</td><td>' + esc(r.Phone) + '</td><td>' + esc(r['Role needed']) + '</td><td>' + esc(r.Location) + '</td>' +
+          '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td></tr>';
+      },
+    });
+
+    wireTable({
+      rows: STATE.organisations, tableId: 'orgsTable', searchId: 'orgSearch', statusFilterId: 'orgStatusFilter', countId: 'orgCount',
+      matchFields: ['Name', 'Phone', 'Email', 'Organisation type', 'Location'],
+      cols: ['ID', 'Name', 'Phone', 'Type', 'Location', 'Status'],
+      renderRow: function (r) {
+        return '<tr><td>' + esc(r.ID) + '</td><td>' + esc(r.Name) + '</td><td>' + esc(r.Phone) + '</td><td>' + esc(r['Organisation type']) + '</td><td>' + esc(r.Location) + '</td>' +
+          '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td></tr>';
+      },
+    });
+
+    wireTable({
+      rows: STATE.requests, tableId: 'requestsTable', searchId: 'requestSearch', statusFilterId: 'requestStatusFilter', countId: 'requestCount',
+      matchFields: ['Client Full Name', 'Client Phone', 'Staff Category', 'State', 'Area'],
+      cols: ['Request ID', 'Client', 'Phone', 'Category', 'State', 'Urgency', 'Status'],
+      renderRow: function (r) {
+        return '<tr><td>' + esc(r['Request ID']) + '</td><td>' + esc(r['Client Full Name']) + '</td><td>' + esc(r['Client Phone']) + '</td><td>' + esc(r['Staff Category']) + '</td><td>' + esc(r.State) + '</td><td>' + esc(r.Urgency) + '</td>' +
+          '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td></tr>';
+      },
+    });
 
     document.getElementById('updatedAt').textContent = 'Updated ' + new Date(data.generatedAt).toLocaleString();
     loading.hidden = true;
@@ -456,6 +756,8 @@
       gate.hidden = true;
       dash.hidden = false;
       render(out.data);
+      var hash = (location.hash || '').slice(1);
+      switchPage(PAGE_META[hash] ? hash : 'overview');
     });
   }
 
@@ -484,7 +786,7 @@
   });
 
   document.getElementById('bellBtn').addEventListener('click', function () {
-    document.getElementById('requests').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    switchPage('requests');
   });
 
   document.getElementById('signOutBtn').addEventListener('click', function () {
@@ -492,16 +794,6 @@
     pwInput.value = '';
     showGate('');
   });
-
-  // Sidebar active-link highlight on scroll.
-  var navLinks = Array.prototype.slice.call(document.querySelectorAll('.sidebar-nav a'));
-  var sections = navLinks.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
-  window.addEventListener('scroll', function () {
-    var pos = window.scrollY + 120;
-    var activeIdx = 0;
-    sections.forEach(function (s, i) { if (s && s.offsetTop <= pos) activeIdx = i; });
-    navLinks.forEach(function (a, i) { a.classList.toggle('active', i === activeIdx); });
-  }, { passive: true });
 
   var saved = null;
   try { saved = sessionStorage.getItem(KEY); } catch (err) {}

@@ -38,7 +38,13 @@ const TABS = {
       // profiles doesn't see a candidate's full legal name. "Status" above already serves as
       // vetting status - not duplicated here. Empty until someone (Hiyame integration, or the
       // team by hand) fills them in - existing rows are unaffected (see migrateTabHeaders_).
-      .concat(['Display Name', 'Salary Expectation', 'Availability', 'Marketplace Consent', 'Visibility']),
+      .concat(['Display Name', 'Salary Expectation', 'Availability', 'Marketplace Consent', 'Visibility'])
+      // 'CRM Synced At' - ISO timestamp set by handleMarkCandidateSynced_ once
+      // the admin dashboard's "Sync to CRM" button successfully posts this
+      // candidate to the company CRM (api/admin-sync-candidate.js). Empty
+      // means never synced. Appended via migrateTabHeaders_, same growth
+      // path as the marketplace fields above - existing rows unaffected.
+      .concat(['CRM Synced At']),
   },
   family: {
     name: 'Families',
@@ -117,7 +123,7 @@ function summarizeTab_(ss, kind) {
 
   const latest = rows.slice()
     .sort(function (a, b) { return new Date(b[idx.Submitted]) - new Date(a[idx.Submitted]); })
-    .slice(0, 8)
+    .slice(0, 300)
     .map(function (r) {
       const o = {};
       def.headers.forEach(function (h, i) {
@@ -199,7 +205,7 @@ function summarizeRequests_(ss) {
 
   const latest = rows.slice()
     .sort(function (a, b) { return new Date(b[idx['Created At']]) - new Date(a[idx['Created At']]); })
-    .slice(0, 8)
+    .slice(0, 300)
     .map(function (r) {
       const o = {};
       REQUEST_HEADERS.forEach(function (h, i) { o[h] = r[i]; });
@@ -283,6 +289,25 @@ function handleDeleteRequest_(p) {
   const rowNum = findRowByColumnValue_(sheet, 1, p.requestId);
   if (!rowNum) return json_({ ok: false, error: 'request_not_found' });
   sheet.deleteRow(rowNum);
+  return json_({ ok: true });
+}
+
+/**
+ * markCandidateSynced(): stamps 'CRM Synced At' on a Candidates row once
+ * api/admin-sync-candidate.js has successfully posted that candidate to
+ * the company CRM's webhook. Secret-gated like every other doPost action -
+ * the admin dashboard never talks to this script directly, only through
+ * that password-gated Vercel function (see whatsapp-intake/README.md's
+ * pattern for why secrets never reach the browser).
+ */
+function handleMarkCandidateSynced_(p) {
+  const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+  const sheet = ensureTab_(ss, 'professional');
+  const idCol = TABS.professional.headers.indexOf('ID') + 1;
+  const rowNum = findRowByColumnValue_(sheet, idCol, p.candidateId);
+  if (!rowNum) return json_({ ok: false, error: 'candidate_not_found' });
+  const syncCol = TABS.professional.headers.indexOf('CRM Synced At') + 1;
+  sheet.getRange(rowNum, syncCol).setValue(new Date().toISOString());
   return json_({ ok: true });
 }
 
@@ -505,6 +530,7 @@ function doPost(e) {
     if (p.action === 'deleteRequest') return handleDeleteRequest_(p);
     if (p.action === 'appendSession') return handleAppendSession_(p);
     if (p.action === 'updateSession') return handleUpdateSession_(p);
+    if (p.action === 'markCandidateSynced') return handleMarkCandidateSynced_(p);
 
     if (p.kind === 'training_access') return logTrainingAccess_(p);
 
