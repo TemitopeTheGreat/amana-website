@@ -156,24 +156,22 @@ module.exports = async (req, res) => {
     record.requestId = result.requestId;
 
     // Respond immediately - the row is safely recorded at this point.
-    // Everything below runs AFTER the browser already has its response.
-    // sendWhatsAppAcknowledgement_ is currently a stub (Stage A4 not
-    // built); sendConfirmationEmail_ only does real work once
-    // RESEND_API_KEY is set. The admin-alert + client-confirmation emails
-    // that actually reach the client today still run inside Code.gs's
-    // appendRequest action itself (handleAppendRequest_) on the live
-    // deployment - NOT split out as a separate notifyRequestSubmitted
-    // call yet. That split exists in this repo's Code.gs
-    // (handleNotifyRequestSubmitted_) but calling it here before the live
-    // Apps Script deployment actually has that action would fall through
-    // to its generic row-write path and create a duplicate row. Re-add
-    // sheetsClient.notifyRequestSubmitted(record) to the Promise.all below
-    // once Code.gs has actually been redeployed.
+    // Everything below runs AFTER the browser already has its response,
+    // so the person submitting the form never waits on the admin-alert
+    // and confirmation emails (previously several extra seconds; see
+    // Code.gs's handleNotifyRequestSubmitted_ and sheets-client.js's
+    // notifyRequestSubmitted). sendWhatsAppAcknowledgement_ is currently a
+    // stub (Stage A4 not built); sendConfirmationEmail_ only does real
+    // work once RESEND_API_KEY is set - Code.gs's MailApp-based
+    // confirmation is what actually reaches the client today.
     res.status(200).json({ ok: true, requestId: result.requestId, duplicateFlag: result.duplicateFlag });
 
     await Promise.all([
       sendWhatsAppAcknowledgement_(record),
       sendConfirmationEmail_(record),
+      sheetsClient.notifyRequestSubmitted(record).catch((e) => {
+        console.error('notifyRequestSubmitted failed:', e.message);
+      }),
     ]);
     return;
   } catch (e) {
