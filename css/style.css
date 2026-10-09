@@ -752,11 +752,19 @@ section[id]{scroll-margin-top:88px;}
   .trust-strip{margin-top:-56px; padding:22px 20px;}
   .section{padding:40px 0;}
   .photo-card{aspect-ratio:4/3.6;}
-  .card-grid, .pillar-grid, .steps, .org-grid, .check-list{grid-template-columns:1fr;}
+  .card-grid, .pillar-grid, .steps, .org-grid, .check-list, .plan-grid, .explore-grid{grid-template-columns:1fr; max-width:none;}
   .form-row{grid-template-columns:1fr;}
-  .footer-links{grid-template-columns:1fr; gap:28px;}
   .back-to-top{right:16px; bottom:16px; width:42px; height:42px;}
   .hero-actions{gap:16px;}
+
+  /* Pricing cards: compact padding/spacing so three stacked plans don't
+     read as an endless scroll - the content stays fully visible (no
+     swipe-to-reveal), just tighter. */
+  .plan-grid{gap:16px;}
+  .plan-card{padding:24px 22px;}
+  .plan-card h3{font-size:1.5rem;}
+  .plan-features{margin:14px 0 20px; gap:8px;}
+  .plan-features li{font-size:.9rem;}
 }
 
 /* ==================================================
@@ -913,19 +921,21 @@ body{animation:pageIn .8s ease both;}
    Mobile: swipeable card rows instead of long stacks
    ================================================== */
 @media (max-width:760px){
-  .photo-grid, .pillar-grid, .card-grid, .steps, .org-grid, .plan-grid, .explore-grid{
+  /* Only the photo gallery (service-role images) swipes horizontally -
+     it's a genuine browse-a-gallery pattern. Pricing, pillars, steps,
+     org cards and explore cards all stack as a clean, fully-visible
+     vertical list instead (see the next block) - a swipeable pricing
+     table hid two of three plans behind a swipe gesture with no visible
+     affordance, which read as "broken" rather than "scrollable." */
+  .photo-grid{
     display:flex; flex-direction:row; overflow-x:auto;
     scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
     gap:14px; margin-left:-24px; margin-right:-24px; padding:4px 24px 18px;
     max-width:none; scrollbar-width:none;
   }
-  .photo-grid::-webkit-scrollbar, .pillar-grid::-webkit-scrollbar, .card-grid::-webkit-scrollbar,
-  .steps::-webkit-scrollbar, .org-grid::-webkit-scrollbar, .plan-grid::-webkit-scrollbar, .explore-grid::-webkit-scrollbar{display:none;}
-  .photo-grid > *, .pillar-grid > *, .card-grid > *, .steps > *, .org-grid > *, .plan-grid > *, .explore-grid > *{
-    flex:0 0 80%; scroll-snap-align:center; min-width:0;
-  }
+  .photo-grid::-webkit-scrollbar{display:none;}
+  .photo-grid > *{flex:0 0 80%; scroll-snap-align:center; min-width:0;}
   .photo-card{aspect-ratio:4/4.4;}
-  .plan-card-featured{order:0;}
   .section{padding:32px 0;}
   .section-head{margin-bottom:22px;}
   .section-head h2{font-size:1.7rem;}
@@ -946,10 +956,12 @@ body{animation:pageIn .8s ease both;}
   .compare-table{min-width:520px;}
   .site-footer{padding-top:36px;}
   .footer-inner{gap:24px; padding-bottom:28px;}
+  /* 2x2: Explore+Company pair on row 1, Legal+Get in touch pair on row 2 -
+     no per-column override, so the natural grid auto-placement keeps
+     each pair side by side instead of one stranding alone above a
+     full-width neighbour. */
   .footer-links{grid-template-columns:1fr 1fr; gap:20px 16px;}
-  .footer-links > div:nth-child(4){grid-column:1 / -1;}
-  .footer-links > div:last-child{grid-column:1 / -1;}
-  .footer-links a{padding:4px 0; font-size:.88rem;}
+  .footer-links a{padding:4px 0; font-size:.88rem; word-break:break-word;}
   .footer-links h4{margin-bottom:8px;}
   .final-cta .section, .final-cta{padding:52px 0;}
 }
