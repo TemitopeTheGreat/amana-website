@@ -12,7 +12,10 @@
 const crypto = require('crypto');
 const { verifySession } = require('./_lib/adminSession');
 
-const USERNAME_RE = /^[a-z0-9._-]{3,40}$/i;
+// Accepts either a simple username (letters/numbers/dots/dashes/underscores)
+// or a full email address, since several accounts were created with an
+// email as the login name.
+const USERNAME_RE = /^[a-z0-9._-]{3,40}$|^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,24}$/i;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
