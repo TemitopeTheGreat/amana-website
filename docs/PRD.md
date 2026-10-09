@@ -30,9 +30,9 @@ The marketing website (this repo) is static. This document specifies the product
 | Plan | For | Price | Includes | Replacement |
 | :--- | :--- | :--- | :--- | :--- |
 | Standard | Everyday households | ₦200,000, one-time | Cleaners, housekeepers, nannies, cooks. Core verification, role training, matching | 30 days |
-| Premium | Specialised or more experienced staff | ₦380,000, one-time | Reliable, experienced cleaners, house managers, governesses, educated nannies, chefs. Enhanced background checks | 60 days |
-| Executive | Fully managed staffing | ₦680,000, one-time | Everything in Premium, plus drivers. Full Managed Staffing: payroll, statutory compliance, ongoing supervision, dedicated relationship management | 60 days |
-| Diaspora | Clients abroad | £400, one-time | Full vetting and training, matching, contract and onboarding, payroll administration, scheduled updates in the client's time zone, dedicated contact | 60 days |
+| Premium | Specialised or more experienced staff | ₦380,000, one-time | Reliable, experienced cleaners, house managers, governesses, educated nannies, chefs. Enhanced background checks | 14 days |
+| Executive | Fully managed staffing | ₦680,000, one-time | Everything in Premium, plus drivers. Full Managed Staffing: payroll, statutory compliance, ongoing supervision, dedicated relationship management | 14 days |
+| Diaspora | Clients abroad | £400, one-time | Full vetting and training, matching, contract and onboarding, payroll administration, scheduled updates in the client's time zone, dedicated contact | 14 days |
 
 All prices are a one-time service fee. The professional's pay is separate and agreed directly between the professional and the client.
 
@@ -53,7 +53,7 @@ Engagement models: **Placement** (one-time vetted introduction) and **Managed St
 | Placement | Onboarding | Contracts, documentation and start date, handled by Amana. | P0 |
 | Managed Staffing | Payroll and compliance | Payroll runs, digital payslips, statutory deductions where applicable. | P1 |
 | Managed Staffing | Supervision | Scheduled check-ins, and a channel for both client and professional to raise concerns. | P1 |
-| Guarantee | Replacement | Open a replacement request within the guarantee window (30 or 60 days) and re-run matching. | P0 |
+| Guarantee | Replacement | Open a replacement request within the guarantee window (30 or 14 days) and re-run matching. | P0 |
 | Organisations | Bulk arrangements | Multi-role, multi-site staffing plans with an account manager. | P2 |
 | Notifications | Email and SMS | Status updates via Resend, and SMS or WhatsApp where reachable. No in-app chat in v1. | P1 |
 | Privacy | Consent and data handling | Explicit consent for sharing a professional's details with a client, and data retention rules. | P0 |
