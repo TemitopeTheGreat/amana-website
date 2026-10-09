@@ -964,6 +964,24 @@ body{animation:pageIn .8s ease both;}
   .footer-links a{padding:4px 0; font-size:.88rem; word-break:break-word;}
   .footer-links h4{margin-bottom:8px;}
   .final-cta .section, .final-cta{padding:52px 0;}
+
+  /* .explore-grid's own base rule (repeat(3,1fr)) is defined further
+     down the file than the earlier mobile single-column fix, so it was
+     winning the cascade and silently cancelling it - placed last here,
+     in the file's final max-width:760px block, so nothing after it can
+     do the same again. */
+  .explore-grid{grid-template-columns:1fr;}
+
+  /* Reduce whitespace: tighter padding/gaps on every card type, not
+     just pricing, so the mobile page doesn't feel like an endless
+     scroll of mostly-empty cards. */
+  .pillar-grid, .card-grid, .org-grid, .steps, .explore-grid{gap:12px;}
+  .pillar, .service-card, .org-card, .explore-card{padding:20px 20px;}
+  .steps li{padding:18px 18px;}
+  .pillar h3, .service-card h3, .org-card h3, .steps h3{font-size:1.08rem; margin-bottom:4px;}
+  .pillar p, .service-card p, .org-card p, .steps p{font-size:.88rem;}
+  .icon-badge{width:42px; height:42px; font-size:1.15rem; margin-bottom:10px;}
+  .section-head{margin-bottom:18px;}
 }
 
 /* Typography refinements */
