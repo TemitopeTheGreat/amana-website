@@ -18,6 +18,41 @@
     document.body.appendChild(wa);
   }
 
+  /* ---------- Site analytics (anonymous, self-hosted - api/track.js) ---------- */
+  // No cookies, no visitor ID, nothing stored in the browser - just an
+  // event count per page/action for the admin dashboard's Analytics page.
+  function track(eventType, label) {
+    try {
+      var payload = { page: location.pathname, eventType: eventType, label: label || '' };
+      if (document.referrer) {
+        try { payload.referrer = new URL(document.referrer).hostname; } catch (e) { /* ignore */ }
+      }
+      fetch('/api/track', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload), keepalive: true,
+      }).catch(function () {});
+    } catch (e) { /* never let tracking break the page */ }
+  }
+
+  track('pageview');
+
+  // One listener for every tracked CTA, rather than editing every page -
+  // matched by attributes that are already there for other reasons
+  // (data-open-modal, the Request Staff link, the WhatsApp button).
+  var TRACK_LABELS = {
+    professional: 'Become a Staff',
+    organisation: 'Partner with Amana',
+    family: 'Find a Professional (modal)',
+  };
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest ? e.target.closest('[data-open-modal], a[href="request-staff.html"], .wa-float') : null;
+    if (!el) return;
+    if (el.classList.contains('wa-float')) return track('click', 'WhatsApp chat button');
+    var modalKind = el.getAttribute('data-open-modal');
+    if (modalKind) return track('click', TRACK_LABELS[modalKind] || ('Modal: ' + modalKind));
+    if (el.getAttribute('href') === 'request-staff.html') return track('click', 'Request Staff');
+  });
+
   /* ---------- Footer year ---------- */
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();

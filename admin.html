@@ -159,6 +159,7 @@
   <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 010 18 14 14 0 010-18z"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.2c0 4.6-3 8.4-7 9.8-4-1.4-7-5.2-7-9.8V6l7-3z"/><circle cx="12" cy="10.5" r="2.2"/><path d="M8.5 15.5c.6-1.6 2-2.5 3.5-2.5s2.9.9 3.5 2.5"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="8"/><rect x="12" y="7" width="3" height="12"/><rect x="17" y="14" width="3" height="5"/></symbol>
 </svg>
 
 <div class="gate" id="gate">
@@ -188,6 +189,7 @@
       <button type="button" data-page="families"><svg><use href="#i-home"/></svg>Families &amp; Orgs<span class="nav-count" id="navCountFamilies" hidden>0</span></button>
       <button type="button" data-page="diaspora"><svg><use href="#i-globe"/></svg>Diaspora<span class="nav-count" id="navCountDiaspora" hidden>0</span></button>
       <button type="button" data-page="requests"><svg><use href="#i-clipboard"/></svg>Requests<span class="nav-count" id="navCountRequests" hidden>0</span></button>
+      <button type="button" data-page="analytics"><svg><use href="#i-chart"/></svg>Analytics</button>
       <button type="button" data-page="users" id="navUsers" hidden><svg><use href="#i-shield"/></svg>Manage Users</button>
     </nav>
     <div class="sidebar-section-label">Account</div>
@@ -383,6 +385,48 @@
         </div>
       </section>
 
+      <!-- ============ ANALYTICS ============ -->
+      <section class="page" id="page-analytics" data-page="analytics" hidden>
+        <div class="kpis" style="grid-template-columns:repeat(3,1fr);">
+          <div class="kpi-card">
+            <div class="kpi-top"><span class="kpi-label">Page views</span><span class="kpi-icon"><svg><use href="#i-chart"/></svg></span></div>
+            <div class="kpi-num" id="aPageViews">0</div>
+            <div class="kpi-sub" id="aPageViewsSub"></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-top"><span class="kpi-label">CTA clicks</span><span class="kpi-icon good"><svg><use href="#i-chart"/></svg></span></div>
+            <div class="kpi-num" id="aClicks">0</div>
+            <div class="kpi-sub">Request Staff, Become a Staff, WhatsApp, etc.</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-top"><span class="kpi-label">Click-through rate</span><span class="kpi-icon warn"><svg><use href="#i-chart"/></svg></span></div>
+            <div class="kpi-num" id="aCtr">0%</div>
+            <div class="kpi-sub">Clicks as a share of page views</div>
+          </div>
+        </div>
+
+        <div class="app-grid">
+          <div class="panel">
+            <h2>Visits, last 8 weeks</h2>
+            <p class="panel-sub">Page views and CTA clicks combined</p>
+            <div class="weeks" id="aWeeks"></div>
+          </div>
+          <div class="panel">
+            <h2>Top pages</h2>
+            <p class="panel-sub">Most-viewed pages, this data set</p>
+            <div id="aTopPages"></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-bottom:20px;">
+          <h2>Clicks by action</h2>
+          <p class="panel-sub">Which calls-to-action visitors actually use</p>
+          <div id="aTopClicks"></div>
+        </div>
+
+        <p class="empty-note" id="aTruncatedNote" hidden>Showing the most recent 20,000 events - older activity still exists in the Site Analytics sheet tab, just outside this summary.</p>
+      </section>
+
       <!-- ============ MANAGE USERS (super admins only) ============ -->
       <section class="page" id="page-users" data-page="users" hidden>
         <div class="page-head">
@@ -455,6 +499,7 @@
     families: { title: 'Families & Organisations', subtitle: 'Household and business enquiries.' },
     diaspora: { title: 'Diaspora', subtitle: 'Clients living abroad who chose the Diaspora package.' },
     requests: { title: 'Staff requests', subtitle: 'Submitted through the Request Staff form on the website.' },
+    analytics: { title: 'Analytics', subtitle: 'Visits and clicks across the site - anonymous, no third-party tracker.' },
     users: { title: 'Manage Users', subtitle: 'Admin accounts - who can sign in, and with what access.' },
   };
 
@@ -740,7 +785,7 @@
   function loadUsers() {
     var container = document.getElementById('usersTable');
     container.innerHTML = '<p class="empty-note">Loading&hellip;</p>';
-    fetch('/api/admin-list-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+    fetch('/api/admin-users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'list' }) })
       .then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out }; }); })
       .then(function (res) {
         if (!res.ok || !res.out.ok) { container.innerHTML = '<p class="empty-note">Could not load accounts.</p>'; return; }
@@ -770,9 +815,9 @@
     var username = btn.getAttribute('data-toggle-user');
     var nextActive = btn.getAttribute('data-active') === '1';
     btn.disabled = true;
-    fetch('/api/admin-toggle-user', {
+    fetch('/api/admin-users', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username, active: nextActive }),
+      body: JSON.stringify({ op: 'toggle', username: username, active: nextActive }),
     }).then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out }; }); })
       .then(function (res) {
         if (!res.ok || !res.out.ok) { btn.disabled = false; return; }
@@ -787,9 +832,9 @@
     var username = document.getElementById('newUsername').value.trim();
     var password = document.getElementById('newPassword').value.trim();
     var role = document.getElementById('newRole').value;
-    fetch('/api/admin-create-user', {
+    fetch('/api/admin-users', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: username, password: password, role: role }),
+      body: JSON.stringify({ op: 'create', username: username, password: password, role: role }),
     }).then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out }; }); })
       .then(function (res) {
         if (!res.ok || !res.out.ok) {
@@ -917,6 +962,16 @@
           '<td><span class="pill ' + statusClass(r.Status) + '">' + esc(r.Status) + '</span></td></tr>';
       },
     });
+
+    var an = data.analytics || { total: 0, pageViews: 0, clicks: 0, viewsByPage: {}, clicksByLabel: {}, weekCounts: {}, truncated: false };
+    document.getElementById('aPageViews').textContent = an.pageViews;
+    document.getElementById('aPageViewsSub').textContent = an.total + ' total events recorded';
+    document.getElementById('aClicks').textContent = an.clicks;
+    document.getElementById('aCtr').textContent = an.pageViews ? Math.round((an.clicks / an.pageViews) * 100) + '%' : '0%';
+    weeksChart(document.getElementById('aWeeks'), an.weekCounts);
+    roleBar(document.getElementById('aTopPages'), an.viewsByPage);
+    roleBar(document.getElementById('aTopClicks'), an.clicksByLabel);
+    document.getElementById('aTruncatedNote').hidden = !an.truncated;
 
     document.getElementById('updatedAt').textContent = 'Updated ' + new Date(data.generatedAt).toLocaleString();
     loading.hidden = true;

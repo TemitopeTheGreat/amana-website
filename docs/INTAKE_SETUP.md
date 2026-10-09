@@ -79,6 +79,16 @@ Both the website's "Become a Staff" and "Request Staff" forms used to send two e
 
 `vercel.json` sets a Content-Security-Policy, HSTS, `X-Frame-Options: DENY`, and a few other standard headers on every response - mainly to stop the site (and especially `admin.html`) from being embedded in another page (clickjacking) and to restrict what a browser will load or connect to if a script was ever injected somewhere. It allows Google Fonts and nothing else external, since that's the only third-party resource any page actually loads.
 
+### Site analytics
+
+The dashboard's **Analytics** page shows page views, CTA clicks (Request Staff, Become a Staff, WhatsApp, etc.), a click-through rate, and an 8-week trend - self-hosted, not a third-party tracker. No cookies, no visitor ID, nothing stored in the browser; each row in a new **Site Analytics** sheet tab is just "this page was viewed" or "this button was clicked," anonymous by design.
+
+`js/script.js` fires these on every page via `api/track.js`, which forwards to `Code.gs`'s `track` action. That action deliberately skips the shared `LockService` lock every other write uses (see the comment on it in `Code.gs`) - it's by far the highest-frequency action, and a burst of visitors should never make a real form submission wait behind it. A plain `appendRow` is good enough for a page-view counter; losing one occasionally isn't a problem the way losing a client's data would be.
+
+### Why there's a combined `api/admin-users.js` instead of three separate files
+
+Vercel's Hobby plan caps a deployment at 12 serverless functions. Adding `api/track.js` for analytics would have pushed past that, so the three Manage Users endpoints (list/create/enable-disable accounts) were combined into one file routed by an `op` field in the request body, freeing two slots. If that plan limit ever stops being a constraint (upgrading to Pro, for instance), there's no pressure to re-split them - it's a reasonable shape either way.
+
 ## What the team sees
 
 | Tab | Holds | Status pipeline |

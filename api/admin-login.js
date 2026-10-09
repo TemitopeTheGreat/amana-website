@@ -31,8 +31,8 @@ module.exports = async (req, res) => {
   // Trimmed - a password copy-pasted from a chat message or doc very
   // easily picks up a stray leading/trailing space, which would otherwise
   // silently fail to match. Trimmed consistently here and wherever a
-  // password is hashed in api/admin-create-user.js, so this never causes
-  // a login that should work to fail.
+  // password is hashed in api/admin-users.js's create op, so this never
+  // causes a login that should work to fail.
   const password = String(body.password || '').trim();
   if (!username || !password) {
     await delay_(300);
