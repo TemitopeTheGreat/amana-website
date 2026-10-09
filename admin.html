@@ -785,7 +785,7 @@
     var errorEl = document.getElementById('createUserError');
     errorEl.textContent = '';
     var username = document.getElementById('newUsername').value.trim();
-    var password = document.getElementById('newPassword').value;
+    var password = document.getElementById('newPassword').value.trim();
     var role = document.getElementById('newRole').value;
     fetch('/api/admin-create-user', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -985,7 +985,7 @@
     e.preventDefault();
     gateError.textContent = '';
     var username = usernameInput.value.trim();
-    var password = pwInput.value;
+    var password = pwInput.value.trim();
     fetch('/api/admin-login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username, password: password }),
     }).then(function (r) { return r.json().then(function (out) { return { ok: r.ok, out: out || {} }; }); })

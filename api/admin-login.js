@@ -28,14 +28,19 @@ module.exports = async (req, res) => {
 
   const body = typeof req.body === 'string' ? safeParse(req.body) : (req.body || {});
   const username = String(body.username || '').trim();
-  const password = String(body.password || '');
+  // Trimmed - a password copy-pasted from a chat message or doc very
+  // easily picks up a stray leading/trailing space, which would otherwise
+  // silently fail to match. Trimmed consistently here and wherever a
+  // password is hashed in api/admin-create-user.js, so this never causes
+  // a login that should work to fail.
+  const password = String(body.password || '').trim();
   if (!username || !password) {
     await delay_(300);
     return res.status(401).json({ error: 'invalid_credentials' });
   }
 
   if (username.toLowerCase() === 'owner') {
-    const expected = process.env.ADMIN_PASSWORD;
+    const expected = String(process.env.ADMIN_PASSWORD || '').trim();
     if (!expected) return res.status(503).json({ error: 'not_configured' });
     if (password !== expected) {
       await delay_(400);

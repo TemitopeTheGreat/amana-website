@@ -29,7 +29,10 @@ module.exports = async (req, res) => {
 
   const body = typeof req.body === 'string' ? safeParse(req.body) : (req.body || {});
   const username = String(body.username || '').trim();
-  const password = String(body.password || '');
+  // Trimmed - matches the trim applied to a submitted password at login
+  // time (api/admin-login.js), so a stray space picked up from copy-
+  // pasting doesn't create a password that can never actually log in.
+  const password = String(body.password || '').trim();
   const role = body.role === 'super' ? 'super' : 'general';
 
   if (!USERNAME_RE.test(username)) {
