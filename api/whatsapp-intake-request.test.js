@@ -22,11 +22,15 @@ const validBody = {
   clientFullName: 'Jane Doe',
   clientPhone: '08012345678',
   clientEmail: 'jane@example.com',
-  clientType: 'Individual / Family',
+  clientType: 'Private household',
   consent: 'on',
   staffCategory: 'Nanny',
   numberRequired: '1',
   state: 'Lagos',
+  confirmTrueComplete: 'on',
+  consentVerification: 'on',
+  consentTerms: 'on',
+  signature: 'Jane Doe',
 };
 
 check('a fully valid submission produces a record with no errors', () => {
@@ -83,6 +87,33 @@ check('an unrecognized employmentType is dropped, not rejected (it is not a requ
   const { record, errors } = buildRequestFromBody({ ...validBody, employmentType: 'Weekends only' });
   assert.deepStrictEqual(errors, []);
   assert.strictEqual(record.employmentType, '');
+});
+
+// Fields added to match the "Amana Domestic Staff Order Request" Google
+// Form (https://forms.gle/uAE2rMPf6FAiQwZk9) - see whatsapp-intake/README.md.
+check('missing signature is rejected', () => {
+  const { errors } = buildRequestFromBody({ ...validBody, signature: '' });
+  assert(errors.includes('signature'));
+});
+
+check('missing any of the three required consent checks is rejected', () => {
+  ['confirmTrueComplete', 'consentVerification', 'consentTerms'].forEach((field) => {
+    const { errors } = buildRequestFromBody({ ...validBody, [field]: undefined });
+    assert(errors.includes(field), `expected ${field} to be reported missing`);
+  });
+});
+
+check('multi-select fields pass through as the comma-joined string the client already built', () => {
+  const { record, errors } = buildRequestFromBody({
+    ...validBody,
+    mainDuties: 'Cleaning, Cooking, Driving',
+    liveArrangement: 'Live-in, Either',
+    idTypes: "NIN slip, Driver's license",
+  });
+  assert.deepStrictEqual(errors, []);
+  assert.strictEqual(record.mainDuties, 'Cleaning, Cooking, Driving');
+  assert.strictEqual(record.liveArrangement, 'Live-in, Either');
+  assert.strictEqual(record.idTypes, "NIN slip, Driver's license");
 });
 
 console.log(`\n${passed} passed${process.exitCode ? ', some FAILED' : ''}`);

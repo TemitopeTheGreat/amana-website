@@ -13,6 +13,70 @@ Fixed dates it sets: standalone automation complete Mon 5 Oct COB,
 Hiyame testing complete Wed 7 Oct COB, approval Thu 8 Oct COB, go-live
 Fri 9 Oct 2026. Two decisions made against it that day, below.
 
+## Matched to the Google Form the team is still using (9 Oct 2026)
+
+Per the user: the team is currently taking client orders through a
+Google Form ("Amana Domestic Staff Order Request",
+https://forms.gle/uAE2rMPf6FAiQwZk9) as a stopgap, specifically "until
+the form matches" this one. `request-staff.html`, `whatsapp-intake/
+schema.js`, `whatsapp-intake/constants.js`, and `apps-script/Code.gs`'s
+`REQUEST_HEADERS` were all expanded to capture every field that Google
+Form asks for (grew from 39 to 75 Requests-tab columns) - registration
+status, referral source, full address detail, household/organisation
+composition, duties checklist, living-arrangement options, working
+days/hours, meals/accommodation detail, cuisine and dietary preferences,
+childcare requirements, preferred age/gender, past-experience notes, ID
+types available, and the Google Form's four required confirmation/
+consent checks plus a typed signature.
+
+Three deliberate deviations from a literal clone, each because the
+alternative is better UX for the same underlying need, not because the
+information is dropped:
+- The form's separate "Employer's first name" / "surname" fields are
+  still two separate inputs on the page, but get joined into the
+  existing single `clientFullName` field before the API ever sees them -
+  nothing downstream (admin dashboard, emails, Sheet) needed to change.
+- `staffCategory` (a short, closed set - Nanny/Housekeeper/Cook/Cleaner/
+  Driver/Other) was kept as an *addition* alongside the Google Form's
+  free-text "Position needed to fill" (`jobTitle`), not a replacement -
+  losing structured categorization would have regressed the admin
+  dashboard's Candidates/Requests filtering.
+- "Preferred contact method" keeps the existing four options (WhatsApp/
+  Phone call/Email/SMS) rather than narrowing to the Google Form's
+  Phone/Email only, since WhatsApp-first contact is this project's own
+  established design (`SITE_CONFIG.whatsapp`, the floating chat button
+  on every page) - narrowing it would have been a real regression.
+
+The NDPA 2023 data-protection consent question was mapped onto the
+existing `consent`/`consentTimestamp` field (same underlying meaning -
+storing/processing personal data for recruitment) rather than adding a
+duplicate; its exact legal wording from the Google Form is preserved
+verbatim in the checkbox label. The other three required confirmations
+("information is true and complete," identity/verification consent,
+terms-of-service agreement) and the signature are new fields
+(`confirmTrueComplete`, `consentVerification`, `consentTerms`,
+`signature`), all required, matching `REQUIRED_FOR_CONFIRMATION`.
+
+Checkbox-group questions (duties, living arrangement, working days,
+cuisines, dietary/childcare requirements, age range, gender, ID types,
+referral source) are collected client-side in `request-staff.html` into
+a single comma-joined string per field - the server and the Sheet never
+see a raw array, consistent with every other free-text field in this
+schema. Two fields ("How did you hear about Amana," dietary/childcare
+requirements) include the Google Form's "Other" free-text option,
+appended as `"Other: <text>"` inside that same joined string.
+
+**Not yet deployed as of this note** - built and tested (`api/
+whatsapp-intake-request.test.js`, `whatsapp-intake/smoke-test.js`) but
+holding for explicit sign-off before going live, since this replaces
+the schema a business-critical form depends on and carries real legal
+consent language. The live Apps Script deployment also needs the
+updated `Code.gs` pasted in and redeployed - same manual step as every
+previous backend change here - before any of this works end to end;
+until then, `ensureRequestsTab_`'s new `migrateTabHeaders_` call makes
+that redeploy safe to do live (appends only the new columns, never
+touches existing Requests rows).
+
 ## Reconciled against the new brief (2 Oct 2026)
 
 Read the brief in full and cross-checked it against everything already

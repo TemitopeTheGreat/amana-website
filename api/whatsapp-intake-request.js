@@ -47,6 +47,10 @@ function buildRequestFromBody(body) {
   const phone = utils.normalizeNigerianPhone(body.clientPhone);
   if (!phone.valid) errors.push('clientPhone');
 
+  // Multi-select fields (checkbox groups, incl. a couple with a free-text
+  // "Other" option) arrive from the form already comma-joined into a
+  // single string by request-staff.html's submit handler - this just
+  // clips length, same as any other free text.
   const record = {
     ...schema.createEmptyRequest(),
     sourceChannel: 'Website',
@@ -59,11 +63,31 @@ function buildRequestFromBody(body) {
       ? body.preferredContactChannel : constants.CONTACT_CHANNELS[0],
     consent: toBool(body.consent),
     consentTimestamp: toBool(body.consent) ? new Date().toISOString() : '',
+    registrationStatus: constants.REGISTRATION_STATUSES.includes(body.registrationStatus) ? body.registrationStatus : '',
+    referralSource: clip(body.referralSource, 300),
+    homeAddress: clip(body.homeAddress, 300),
+    officeAddress: clip(body.officeAddress, 300),
+    landmark: clip(body.landmark, 200),
+    addressDuration: clip(body.addressDuration, 120),
+    employerOccupation: clip(body.employerOccupation, 200),
+    companyType: clip(body.companyType, 200),
+    cacNumber: clip(body.cacNumber, 60),
+    householdAdults: clip(body.householdAdults, 40),
+    householdChildren: clip(body.householdChildren, 40),
+    childrenAgeGroups: clip(body.childrenAgeGroups, 200),
+    specialCareNeeds: clip(body.specialCareNeeds, 500),
+    pets: clip(body.pets, 200),
+    propertyType: constants.PROPERTY_TYPES.includes(body.propertyType) ? body.propertyType : '',
+    existingStaff: clip(body.existingStaff, 500),
     staffCategory: constants.STAFF_CATEGORIES.includes(body.staffCategory) ? body.staffCategory : '',
     jobTitle: clip(body.jobTitle, 120),
     numberRequired: Math.max(1, parseInt(body.numberRequired, 10) || 1),
     employmentType: constants.EMPLOYMENT_TYPES.includes(body.employmentType) ? body.employmentType : '',
-    liveArrangement: constants.LIVE_ARRANGEMENTS.includes(body.liveArrangement) ? body.liveArrangement : '',
+    liveArrangement: clip(body.liveArrangement, 200),
+    liveOutFrequency: constants.LIVE_OUT_FREQUENCIES.includes(body.liveOutFrequency) ? body.liveOutFrequency : '',
+    mainDuties: clip(body.mainDuties, 300),
+    vacancyReason: constants.VACANCY_REASONS.includes(body.vacancyReason) ? body.vacancyReason : '',
+    workAddresses: clip(body.workAddresses, 500),
     state: clip(body.state, 80),
     lga: clip(body.lga, 80),
     area: clip(body.area, 120),
@@ -75,12 +99,28 @@ function buildRequestFromBody(body) {
     startDate: clip(body.startDate, 40),
     urgency: constants.URGENCY_LEVELS.includes(body.urgency) ? body.urgency : '',
     workingDays: clip(body.workingDays, 120),
+    startTime: clip(body.startTime, 10),
+    finishTime: clip(body.finishTime, 10),
     workingHours: clip(body.workingHours, 120),
     accommodation: toBool(body.accommodation),
+    accommodationType: constants.ACCOMMODATION_TYPES.includes(body.accommodationType) ? body.accommodationType : '',
     meals: toBool(body.meals),
+    mealsCount: constants.MEALS_PROVIDED_OPTIONS.includes(body.mealsCount) ? body.mealsCount : '',
     salaryMin: toNumberOrNull(body.salaryMin),
     salaryMax: toNumberOrNull(body.salaryMax),
     currency: clip(body.currency, 10) || 'NGN',
+    cuisines: clip(body.cuisines, 200),
+    dietaryRequirements: clip(body.dietaryRequirements, 300),
+    childcareRequirements: clip(body.childcareRequirements, 300),
+    preferredAgeRange: clip(body.preferredAgeRange, 100),
+    preferredGender: clip(body.preferredGender, 60),
+    pastExperience: clip(body.pastExperience, 2000),
+    idTypes: clip(body.idTypes, 200),
+    confirmTrueComplete: toBool(body.confirmTrueComplete),
+    consentVerification: toBool(body.consentVerification),
+    consentTerms: toBool(body.consentTerms),
+    signature: clip(body.signature, 160),
+    questionsComments: clip(body.questionsComments, 2000),
   };
 
   const { valid, missing } = schema.validateForConfirmation(record);

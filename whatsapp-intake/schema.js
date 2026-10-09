@@ -8,6 +8,11 @@
 // README.md), and adding one just for this module isn't worth it. The
 // typedef below gives the same editor autocomplete/type-checking in VS
 // Code without a compile step.
+//
+// Fields from `registrationStatus` through `questionsComments` below
+// were added to match the "Amana Domestic Staff Order Request" Google
+// Form (https://forms.gle/uAE2rMPf6FAiQwZk9) field-for-field, so
+// request-staff.html can fully replace it - see whatsapp-intake/README.md.
 
 /**
  * @typedef {Object} AmanaRequest
@@ -23,11 +28,31 @@
  * @property {string} preferredContactChannel - one of constants.CONTACT_CHANNELS
  * @property {boolean} consent
  * @property {string} consentTimestamp     - ISO 8601, set when consent is true
+ * @property {string} registrationStatus   - one of constants.REGISTRATION_STATUSES
+ * @property {string} referralSource       - comma-joined subset of constants.REFERRAL_SOURCES (plus free text if "Other" was used)
+ * @property {string} homeAddress
+ * @property {string} officeAddress
+ * @property {string} landmark             - nearest landmark / bus stop
+ * @property {string} addressDuration      - how long they've lived at this address
+ * @property {string} employerOccupation
+ * @property {string} companyType
+ * @property {string} cacNumber
+ * @property {string} householdAdults
+ * @property {string} householdChildren
+ * @property {string} childrenAgeGroups
+ * @property {string} specialCareNeeds
+ * @property {string} pets
+ * @property {string} propertyType         - one of constants.PROPERTY_TYPES
+ * @property {string} existingStaff        - other domestic staff currently employed
  * @property {string} staffCategory        - one of constants.STAFF_CATEGORIES
- * @property {string} jobTitle
+ * @property {string} jobTitle             - the exact "position needed to fill" wording
  * @property {number} numberRequired
  * @property {string} employmentType       - one of constants.EMPLOYMENT_TYPES
- * @property {string} liveArrangement      - one of constants.LIVE_ARRANGEMENTS
+ * @property {string} liveArrangement      - comma-joined subset of constants.LIVE_ARRANGEMENTS
+ * @property {string} liveOutFrequency     - one of constants.LIVE_OUT_FREQUENCIES
+ * @property {string} mainDuties           - comma-joined subset of constants.MAIN_DUTIES
+ * @property {string} vacancyReason        - one of constants.VACANCY_REASONS
+ * @property {string} workAddresses        - every address the staff member will work at
  * @property {string} state
  * @property {string} lga
  * @property {string} area
@@ -39,12 +64,28 @@
  * @property {string} startDate            - ISO 8601 date, or '' if not given
  * @property {string} urgency              - one of constants.URGENCY_LEVELS
  * @property {string} workingDays
+ * @property {string} startTime            - 24h HH:MM
+ * @property {string} finishTime           - 24h HH:MM
  * @property {string} workingHours
  * @property {boolean} accommodation
+ * @property {string} accommodationType    - one of constants.ACCOMMODATION_TYPES
  * @property {boolean} meals
+ * @property {string} mealsCount           - one of constants.MEALS_PROVIDED_OPTIONS
  * @property {number|null} salaryMin
  * @property {number|null} salaryMax
  * @property {string} currency             - default 'NGN'
+ * @property {string} cuisines             - comma-joined subset of constants.CUISINES
+ * @property {string} dietaryRequirements  - comma-joined subset of constants.DIETARY_REQUIREMENTS (plus free text if "Other" was used)
+ * @property {string} childcareRequirements - comma-joined subset of constants.CHILDCARE_REQUIREMENTS (plus free text if "Other" was used)
+ * @property {string} preferredAgeRange    - comma-joined subset of constants.PREFERRED_AGE_RANGES
+ * @property {string} preferredGender      - comma-joined subset of constants.PREFERRED_GENDERS
+ * @property {string} pastExperience       - what worked / didn't with past staff
+ * @property {string} idTypes              - comma-joined subset of constants.ID_TYPES
+ * @property {boolean} confirmTrueComplete - "information given is true and complete"
+ * @property {boolean} consentVerification - consent to identity/address/employment verification
+ * @property {boolean} consentTerms        - agreement to terms of service and code of conduct
+ * @property {string} signature            - typed full name as signature
+ * @property {string} questionsComments    - free-text questions/comments from the client
  * @property {string} assignedRecruiter
  * @property {string} lastUpdatedAt         - ISO 8601, bumped on every write
  * @property {string} nextAction
@@ -57,11 +98,20 @@ const FIELD_ORDER = [
   'requestId', 'createdAt', 'sourceChannel', 'sessionId', 'status',
   'clientFullName', 'clientPhone', 'clientEmail', 'clientType', 'preferredContactChannel',
   'consent', 'consentTimestamp',
-  'staffCategory', 'jobTitle', 'numberRequired', 'employmentType', 'liveArrangement',
+  'registrationStatus', 'referralSource',
+  'homeAddress', 'officeAddress', 'landmark', 'addressDuration',
+  'employerOccupation', 'companyType', 'cacNumber',
+  'householdAdults', 'householdChildren', 'childrenAgeGroups', 'specialCareNeeds', 'pets', 'propertyType', 'existingStaff',
+  'staffCategory', 'jobTitle', 'numberRequired', 'employmentType', 'liveArrangement', 'liveOutFrequency',
+  'mainDuties', 'vacancyReason', 'workAddresses',
   'state', 'lga', 'area',
   'responsibilities', 'requiredSkills', 'qualifications', 'experience', 'languages',
-  'startDate', 'urgency', 'workingDays', 'workingHours', 'accommodation', 'meals',
+  'startDate', 'urgency', 'workingDays', 'startTime', 'finishTime', 'workingHours',
+  'accommodation', 'accommodationType', 'meals', 'mealsCount',
   'salaryMin', 'salaryMax', 'currency',
+  'cuisines', 'dietaryRequirements', 'childcareRequirements', 'preferredAgeRange', 'preferredGender',
+  'pastExperience', 'idTypes',
+  'confirmTrueComplete', 'consentVerification', 'consentTerms', 'signature', 'questionsComments',
   'assignedRecruiter', 'lastUpdatedAt', 'nextAction', 'notes', 'closureReason',
 ];
 
@@ -86,11 +136,31 @@ function createEmptyRequest() {
     preferredContactChannel: '',
     consent: false,
     consentTimestamp: '',
+    registrationStatus: '',
+    referralSource: '',
+    homeAddress: '',
+    officeAddress: '',
+    landmark: '',
+    addressDuration: '',
+    employerOccupation: '',
+    companyType: '',
+    cacNumber: '',
+    householdAdults: '',
+    householdChildren: '',
+    childrenAgeGroups: '',
+    specialCareNeeds: '',
+    pets: '',
+    propertyType: '',
+    existingStaff: '',
     staffCategory: '',
     jobTitle: '',
     numberRequired: 1,
     employmentType: '',
     liveArrangement: '',
+    liveOutFrequency: '',
+    mainDuties: '',
+    vacancyReason: '',
+    workAddresses: '',
     state: '',
     lga: '',
     area: '',
@@ -102,12 +172,28 @@ function createEmptyRequest() {
     startDate: '',
     urgency: '',
     workingDays: '',
+    startTime: '',
+    finishTime: '',
     workingHours: '',
     accommodation: false,
+    accommodationType: '',
     meals: false,
+    mealsCount: '',
     salaryMin: null,
     salaryMax: null,
     currency: 'NGN',
+    cuisines: '',
+    dietaryRequirements: '',
+    childcareRequirements: '',
+    preferredAgeRange: '',
+    preferredGender: '',
+    pastExperience: '',
+    idTypes: '',
+    confirmTrueComplete: false,
+    consentVerification: false,
+    consentTerms: false,
+    signature: '',
+    questionsComments: '',
     assignedRecruiter: '',
     lastUpdatedAt: '',
     nextAction: '',
@@ -120,11 +206,14 @@ function createEmptyRequest() {
  * Fields that must be non-empty before a request can move out of the
  * Intake phase (status New/Confirmed). Used by both the website form's
  * server-side validation and the bot's step-14 review/confirm gate, so
- * the two channels enforce the same minimum bar.
+ * the two channels enforce the same minimum bar. Includes the Google
+ * Form's four required confirm/consent checks and signature, alongside
+ * the original minimum bar.
  */
 const REQUIRED_FOR_CONFIRMATION = [
   'clientFullName', 'clientPhone', 'clientType', 'consent',
   'staffCategory', 'numberRequired', 'state',
+  'confirmTrueComplete', 'consentVerification', 'consentTerms', 'signature',
 ];
 
 /**

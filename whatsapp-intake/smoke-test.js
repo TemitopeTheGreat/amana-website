@@ -39,11 +39,15 @@ check('validateForConfirmation() passes once required fields are filled', () => 
     ...schema.createEmptyRequest(),
     clientFullName: 'Jane Doe',
     clientPhone: '+2348012345678',
-    clientType: 'Individual / Family',
+    clientType: 'Private household',
     consent: true,
     staffCategory: 'Nanny',
     numberRequired: 1,
     state: 'Lagos',
+    confirmTrueComplete: true,
+    consentVerification: true,
+    consentTerms: true,
+    signature: 'Jane Doe',
   };
   const { valid, missing } = schema.validateForConfirmation(r);
   assert.strictEqual(valid, true, 'unexpected missing: ' + missing.join(', '));

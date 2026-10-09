@@ -22,7 +22,8 @@
   /* Page-specific only — everything else reuses css/style.css */
   .intake-main{padding:48px 0 80px;}
   .intake-form fieldset{border:0; padding:0; margin:0 0 32px;}
-  .intake-form legend{font-family:var(--font-head); font-size:1.2rem; color:var(--navy-950); margin-bottom:14px; padding:0;}
+  .intake-form legend{font-family:var(--font-head); font-size:1.2rem; color:var(--navy-950); margin-bottom:4px; padding:0;}
+  .intake-form .legend-sub{font-size:.84rem; color:var(--ink-soft); margin:0 0 14px;}
   .intake-form .form-row{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;}
   .intake-form label{display:block; font-size:.88rem; font-weight:500; color:var(--ink); margin-bottom:16px;}
   .intake-form .form-row label{margin-bottom:0;}
@@ -33,12 +34,17 @@
   }
   .intake-form .checkbox-row{display:flex; align-items:flex-start; gap:10px; font-size:.88rem; font-weight:400;}
   .intake-form .checkbox-row input{width:auto; margin-top:3px;}
+  .intake-form .option-group{display:flex; flex-wrap:wrap; gap:10px 20px; margin-top:6px; margin-bottom:16px;}
+  .intake-form .option-group .checkbox-row{margin-bottom:0;}
+  .intake-form .other-input{margin-top:8px; max-width:320px;}
   .intake-banner{background:var(--cream-dark); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px 20px; margin-bottom:32px; font-size:.9rem; color:var(--ink-soft);}
   .intake-error{color:#b4232c; font-size:.88rem; margin-top:-8px; margin-bottom:20px; display:none;}
   .intake-error.visible{display:block;}
   .intake-success{display:none; text-align:center; padding:48px 20px;}
   .intake-success.visible{display:block;}
   .intake-success h2{margin-bottom:10px;}
+  .consent-block{background:var(--cream-dark); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px 20px; margin-bottom:16px;}
+  .consent-block .checkbox-row{margin-bottom:0;}
 </style>
 </head>
 <body>
@@ -88,40 +94,125 @@
       </label>
 
       <fieldset>
-        <legend>Your details</legend>
+        <legend>About you</legend>
+        <label>Have you registered with Amana before? *
+          <select name="registrationStatus" required>
+            <option value="">Select one</option>
+            <option value="I am a new customer">I am a new customer</option>
+            <option value="I am an existing customer">I am an existing customer</option>
+          </select>
+        </label>
+        <label>Who is hiring? *
+          <select name="clientType" required>
+            <option value="">Select one</option>
+            <option value="Private household">Private household</option>
+            <option value="Company or organisation">Company or organisation</option>
+          </select>
+        </label>
         <div class="form-row">
-          <label>Full name *
-            <input type="text" name="clientFullName" required maxlength="120">
+          <label>Employer's first name *
+            <input type="text" name="employerFirstName" required maxlength="80">
           </label>
+          <label>Employer's surname *
+            <input type="text" name="employerSurname" required maxlength="80">
+          </label>
+        </div>
+        <div class="form-row">
           <label>Phone number *
             <input type="tel" name="clientPhone" required placeholder="e.g. 0801 234 5678">
           </label>
+          <label>Email address *
+            <input type="email" name="clientEmail" required maxlength="160">
+          </label>
         </div>
+        <label>How did you hear about Amana? *</label>
+        <div class="option-group" data-group="referralSource">
+          <label class="checkbox-row"><input type="checkbox" value="Google"> Google</label>
+          <label class="checkbox-row"><input type="checkbox" value="Word of Mouth"> Word of Mouth</label>
+          <label class="checkbox-row"><input type="checkbox" value="WhatsApp"> WhatsApp</label>
+          <label class="checkbox-row"><input type="checkbox" value="AI search"> AI search</label>
+          <label class="checkbox-row"><input type="checkbox" value="Social media"> Social media</label>
+          <label class="checkbox-row"><input type="checkbox" data-other="1"> Other</label>
+        </div>
+        <input type="text" class="other-input" data-other-for="referralSource" placeholder="Tell us where" maxlength="120" hidden>
+      </fieldset>
+
+      <fieldset>
+        <legend>Address</legend>
         <div class="form-row">
-          <label>Email address
-            <input type="email" name="clientEmail" maxlength="160">
+          <label>State *
+            <input type="text" name="state" required maxlength="80">
           </label>
-          <label>You are *
-            <select name="clientType" required>
-              <option value="Individual / Family">Individual / Family</option>
-              <option value="Business / Organisation">Business / Organisation</option>
-            </select>
+          <label>Area / neighbourhood *
+            <input type="text" name="area" required maxlength="120" placeholder="e.g. Lekki Phase 1">
           </label>
         </div>
-        <label>Preferred contact channel
-          <select name="preferredContactChannel">
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="Phone call">Phone call</option>
-            <option value="Email">Email</option>
-            <option value="SMS">SMS</option>
+        <label>Home address *
+          <input type="text" name="homeAddress" required maxlength="300">
+        </label>
+        <label>Office / business address
+          <input type="text" name="officeAddress" maxlength="300">
+        </label>
+        <div class="form-row">
+          <label>Nearest landmark / bus stop
+            <input type="text" name="landmark" maxlength="200">
+          </label>
+          <label>How long have you lived at this address?
+            <input type="text" name="addressDuration" maxlength="120">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>About the household / organisation</legend>
+        <div class="form-row">
+          <label>Occupation or profession of the employer
+            <input type="text" name="employerOccupation" maxlength="200">
+          </label>
+          <label>Company type
+            <input type="text" name="companyType" maxlength="200">
+          </label>
+        </div>
+        <label>CAC Registration Number, if available
+          <input type="text" name="cacNumber" maxlength="60">
+        </label>
+        <div class="form-row">
+          <label>How many adults live in the household?
+            <input type="text" name="householdAdults" maxlength="40">
+          </label>
+          <label>How many children live in the household?
+            <input type="text" name="householdChildren" maxlength="40">
+          </label>
+        </div>
+        <label>Age groups of the children
+          <input type="text" name="childrenAgeGroups" maxlength="200" placeholder="e.g. 2, 5 and 9 years old">
+        </label>
+        <label>Does anyone in the household need regular care (e.g. elderly or special care)?
+          <input type="text" name="specialCareNeeds" maxlength="500">
+        </label>
+        <label>How many pets at home, and what type?
+          <input type="text" name="pets" maxlength="200">
+        </label>
+        <label>What type of property?
+          <select name="propertyType">
+            <option value="">Select one</option>
+            <option value="Duplex">Duplex</option>
+            <option value="Flat">Flat</option>
+            <option value="Bungalow">Bungalow</option>
           </select>
+        </label>
+        <label>What other domestic staff are currently employed?
+          <input type="text" name="existingStaff" maxlength="500">
         </label>
       </fieldset>
 
       <fieldset>
-        <legend>Role requirements</legend>
+        <legend>The role</legend>
         <div class="form-row">
-          <label>Staff category *
+          <label>Position needed to fill *
+            <input type="text" name="jobTitle" required maxlength="120" placeholder="e.g. Live-in nanny">
+          </label>
+          <label>Closest category *
             <select name="staffCategory" required>
               <option value="">Select one</option>
               <option value="Nanny">Nanny</option>
@@ -132,64 +223,52 @@
               <option value="Other">Other</option>
             </select>
           </label>
-          <label>Number required *
-            <input type="number" name="numberRequired" min="1" value="1" required>
-          </label>
         </div>
-        <div class="form-row">
-          <label>Employment type
-            <select name="employmentType">
-              <option value="">Not sure yet</option>
-              <option value="Full-time">Full-time</option>
-              <option value="Part-time">Part-time</option>
-            </select>
-          </label>
-          <label>Live-in or live-out
-            <select name="liveArrangement">
-              <option value="">Not sure yet</option>
-              <option value="Live-in">Live-in</option>
-              <option value="Live-out">Live-out</option>
-            </select>
-          </label>
+        <label>How many people are needed for this position? *
+          <input type="number" name="numberRequired" min="1" value="1" required>
+        </label>
+        <label>Main duties and responsibilities</label>
+        <div class="option-group" data-group="mainDuties">
+          <label class="checkbox-row"><input type="checkbox" value="Cleaning"> Cleaning</label>
+          <label class="checkbox-row"><input type="checkbox" value="Cooking"> Cooking</label>
+          <label class="checkbox-row"><input type="checkbox" value="Laundry"> Laundry</label>
+          <label class="checkbox-row"><input type="checkbox" value="Childcare"> Childcare</label>
+          <label class="checkbox-row"><input type="checkbox" value="Shopping / market runs"> Shopping / market runs</label>
+          <label class="checkbox-row"><input type="checkbox" value="Driving"> Driving</label>
+          <label class="checkbox-row"><input type="checkbox" value="Facility management"> Facility management</label>
+          <label class="checkbox-row"><input type="checkbox" value="Tutoring"> Tutoring</label>
+          <label class="checkbox-row"><input type="checkbox" value="House management"> House management</label>
         </div>
-        <label>Main responsibilities
+        <label style="margin-top:16px;">Anything else about the role
           <textarea name="responsibilities" rows="3" maxlength="2000"></textarea>
         </label>
-        <div class="form-row">
-          <label>Required skills
-            <input type="text" name="requiredSkills" maxlength="500">
-          </label>
-          <label>Required experience
-            <input type="text" name="experience" maxlength="500" placeholder="e.g. 2+ years">
-          </label>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Location</legend>
-        <div class="form-row">
-          <label>State *
-            <input type="text" name="state" required maxlength="80">
-          </label>
-          <label>LGA
-            <input type="text" name="lga" maxlength="80">
-          </label>
-        </div>
-        <label>Area / neighbourhood
-          <input type="text" name="area" maxlength="120" placeholder="e.g. Lekki Phase 1">
+        <label>Reason for the vacancy
+          <select name="vacancyReason">
+            <option value="">Select one</option>
+            <option value="New position">New position</option>
+            <option value="Replacement">Replacement</option>
+            <option value="Additional staff">Additional staff</option>
+            <option value="Temporary cover">Temporary cover</option>
+          </select>
         </label>
-      </fieldset>
-
-      <fieldset>
-        <legend>Salary &amp; timing</legend>
-        <div class="form-row">
-          <label>Salary range minimum (₦)
-            <input type="number" name="salaryMin" min="0">
-          </label>
-          <label>Salary range maximum (₦)
-            <input type="number" name="salaryMax" min="0">
-          </label>
+        <label>Which living arrangement are you open to?</label>
+        <div class="option-group" data-group="liveArrangement">
+          <label class="checkbox-row"><input type="checkbox" value="Live-in"> Live-in</label>
+          <label class="checkbox-row"><input type="checkbox" value="Live-out"> Live-out</label>
+          <label class="checkbox-row"><input type="checkbox" value="Either"> Either</label>
+          <label class="checkbox-row"><input type="checkbox" value="Monday to Friday live-in"> Monday to Friday live-in</label>
         </div>
+        <label style="margin-top:16px;">If you need live-out, how many times a week do you need their services?
+          <select name="liveOutFrequency">
+            <option value="">Not applicable</option>
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            <option value="N/A">N/A</option>
+          </select>
+        </label>
+        <label>Please state all addresses where your staff will work
+          <textarea name="workAddresses" rows="2" maxlength="500"></textarea>
+        </label>
         <div class="form-row">
           <label>Preferred start date
             <input type="date" name="startDate">
@@ -203,17 +282,161 @@
             </select>
           </label>
         </div>
+        <label>Working days</label>
+        <div class="option-group" data-group="workingDays">
+          <label class="checkbox-row"><input type="checkbox" value="Monday"> Monday</label>
+          <label class="checkbox-row"><input type="checkbox" value="Tuesday"> Tuesday</label>
+          <label class="checkbox-row"><input type="checkbox" value="Wednesday"> Wednesday</label>
+          <label class="checkbox-row"><input type="checkbox" value="Thursday"> Thursday</label>
+          <label class="checkbox-row"><input type="checkbox" value="Friday"> Friday</label>
+          <label class="checkbox-row"><input type="checkbox" value="Saturday"> Saturday</label>
+          <label class="checkbox-row"><input type="checkbox" value="Sunday"> Sunday</label>
+        </div>
+        <div class="form-row" style="margin-top:16px;">
+          <label>Usual start time
+            <input type="time" name="startTime">
+          </label>
+          <label>Usual finish time
+            <input type="time" name="finishTime">
+          </label>
+        </div>
         <div class="form-row">
-          <label class="checkbox-row"><input type="checkbox" name="accommodation"> Accommodation provided</label>
-          <label class="checkbox-row"><input type="checkbox" name="meals"> Meals provided</label>
+          <label>Salary budget, monthly minimum (₦)
+            <input type="number" name="salaryMin" min="0">
+          </label>
+          <label>Salary budget, monthly maximum (₦)
+            <input type="number" name="salaryMax" min="0">
+          </label>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Consent</legend>
-        <label class="consent checkbox-row">
-          <input type="checkbox" name="consent" required>
-          <span>I agree that Amana may store my details to process this request. Read our <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+        <legend>Provisions</legend>
+        <div class="form-row">
+          <label>Meals provided daily
+            <select name="mealsCount">
+              <option value="">Select one</option>
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="None">None</option>
+            </select>
+          </label>
+          <label>Accommodation provided
+            <select name="accommodationType">
+              <option value="">None</option>
+              <option value="Room in Boys' Quarters (BQ)">Room in Boys' Quarters (BQ)</option>
+              <option value="Room in main house">Room in main house</option>
+              <option value="Separate flat">Separate flat</option>
+              <option value="Shared staff room">Shared staff room</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Preferences for the professional</legend>
+        <p class="legend-sub">Only fill in what's relevant to the role.</p>
+        <label>Cuisines the cook / chef should handle</label>
+        <div class="option-group" data-group="cuisines">
+          <label class="checkbox-row"><input type="checkbox" value="Nigerian"> Nigerian</label>
+          <label class="checkbox-row"><input type="checkbox" value="Continental"> Continental</label>
+          <label class="checkbox-row"><input type="checkbox" value="Western"> Western</label>
+          <label class="checkbox-row"><input type="checkbox" value="Asian"> Asian</label>
+          <label class="checkbox-row"><input type="checkbox" value="Baking / pastry"> Baking / pastry</label>
+          <label class="checkbox-row"><input type="checkbox" value="Not applicable"> Not applicable</label>
+        </div>
+        <label style="margin-top:16px;">Dietary, religious or cultural food requirements</label>
+        <div class="option-group" data-group="dietaryRequirements">
+          <label class="checkbox-row"><input type="checkbox" value="Vegetarian"> Vegetarian</label>
+          <label class="checkbox-row"><input type="checkbox" value="Vegan"> Vegan</label>
+          <label class="checkbox-row"><input type="checkbox" value="Kosher"> Kosher</label>
+          <label class="checkbox-row"><input type="checkbox" value="Halal"> Halal</label>
+          <label class="checkbox-row"><input type="checkbox" value="Gluten-free"> Gluten-free</label>
+          <label class="checkbox-row"><input type="checkbox" value="None"> None</label>
+          <label class="checkbox-row"><input type="checkbox" data-other="1"> Other</label>
+        </div>
+        <input type="text" class="other-input" data-other-for="dietaryRequirements" placeholder="Tell us more" maxlength="200" hidden>
+        <label style="margin-top:16px;">Childcare requirements</label>
+        <div class="option-group" data-group="childcareRequirements">
+          <label class="checkbox-row"><input type="checkbox" value="Newborn / infant care"> Newborn / infant care</label>
+          <label class="checkbox-row"><input type="checkbox" value="School runs"> School runs</label>
+          <label class="checkbox-row"><input type="checkbox" value="Homework support"> Homework support</label>
+          <label class="checkbox-row"><input type="checkbox" value="First-aid trained"> First-aid trained</label>
+          <label class="checkbox-row"><input type="checkbox" value="Special needs experience"> Special needs experience</label>
+          <label class="checkbox-row"><input type="checkbox" value="N/A"> N/A</label>
+          <label class="checkbox-row"><input type="checkbox" data-other="1"> Other</label>
+        </div>
+        <input type="text" class="other-input" data-other-for="childcareRequirements" placeholder="Tell us more" maxlength="200" hidden>
+        <label style="margin-top:16px;">Preferred age range</label>
+        <div class="option-group" data-group="preferredAgeRange">
+          <label class="checkbox-row"><input type="checkbox" value="23-29"> 23-29</label>
+          <label class="checkbox-row"><input type="checkbox" value="30-40"> 30-40</label>
+          <label class="checkbox-row"><input type="checkbox" value="41-49"> 41-49</label>
+          <label class="checkbox-row"><input type="checkbox" value="50-55"> 50-55</label>
+        </div>
+        <label style="margin-top:16px;">Preferred gender</label>
+        <div class="option-group" data-group="preferredGender">
+          <label class="checkbox-row"><input type="checkbox" value="Female"> Female</label>
+          <label class="checkbox-row"><input type="checkbox" value="Male"> Male</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Background</legend>
+        <label>Briefly tell us about past experiences with staff, what worked and what did not
+          <textarea name="pastExperience" rows="3" maxlength="2000"></textarea>
+        </label>
+        <label>Type of ID you have available</label>
+        <div class="option-group" data-group="idTypes">
+          <label class="checkbox-row"><input type="checkbox" value="NIN slip"> NIN slip</label>
+          <label class="checkbox-row"><input type="checkbox" value="Driver's license"> Driver's license</label>
+          <label class="checkbox-row"><input type="checkbox" value="International passport"> International passport</label>
+          <label class="checkbox-row"><input type="checkbox" value="Voter's card"> Voter's card</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Confirmation &amp; consent</legend>
+        <div class="consent-block">
+          <label class="checkbox-row">
+            <input type="checkbox" name="confirmTrueComplete" required>
+            <span>I confirm the information I have given is true and complete. *</span>
+          </label>
+        </div>
+        <div class="consent-block">
+          <label class="checkbox-row">
+            <input type="checkbox" name="consentVerification" required>
+            <span>I consent to Amana verifying my identity, address, and employment/business details and referees. *</span>
+          </label>
+        </div>
+        <div class="consent-block">
+          <label class="checkbox-row">
+            <input type="checkbox" name="consent" required>
+            <span>I consent to Amana storing and processing my personal data for recruitment as set out in the <a href="privacy.html" target="_blank" rel="noopener">privacy notice</a> (Nigeria Data Protection Act 2023). *</span>
+          </label>
+        </div>
+        <div class="consent-block">
+          <label class="checkbox-row">
+            <input type="checkbox" name="consentTerms" required>
+            <span>I have read and agree to Amana's <a href="client-code-of-conduct.html" target="_blank" rel="noopener">terms of service and code of conduct</a> as set out on amanastaff.com. *</span>
+          </label>
+        </div>
+        <label>Typed full name as signature *
+          <input type="text" name="signature" required maxlength="160">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Contact &amp; follow-up</legend>
+        <label>Preferred contact method
+          <select name="preferredContactChannel">
+            <option value="WhatsApp">WhatsApp</option>
+            <option value="Phone call">Phone call</option>
+            <option value="Email">Email</option>
+            <option value="SMS">SMS</option>
+          </select>
+        </label>
+        <label>Questions and comments
+          <textarea name="questionsComments" rows="3" maxlength="2000"></textarea>
         </label>
       </fieldset>
 
@@ -274,9 +497,17 @@
 
 <script src="js/script.js"></script>
 <script>
-  // Page-specific: posts to the new whatsapp-intake backend, separate
-  // from the shared lead-modal logic in js/script.js (which this page
-  // doesn't use — it has its own form, not the shared modal).
+  // Page-specific: posts to the whatsapp-intake backend, separate from
+  // the shared lead-modal logic in js/script.js (which this page doesn't
+  // use — it has its own form, not the shared modal).
+  //
+  // This form matches the "Amana Domestic Staff Order Request" Google
+  // Form (https://forms.gle/uAE2rMPf6FAiQwZk9) field-for-field - see
+  // whatsapp-intake/README.md. Checkbox groups are collected here into a
+  // single comma-joined string per group (data-group="fieldName"), which
+  // is what the schema (whatsapp-intake/schema.js) and the Sheet columns
+  // (apps-script/Code.gs) expect - the server never sees raw checkbox
+  // arrays.
   (function () {
     var form = document.getElementById('intakeForm');
     var errorEl = document.getElementById('formError');
@@ -292,6 +523,42 @@
       errorEl.classList.remove('visible');
     }
 
+    // Reveal an "Other" free-text box the moment its checkbox is ticked,
+    // and hide+clear it again if unticked.
+    document.querySelectorAll('.option-group').forEach(function (group) {
+      var otherCheckbox = group.querySelector('[data-other]');
+      if (!otherCheckbox) return;
+      var otherInput = form.querySelector('.other-input[data-other-for="' + group.getAttribute('data-group') + '"]');
+      if (!otherInput) return;
+      otherCheckbox.addEventListener('change', function () {
+        otherInput.hidden = !otherCheckbox.checked;
+        if (!otherCheckbox.checked) otherInput.value = '';
+        if (otherCheckbox.checked) otherInput.focus();
+      });
+    });
+
+    function collectGroup(name) {
+      var group = form.querySelector('.option-group[data-group="' + name + '"]');
+      if (!group) return '';
+      var values = Array.prototype.slice.call(group.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(function (cb) {
+          if (cb.hasAttribute('data-other')) {
+            var otherInput = form.querySelector('.other-input[data-other-for="' + name + '"]');
+            var text = otherInput && otherInput.value.trim();
+            return text ? 'Other: ' + text : null;
+          }
+          return cb.value;
+        })
+        .filter(Boolean);
+      return values.join(', ');
+    }
+
+    var CHECKBOX_GROUPS = [
+      'referralSource', 'mainDuties', 'liveArrangement', 'workingDays',
+      'cuisines', 'dietaryRequirements', 'childcareRequirements',
+      'preferredAgeRange', 'preferredGender', 'idTypes',
+    ];
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       clearError();
@@ -301,12 +568,26 @@
       var data = {};
       new FormData(form).forEach(function (value, key) {
         if (key === 'website') return;
-        if (key === 'accommodation' || key === 'meals' || key === 'consent') {
+        if (key === 'confirmTrueComplete' || key === 'consentVerification' || key === 'consentTerms' || key === 'consent') {
           data[key] = true;
         } else {
           data[key] = value;
         }
       });
+
+      CHECKBOX_GROUPS.forEach(function (name) { data[name] = collectGroup(name); });
+
+      // Two text inputs on this page, one schema field - preserves the
+      // rest of the pipeline (admin dashboard, emails) exactly as it
+      // already works with a single full name.
+      var first = (form.employerFirstName && form.employerFirstName.value || '').trim();
+      var surname = (form.employerSurname && form.employerSurname.value || '').trim();
+      data.clientFullName = (first + ' ' + surname).trim();
+
+      // accommodation/meals stay as booleans for the rest of the
+      // pipeline; accommodationType/mealsCount carry the actual detail.
+      data.accommodation = !!(data.accommodationType && data.accommodationType.trim());
+      data.meals = !!(data.mealsCount && data.mealsCount !== 'None');
 
       submitBtn.disabled = true;
       submitBtn.textContent = 'Submitting…';

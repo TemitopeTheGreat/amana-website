@@ -82,6 +82,7 @@ function statsResponse_(secret) {
         families: summarizeTab_(ss, 'family'),
         organisations: summarizeTab_(ss, 'organisation'),
         requests: summarizeRequests_(ss),
+        analytics: summarizeAnalytics_(ss),
       },
     });
   } catch (err) {
@@ -153,15 +154,30 @@ const REQUEST_STATUSES = [
 // Column headers, Title Case. Must match whatsapp-intake/schema.js's FIELD_ORDER
 // field-for-field (headerToField_ below converts between the two) — if you add
 // or rename a field there, make the same change here.
+// Matches whatsapp-intake/schema.js's FIELD_ORDER field-for-field (see
+// headerToField_ below), which in turn matches the "Amana Domestic Staff
+// Order Request" Google Form (https://forms.gle/uAE2rMPf6FAiQwZk9)
+// field-for-field - request-staff.html replaces that form, so this sheet
+// captures everything it did. If you add or rename a field in schema.js,
+// make the matching change here.
 const REQUEST_HEADERS = [
   'Request ID', 'Created At', 'Source Channel', 'Session ID', 'Status',
   'Client Full Name', 'Client Phone', 'Client Email', 'Client Type', 'Preferred Contact Channel',
   'Consent', 'Consent Timestamp',
-  'Staff Category', 'Job Title', 'Number Required', 'Employment Type', 'Live Arrangement',
+  'Registration Status', 'Referral Source',
+  'Home Address', 'Office Address', 'Landmark', 'Address Duration',
+  'Employer Occupation', 'Company Type', 'CAC Number',
+  'Household Adults', 'Household Children', 'Children Age Groups', 'Special Care Needs', 'Pets', 'Property Type', 'Existing Staff',
+  'Staff Category', 'Job Title', 'Number Required', 'Employment Type', 'Live Arrangement', 'Live Out Frequency',
+  'Main Duties', 'Vacancy Reason', 'Work Addresses',
   'State', 'LGA', 'Area',
   'Responsibilities', 'Required Skills', 'Qualifications', 'Experience', 'Languages',
-  'Start Date', 'Urgency', 'Working Days', 'Working Hours', 'Accommodation', 'Meals',
+  'Start Date', 'Urgency', 'Working Days', 'Start Time', 'Finish Time', 'Working Hours',
+  'Accommodation', 'Accommodation Type', 'Meals', 'Meals Count',
   'Salary Min', 'Salary Max', 'Currency',
+  'Cuisines', 'Dietary Requirements', 'Childcare Requirements', 'Preferred Age Range', 'Preferred Gender',
+  'Past Experience', 'ID Types',
+  'Confirm True Complete', 'Consent Verification', 'Consent Terms', 'Signature', 'Questions Comments',
   'Assigned Recruiter', 'Last Updated At', 'Next Action', 'Notes', 'Closure Reason',
 ];
 
@@ -171,6 +187,14 @@ const BOT_SESSION_HEADERS = [
 ];
 
 const AUTOMATION_LOG_HEADERS = ['Timestamp', 'Workflow ID', 'Source Record', 'Error', 'Retry Count'];
+
+/* ================= Site analytics (page views + key CTA clicks) ================= */
+/* Anonymous, lightweight, self-hosted - no cookies, no third-party        */
+/* service, no persistent visitor ID. Each row is one event (a page load   */
+/* or a click on a tracked CTA); the admin dashboard aggregates them into  */
+/* totals, top pages/CTAs and a weekly trend. See js/script.js's track()   */
+/* and api/track.js.                                                      */
+const ANALYTICS_HEADERS = ['Timestamp', 'Event Type', 'Page', 'Label', 'Referrer Host'];
 
 /* ================= Admin accounts (super / general roles) ================= */
 /* A named account per staff member, instead of one shared ADMIN_PASSWORD.    */
@@ -589,7 +613,11 @@ function confirmRequestSubmitter_(record) {
 
 function ensureRequestsTab_(ss) {
   let sheet = ss.getSheetByName('Requests');
-  if (sheet) return sheet;
+  // Migrate first, unlike before - REQUEST_HEADERS grew from 39 to 75
+  // fields (matching the Google Form being replaced) and this tab
+  // already exists in production, so without this the 36 new columns
+  // would never get added and every new write would misalign.
+  if (sheet) { migrateTabHeaders_(sheet, { headers: REQUEST_HEADERS }); return sheet; }
   sheet = ss.insertSheet('Requests');
   const n = REQUEST_HEADERS.length;
   sheet.getRange(1, 1, 1, n).setValues([REQUEST_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
@@ -618,6 +646,98 @@ function ensureAutomationLogTab_(ss) {
   sheet.getRange(1, 1, 1, AUTOMATION_LOG_HEADERS.length).setValues([AUTOMATION_LOG_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
   sheet.setFrozenRows(1);
   return sheet;
+}
+
+function ensureAnalyticsTab_(ss) {
+  let sheet = ss.getSheetByName('Site Analytics');
+  if (sheet) return sheet;
+  sheet = ss.insertSheet('Site Analytics');
+  sheet.getRange(1, 1, 1, ANALYTICS_HEADERS.length).setValues([ANALYTICS_HEADERS]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#0b1d2e');
+  sheet.setFrozenRows(1);
+  sheet.setColumnWidths(1, ANALYTICS_HEADERS.length, 160);
+  return sheet;
+}
+
+// Appends one analytics event. Deliberately NOT behind the shared
+// LockService lock (see doPost) - a plain appendRow is good enough for a
+// page-view counter, and this is by far the highest-frequency action, so
+// it must never make a real form submission wait behind it.
+function handleTrack_(p) {
+  try {
+    const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
+    const sheet = ensureAnalyticsTab_(ss);
+    sheet.appendRow([
+      new Date().toISOString(),
+      p.eventType === 'click' ? 'click' : 'pageview',
+      clean_(p.page).slice(0, 200),
+      clean_(p.label).slice(0, 200),
+      clean_(p.referrer).slice(0, 200),
+    ]);
+  } catch (err) {
+    // Never let an analytics failure surface as an error to a visitor's
+    // browser - api/track.js already treats every response as fire-and-
+    // forget, so just drop it.
+  }
+  return json_({ ok: true });
+}
+
+// Aggregates the Site Analytics tab for the admin dashboard: totals, top
+// pages, top tracked CTA clicks, and the same 8-week trend shape the
+// other tabs use (see admin.html's weeksChart). Reads at most the last
+// ANALYTICS_MAX_ROWS rows, newest-first, so a long-running site doesn't
+// make this call slower over time - older rows still exist in the sheet,
+// just outside this summary.
+const ANALYTICS_MAX_ROWS = 20000;
+
+function summarizeAnalytics_(ss) {
+  const sheet = ss.getSheetByName('Site Analytics');
+  const idx = {};
+  ANALYTICS_HEADERS.forEach(function (h, i) { idx[h] = i; });
+  const tz = Session.getScriptTimeZone();
+
+  const lastRow = sheet ? sheet.getLastRow() : 0;
+  const total = Math.max(0, lastRow - 1);
+  const startRow = Math.max(2, lastRow - ANALYTICS_MAX_ROWS + 1);
+  const rows = (!sheet || lastRow < 2)
+    ? []
+    : sheet.getRange(startRow, 1, lastRow - startRow + 1, ANALYTICS_HEADERS.length).getValues();
+
+  let pageViews = 0;
+  let clicks = 0;
+  const viewsByPage = {};
+  const clicksByLabel = {};
+  const weekCounts = {};
+
+  rows.forEach(function (r) {
+    const type = r[idx['Event Type']];
+    const page = r[idx['Page']] || '(unknown)';
+    const d = new Date(r[idx['Timestamp']]);
+    if (type === 'click') {
+      clicks++;
+      const label = r[idx['Label']] || '(unlabelled)';
+      clicksByLabel[label] = (clicksByLabel[label] || 0) + 1;
+    } else {
+      pageViews++;
+      viewsByPage[page] = (viewsByPage[page] || 0) + 1;
+    }
+    if (!isNaN(d)) {
+      const monday = new Date(d);
+      monday.setHours(0, 0, 0, 0);
+      monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+      const key = Utilities.formatDate(monday, tz, 'yyyy-MM-dd');
+      weekCounts[key] = (weekCounts[key] || 0) + 1;
+    }
+  });
+
+  return {
+    total: total,
+    pageViews: pageViews,
+    clicks: clicks,
+    viewsByPage: viewsByPage,
+    clicksByLabel: clicksByLabel,
+    weekCounts: weekCounts,
+    truncated: total > rows.length,
+  };
 }
 
 // The brief's remaining Section 4 tabs (Shortlists, Placements, Lists &
@@ -692,13 +812,24 @@ function headerToField_(header) {
 }
 
 function doPost(e) {
+  // Parsed and secret-checked before the lock below, not inside it - the
+  // 'track' action (site analytics pings) needs to return without ever
+  // taking that lock, since it's by far the highest-frequency action and
+  // every other action shares one global lock. See the 'track' check
+  // right after the secret check.
+  const p = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+  const secret = PropertiesService.getScriptProperties().getProperty('SECRET');
+  if (!secret || p.secret !== secret) return json_({ ok: false, error: 'unauthorized' });
+
+  // Analytics pings are high-frequency and low-stakes (losing one is
+  // fine - it's a page-view counter, not a client's data) - handled with
+  // a plain appendRow (no lock) so a burst of visitors can never make a
+  // real form submission wait behind them.
+  if (p.action === 'track') return handleTrack_(p);
+
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(20000);
-    const p = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-
-    const secret = PropertiesService.getScriptProperties().getProperty('SECRET');
-    if (!secret || p.secret !== secret) return json_({ ok: false, error: 'unauthorized' });
 
     // WhatsApp-intake "Request Staff" flow (whatsapp-intake/README.md) — routed by
     // action, not kind, so it doesn't collide with the professional/family/
@@ -766,8 +897,7 @@ function doPost(e) {
     return json_({ ok: true, id: id, cvLink: cvLink });
   } catch (err) {
     try {
-      const p2 = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-      logAutomationFailure_(p2.action || p2.kind || 'doPost', p2.record && p2.record.clientPhone || p2.phone || '', err);
+      logAutomationFailure_(p.action || p.kind || 'doPost', (p.record && p.record.clientPhone) || p.phone || '', err);
     } catch (x) { /* best effort */ }
     return json_({ ok: false, error: String(err && err.message || err) });
   } finally {
@@ -799,6 +929,7 @@ function setup() {
   ensurePlacementsTab_(ss);
   ensureListsSettingsTab_(ss);
   ensureAdminUsersTab_(ss);
+  ensureAnalyticsTab_(ss);
   polish();
 
   // Remove the default empty tab if it is still there.
