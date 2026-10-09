@@ -427,14 +427,22 @@
           body: JSON.stringify(data)
         });
       }).then(function (r) {
-        if (!r.ok) throw new Error('failed');
+        if (!r.ok) {
+          return r.json().catch(function () { return null; }).then(function (out) {
+            throw new Error((out && out.error) || 'failed');
+          });
+        }
         modalForm.hidden = true;
         modalSuccess.hidden = false;
-      }).catch(function () {
+      }).catch(function (e) {
         var alt = '';
         if (SITE_CONFIG.whatsapp) alt = ' You can also <a href="https://wa.me/' + SITE_CONFIG.whatsapp + '" target="_blank" rel="noopener">message us on WhatsApp</a>.';
         else if (SITE_CONFIG.email) alt = ' You can also email <a href="mailto:' + SITE_CONFIG.email + '">' + SITE_CONFIG.email + '</a>.';
-        showError('We could not send your request just now. Please try again in a moment.' + alt);
+        if (e && e.message === 'invalid_cv') {
+          showError('Your CV could not be attached - make sure it is a PDF or Word file under 2.5 MB. You can also submit without one and send it separately.' + alt);
+        } else {
+          showError('We could not send your request just now. Please try again in a moment.' + alt);
+        }
       }).then(function () {
         submitBtn.disabled = false;
         submitBtn.textContent = label;
