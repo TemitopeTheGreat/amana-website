@@ -943,6 +943,18 @@ function doPost(e) {
  * colours and the Dashboard tab, and creates the shared secret.
  * The secret is printed in the Execution log: copy it into Vercel as APPS_SCRIPT_SECRET.
  */
+/**
+ * Every step wrapped individually (step_ catches and logs, never throws)
+ * so one flaky step - most often polish()'s dashboard rebuild, which
+ * deletes and recreates the "Dashboard" tab and its charts every run and
+ * can hit transient Sheets-platform errors like "Sheet NNN not found" on
+ * repeated runs - can never take down the rest of setup() with it. The
+ * schema/tab-creation steps matter far more than the cosmetic dashboard,
+ * so they're guaranteed to run and report clearly either way. Check the
+ * execution log after running: every step prints ok or "Step failed" with
+ * its own error, instead of one bare uncaught exception that gives no clue
+ * which step actually broke.
+ */
 function setup() {
   const props = PropertiesService.getScriptProperties();
   if (PRESET_SECRET) {
@@ -951,23 +963,29 @@ function setup() {
     props.setProperty('SECRET', Utilities.getUuid() + Utilities.getUuid());
   }
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
-  Object.keys(TABS).forEach(function (k) { ensureTab_(ss, k); });
-  ensureTrainingSheets_(ss);
-  ensureRequestsTab_(ss);
-  ensureBotSessionsTab_(ss);
-  ensureAutomationLogTab_(ss);
-  ensureShortlistsTab_(ss);
-  ensurePlacementsTab_(ss);
-  ensureListsSettingsTab_(ss);
-  ensureAdminUsersTab_(ss);
-  ensureAnalyticsTab_(ss);
-  polish();
+  Object.keys(TABS).forEach(function (k) { step_('ensure tab: ' + TABS[k].name, function () { ensureTab_(ss, k); }); });
+  step_('ensure training sheets', function () { ensureTrainingSheets_(ss); });
+  step_('ensure Requests tab', function () { ensureRequestsTab_(ss); });
+  step_('ensure Bot Sessions tab', function () { ensureBotSessionsTab_(ss); });
+  step_('ensure Automation Log tab', function () { ensureAutomationLogTab_(ss); });
+  step_('ensure Shortlists tab', function () { ensureShortlistsTab_(ss); });
+  step_('ensure Placements tab', function () { ensurePlacementsTab_(ss); });
+  step_('ensure Lists & Settings tab', function () { ensureListsSettingsTab_(ss); });
+  step_('ensure Admin Users tab', function () { ensureAdminUsersTab_(ss); });
+  step_('ensure Site Analytics tab', function () { ensureAnalyticsTab_(ss); });
+  step_('polish (cosmetic formatting + Dashboard tab)', function () { polish(); });
 
-  // Remove the default empty tab if it is still there.
-  const def = ss.getSheetByName('Sheet1');
-  if (def && def.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(def);
+  step_('remove default Sheet1 if empty', function () {
+    const def = ss.getSheetByName('Sheet1');
+    if (def && def.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(def);
+  });
 
-  ss.setActiveSheet(ss.getSheetByName('Dashboard'));
+  step_('set active sheet to Dashboard', function () {
+    const dash = ss.getSheetByName('Dashboard');
+    if (dash) ss.setActiveSheet(dash);
+  });
+
+  Logger.log('Setup complete. Any "Step failed" lines above show what to send back - everything else ran.');
   Logger.log('SECRET (add to Vercel as APPS_SCRIPT_SECRET): ' + props.getProperty('SECRET'));
 }
 
@@ -1242,16 +1260,20 @@ const COL_WIDTH = {
  */
 function polish() {
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
-  Object.keys(TABS).forEach(function (k) { ensureTab_(ss, k); });
+  Object.keys(TABS).forEach(function (k) { step_('ensure tab (polish): ' + TABS[k].name, function () { ensureTab_(ss, k); }); });
   const tabColour = { professional: BRAND.navy, family: BRAND.gold, organisation: BRAND.sage };
   Object.keys(TABS).forEach(function (k) {
     step_('format ' + TABS[k].name, function () { polishTab_(ss, k, tabColour[k]); });
   });
   step_('dashboard', function () { polishDashboard_(ss); });
-  const def = ss.getSheetByName('Sheet1');
-  if (def && def.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(def);
-  const dash = ss.getSheetByName('Dashboard');
-  if (dash) ss.setActiveSheet(dash);
+  step_('remove default Sheet1 if empty (polish)', function () {
+    const def = ss.getSheetByName('Sheet1');
+    if (def && def.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(def);
+  });
+  step_('set active sheet to Dashboard (polish)', function () {
+    const dash = ss.getSheetByName('Dashboard');
+    if (dash) ss.setActiveSheet(dash);
+  });
   Logger.log('Polish complete. Any "Step failed" lines above show what to send back.');
 }
 
@@ -1329,7 +1351,19 @@ function polishTab_(ss, kind, tabColour) {
 
 function polishDashboard_(ss) {
   let d = ss.getSheetByName('Dashboard');
-  if (d) ss.deleteSheet(d);
+  if (d) {
+    // Explicitly remove any protection on the old sheet before deleting
+    // it - a lingering protection object referencing a since-deleted
+    // sheet's GID is a known cause of "Sheet NNN not found" on a later
+    // run, since this function deletes and recreates "Dashboard" (and
+    // re-protects it, see the bottom of this function) every time it
+    // runs. Best-effort: a failure here shouldn't block the rebuild.
+    try {
+      const protections = d.getProtections(SpreadsheetApp.ProtectionType.SHEET);
+      protections.forEach(function (p) { if (p.canEdit()) p.remove(); });
+    } catch (e) { /* best effort */ }
+    ss.deleteSheet(d);
+  }
   d = ss.insertSheet('Dashboard', 0);
   d.setTabColor(BRAND.terracotta);
   d.setHiddenGridlines(true);
