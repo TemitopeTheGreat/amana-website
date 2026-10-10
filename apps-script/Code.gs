@@ -210,18 +210,42 @@ const ADMIN_USER_HEADERS = [
   'Failed Attempts', 'Locked Until', 'Created At', 'Created By', 'Last Login At',
 ];
 
+/**
+ * Reads the Requests tab's ACTUAL header row - not the REQUEST_HEADERS
+ * constant - and returns it alongside a name->column-index lookup.
+ * Every Requests-tab read/write goes through this instead of assuming
+ * REQUEST_HEADERS' array order matches the sheet, because it doesn't
+ * have to: migrateTabHeaders_ only ever APPENDS missing columns to an
+ * existing tab, it never reorders. REQUEST_HEADERS grew from 39 to 75
+ * fields with new fields interleaved among old ones (grouped by topic,
+ * not appended at the end) - the live sheet kept its original 39
+ * columns in their original positions and got the 36 new ones tacked
+ * on after, in whatever order was still "missing" at migration time.
+ * Writing by REQUEST_HEADERS' array position instead of by actual
+ * column name put real answers in the wrong columns - this is the fix.
+ */
+function requestColumns_(sheet) {
+  const lastCol = Math.max(sheet.getLastColumn(), 1);
+  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) { return String(h || '').trim(); });
+  const idx = {};
+  headers.forEach(function (h, i) { if (h) idx[h] = i; });
+  return { headers: headers, idx: idx };
+}
+
 function summarizeRequests_(ss) {
   const sheet = ss.getSheetByName('Requests');
-  const idx = {};
-  REQUEST_HEADERS.forEach(function (h, i) { idx[h] = i; });
   const tz = Session.getScriptTimeZone();
-
-  const rows = (!sheet || sheet.getLastRow() < 2)
-    ? []
-    : sheet.getRange(2, 1, sheet.getLastRow() - 1, REQUEST_HEADERS.length).getValues().filter(function (r) { return r[idx['Request ID']]; });
-
   const statusCounts = {};
   REQUEST_STATUSES.forEach(function (s) { statusCounts[s] = 0; });
+  if (!sheet) return { total: 0, statusCounts: statusCounts, categoryCounts: {}, weekCounts: {}, latest: [] };
+
+  const cols = requestColumns_(sheet);
+  const idx = cols.idx;
+
+  const rows = (sheet.getLastRow() < 2)
+    ? []
+    : sheet.getRange(2, 1, sheet.getLastRow() - 1, cols.headers.length).getValues().filter(function (r) { return r[idx['Request ID']]; });
+
   const categoryCounts = {};
   const weekCounts = {};
 
@@ -246,7 +270,7 @@ function summarizeRequests_(ss) {
     .slice(0, 300)
     .map(function (r) {
       const o = {};
-      REQUEST_HEADERS.forEach(function (h, i) { o[h] = r[i]; });
+      cols.headers.forEach(function (h, i) { if (h) o[h] = r[i]; });
       return o;
     });
 
@@ -267,6 +291,7 @@ function handleAppendRequest_(p) {
   const record = p.record || {};
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
   const sheet = ensureRequestsTab_(ss);
+  const cols = requestColumns_(sheet);
 
   const duplicate = findDuplicateRequest_(sheet, record.clientPhone, record.staffCategory);
   const requestId = nextId_('REQ');
@@ -275,7 +300,7 @@ function handleAppendRequest_(p) {
   record.lastUpdatedAt = record.createdAt;
   if (!record.status) record.status = 'New';
 
-  const row = REQUEST_HEADERS.map(function (h) { return clean_(record[headerToField_(h)]); });
+  const row = cols.headers.map(function (h) { return h ? clean_(record[headerToField_(h)]) : ''; });
   const r = sheet.getLastRow() + 1;
   sheet.getRange(r, 1, 1, row.length).setNumberFormat('@');
   sheet.getRange(r, 1, 1, row.length).setValues([row]);
@@ -293,14 +318,16 @@ function handleUpdateRequest_(p) {
   const sheet = ensureRequestsTab_(ss);
   const rowNum = findRowByColumnValue_(sheet, 1, p.requestId);
   if (!rowNum) return json_({ ok: false, error: 'request_not_found' });
+  const cols = requestColumns_(sheet);
 
-  const current = sheet.getRange(rowNum, 1, 1, REQUEST_HEADERS.length).getValues()[0];
+  const current = sheet.getRange(rowNum, 1, 1, cols.headers.length).getValues()[0];
   const patch = p.patch || {};
-  const updated = REQUEST_HEADERS.map(function (h, i) {
+  const updated = cols.headers.map(function (h, i) {
+    if (!h) return current[i];
     const field = headerToField_(h);
     return Object.prototype.hasOwnProperty.call(patch, field) ? clean_(patch[field]) : current[i];
   });
-  updated[REQUEST_HEADERS.indexOf('Last Updated At')] = new Date().toISOString();
+  if (cols.idx['Last Updated At'] !== undefined) updated[cols.idx['Last Updated At']] = new Date().toISOString();
   sheet.getRange(rowNum, 1, 1, updated.length).setValues([updated]);
   return json_({ ok: true });
 }
@@ -308,11 +335,13 @@ function handleUpdateRequest_(p) {
 function handleFindRequestBySession_(p) {
   const ss = SpreadsheetApp.openById(CONFIG.SHEET_ID);
   const sheet = ensureRequestsTab_(ss);
-  const rowNum = findRowByColumnValue_(sheet, REQUEST_HEADERS.indexOf('Session ID') + 1, p.sessionId);
+  const cols = requestColumns_(sheet);
+  if (cols.idx['Session ID'] === undefined) return json_({ ok: true, record: null });
+  const rowNum = findRowByColumnValue_(sheet, cols.idx['Session ID'] + 1, p.sessionId);
   if (!rowNum) return json_({ ok: true, record: null });
-  const values = sheet.getRange(rowNum, 1, 1, REQUEST_HEADERS.length).getValues()[0];
+  const values = sheet.getRange(rowNum, 1, 1, cols.headers.length).getValues()[0];
   const record = {};
-  REQUEST_HEADERS.forEach(function (h, i) { record[headerToField_(h)] = values[i]; });
+  cols.headers.forEach(function (h, i) { if (h) record[headerToField_(h)] = values[i]; });
   return json_({ ok: true, record: record });
 }
 
@@ -516,11 +545,13 @@ function handleRecordLoginAttempt_(p) {
 
 function findDuplicateRequest_(sheet, phone, staffCategory) {
   if (!phone || sheet.getLastRow() < 2) return null;
-  const phoneCol = REQUEST_HEADERS.indexOf('Client Phone');
-  const categoryCol = REQUEST_HEADERS.indexOf('Staff Category');
-  const createdCol = REQUEST_HEADERS.indexOf('Created At');
-  const idCol = REQUEST_HEADERS.indexOf('Request ID');
-  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, REQUEST_HEADERS.length).getValues();
+  const cols = requestColumns_(sheet);
+  const phoneCol = cols.idx['Client Phone'];
+  const categoryCol = cols.idx['Staff Category'];
+  const createdCol = cols.idx['Created At'];
+  const idCol = cols.idx['Request ID'];
+  if (phoneCol === undefined || idCol === undefined) return null;
+  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, cols.headers.length).getValues();
   const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   for (let i = 0; i < rows.length; i++) {
