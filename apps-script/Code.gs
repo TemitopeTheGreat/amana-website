@@ -973,17 +973,15 @@ function setup() {
   step_('ensure Lists & Settings tab', function () { ensureListsSettingsTab_(ss); });
   step_('ensure Admin Users tab', function () { ensureAdminUsersTab_(ss); });
   step_('ensure Site Analytics tab', function () { ensureAnalyticsTab_(ss); });
+  // polish() does its own Sheet1-cleanup and active-tab-set at the end
+  // (using a spreadsheet handle it opens itself), AFTER rebuilding the
+  // Dashboard tab. Repeating those two steps here, against the `ss`
+  // handle opened at the top of this function, used to fail with
+  // "Sheet NNN not found" - polish() had already deleted that same
+  // Dashboard tab through its own handle, leaving this function's
+  // handle stale. They were pure duplication anyway, so removed rather
+  // than reopening `ss` to patch around it.
   step_('polish (cosmetic formatting + Dashboard tab)', function () { polish(); });
-
-  step_('remove default Sheet1 if empty', function () {
-    const def = ss.getSheetByName('Sheet1');
-    if (def && def.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(def);
-  });
-
-  step_('set active sheet to Dashboard', function () {
-    const dash = ss.getSheetByName('Dashboard');
-    if (dash) ss.setActiveSheet(dash);
-  });
 
   Logger.log('Setup complete. Any "Step failed" lines above show what to send back - everything else ran.');
   Logger.log('SECRET (add to Vercel as APPS_SCRIPT_SECRET): ' + props.getProperty('SECRET'));
